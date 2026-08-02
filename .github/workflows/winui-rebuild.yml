@@ -19,9 +19,13 @@ jobs:
         run: |
           dotnet restore DoomLauncher.WinUI/DoomLauncher.WinUI.csproj
           dotnet restore DoomLauncher.Modern.Tests/DoomLauncher.Modern.Tests.csproj
+          dotnet restore DoomLauncher.Bootstrap/DoomLauncher.Bootstrap.csproj
 
       - name: Build WinUI 3
         run: dotnet build DoomLauncher.WinUI/DoomLauncher.WinUI.csproj -c Release -p:Platform=x64 --no-restore
+
+      - name: Build portable launcher bootstrap
+        run: dotnet build DoomLauncher.Bootstrap/DoomLauncher.Bootstrap.csproj -c Release --no-restore
 
       - name: Run modern contract tests
         run: dotnet run --project DoomLauncher.Modern.Tests/DoomLauncher.Modern.Tests.csproj -c Release --no-restore

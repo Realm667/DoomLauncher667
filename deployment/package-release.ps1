@@ -4,15 +4,20 @@ param(
     [ValidatePattern('^\d+\.\d+\.\d+$')]
     [string]$Version,
 
-    [string]$OutputDirectory = (Join-Path $PSScriptRoot '..\artifacts'),
+    [string]$OutputDirectory,
 
-    [string]$PublishDirectory
+    [string]$PublishDirectory,
+
+    [string]$BootstrapPublishDirectory
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $repositoryRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
+    $OutputDirectory = Join-Path $repositoryRoot 'artifacts'
+}
 $outputRoot = [IO.Path]::GetFullPath($OutputDirectory)
 $packageName = "DoomLauncher667-$Version-beta-win-x64"
 $packageRoot = Join-Path $outputRoot $packageName
@@ -69,6 +74,52 @@ $launcherExecutable = Join-Path $PublishDirectory 'DoomLauncher.WinUI.exe'
 if (-not (Test-Path -LiteralPath $launcherExecutable -PathType Leaf)) {
     throw "Published launcher not found: $launcherExecutable"
 }
+$launcherVersion = (Get-Item -LiteralPath `
+    $launcherExecutable).VersionInfo.FileVersion
+if ($launcherVersion -ne "$Version.0") {
+    throw "WinUI version $launcherVersion does not match package version $Version.0."
+}
+
+if ([string]::IsNullOrWhiteSpace($BootstrapPublishDirectory)) {
+    $BootstrapPublishDirectory = Join-Path $outputRoot "launcher-$Version-win-x64"
+    $resolvedBootstrapPublish = [IO.Path]::GetFullPath(
+        $BootstrapPublishDirectory)
+    if (-not $resolvedBootstrapPublish.StartsWith(
+            $outputPrefix,
+            [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Unsafe bootstrap target rejected: $resolvedBootstrapPublish"
+    }
+    if (Test-Path -LiteralPath $resolvedBootstrapPublish) {
+        Remove-Item -LiteralPath $resolvedBootstrapPublish -Recurse -Force
+    }
+
+    & dotnet publish (
+        Join-Path $repositoryRoot `
+            'DoomLauncher.Bootstrap\DoomLauncher.Bootstrap.csproj') `
+        -c Release `
+        --no-restore `
+        -o $resolvedBootstrapPublish
+    if ($LASTEXITCODE -ne 0) {
+        throw "DoomLauncher667 bootstrap publish failed with exit code $LASTEXITCODE."
+    }
+    $bootstrapExecutable = Join-Path `
+        $resolvedBootstrapPublish 'DoomLauncher667.exe'
+    $compiledVersion = (Get-Item -LiteralPath `
+        $bootstrapExecutable).VersionInfo.FileVersion
+    if ($compiledVersion -ne "$Version.0") {
+        throw "Bootstrap version $compiledVersion does not match package version $Version.0."
+    }
+    $BootstrapPublishDirectory = $resolvedBootstrapPublish
+}
+else {
+    $BootstrapPublishDirectory = [IO.Path]::GetFullPath(
+        $BootstrapPublishDirectory)
+}
+
+$bootstrapExecutable = Join-Path $BootstrapPublishDirectory 'DoomLauncher667.exe'
+if (-not (Test-Path -LiteralPath $bootstrapExecutable -PathType Leaf)) {
+    throw "Published bootstrap not found: $bootstrapExecutable"
+}
 
 $templateRoot = Join-Path $repositoryRoot 'deployment\reset-instance'
 Copy-Item -Path (Join-Path $templateRoot '*') `
@@ -99,6 +150,9 @@ foreach ($directory in @(
 Copy-Item -Path (Join-Path $PublishDirectory '*') `
     -Destination (Join-Path $packageRoot 'WinUI') `
     -Recurse `
+    -Force
+Copy-Item -LiteralPath $bootstrapExecutable `
+    -Destination (Join-Path $packageRoot 'DoomLauncher667.exe') `
     -Force
 
 $themeSource = Join-Path $repositoryRoot 'DoomLauncher.WinUI\Assets\Themes'
@@ -143,6 +197,7 @@ $checksum = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash
 if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_OUTPUT)) {
     Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value "archive=$archivePath"
     Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value "checksum=$checksumPath"
+    Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value "package=$packageRoot"
 }
 
 Write-Host "Package: $archivePath"

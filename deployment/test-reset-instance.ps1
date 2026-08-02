@@ -40,7 +40,7 @@ try {
     Copy-Item -LiteralPath $template -Destination $testRoot -Recurse
     Add-TestData -Root $testRoot
 
-    & (Join-Path $testRoot 'Reset-DoomLauncher-WinUI.cmd') /Y
+    & (Join-Path $testRoot 'DoomLauncher667-reset.cmd') /Y
     if ($LASTEXITCODE -ne 0) {
         throw "The reset wrapper exited with code $LASTEXITCODE."
     }

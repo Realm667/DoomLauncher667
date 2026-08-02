@@ -22,5 +22,6 @@ if errorlevel 1 (
 
 echo.
 echo Die Testinstanz befindet sich wieder im Auslieferungszustand.
-pause
+if /I not "%~1"=="/Y" pause
 endlocal
+exit /b 0

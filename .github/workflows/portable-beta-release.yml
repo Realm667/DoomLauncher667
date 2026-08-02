@@ -40,6 +40,7 @@ jobs:
         run: |
           dotnet restore DoomLauncher.WinUI/DoomLauncher.WinUI.csproj
           dotnet restore DoomLauncher.Modern.Tests/DoomLauncher.Modern.Tests.csproj
+          dotnet restore DoomLauncher.Bootstrap/DoomLauncher.Bootstrap.csproj
 
       - name: Test
         run: dotnet run --project DoomLauncher.Modern.Tests/DoomLauncher.Modern.Tests.csproj -c Release --no-restore
@@ -53,6 +54,10 @@ jobs:
         shell: pwsh
         run: ./deployment/package-release.ps1 -Version "${{ steps.version.outputs.number }}" -OutputDirectory "$env:RUNNER_TEMP\release"
 
+      - name: Test portable update compatibility
+        shell: pwsh
+        run: ./deployment/test-portable-update.ps1 -PackageDirectory "${{ steps.package.outputs.package }}"
+
       - name: Publish GitHub beta release
         shell: pwsh
         env:
@@ -65,10 +70,12 @@ jobs:
           Portable Windows x64 beta package for testing.
 
           1. Download and extract the ZIP into a writable folder.
-          2. Run `Start-DoomLauncher-WinUI.cmd`.
+          2. Run `DoomLauncher667.exe`.
           3. Follow the first-setup assistant to configure IWADs, source ports and mods.
 
           The package is self-contained and does not require a separate .NET installation.
+          For an update, copy the new package over the existing portable installation.
+          Existing databases, mods, screenshots, settings and custom themes are preserved.
           Verify the ZIP with the attached SHA-256 file before extracting it.
           "@
           if (gh release view $env:GITHUB_REF_NAME --repo $env:GITHUB_REPOSITORY 2>$null) {

@@ -2,7 +2,7 @@
 
 ## Architecture
 
-Version 0.8.5 is a self-contained WinUI 3 client. It uses the established
+Version 0.8.6 is a self-contained WinUI 3 client. It uses the established
 `DoomLauncher.sqlite` schema as its source of truth but does not require or
 start the classic .NET Framework executable.
 
@@ -55,10 +55,27 @@ shown transparently and can still receive a manually entered version.
 ## Debug mode
 
 The Debug navigation item is absent during normal starts. Launch with
-`DoomLauncher.WinUI.exe --debug` or use
-`Start-DoomLauncher-WinUI-Debug.cmd` in a portable distribution to expose
+`DoomLauncher667.exe --debug` or use `DoomLauncher667-debug.cmd` in a portable
+distribution to expose
 runtime paths, database diagnostics and backup-first repair, source-port
 capability inspection and the visual/audio achievement-notification test.
+
+## Portable start and update contract
+
+Users start the distribution through `DoomLauncher667.exe` in the package
+root. This lightweight bootstrapper creates the portable user-state directory,
+sets the database, state and crash-log overrides, starts the self-contained
+WinUI executable from `WinUI`, and forwards command-line arguments without
+opening a console window.
+
+Updates are installed by copying a newer release over the existing portable
+directory while the launcher is closed. Release packages never contain
+`DoomLauncher.sqlite` or persisted user-state files. Managed game files,
+screenshots, saves, artwork, settings and custom themes are therefore retained.
+`WinUiDatabaseSchema` uses additive, idempotent migrations so older databases
+are upgraded in place. The release workflow runs
+`deployment/test-portable-update.ps1` and refuses publication when an overlay
+changes representative user data or omits the new launch entry points.
 
 ## Runtime configuration
 

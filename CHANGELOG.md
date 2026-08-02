@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 0.8.6 - 2026-08-02
+
+- Added `DoomLauncher667.exe` as the primary portable, console-free entry
+  point. It preserves the database, state and diagnostic-path behavior of the
+  former start script and forwards command-line options to the WinUI client.
+- Replaced the former debug and reset script names with the clearer
+  `DoomLauncher667-debug.cmd` and `DoomLauncher667-reset.cmd` entry points.
+- Added a release-gating overlay-update contract. It verifies that copying a
+  new package over an existing installation preserves the database, mods,
+  settings and custom themes while updating all application components.
+- Documented the backwards-compatible portable update policy and updated the
+  GitHub release instructions to use the new executable.
+- Fixed the package script's default artifact-directory resolution and added
+  the lightweight launcher build to local and GitHub release packaging.
+
 ## 0.8.5 - 2026-08-02
 
 - Localized IWAD scan conflicts and related first-setup warnings through the
