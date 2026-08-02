@@ -4,7 +4,11 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$resolvedRoot = [IO.Path]::GetFullPath($Root).TrimEnd(
+$normalizedRoot = $Root.Trim().Trim('"')
+if ([string]::IsNullOrWhiteSpace($normalizedRoot)) {
+    throw 'Reset root is empty. No files were changed.'
+}
+$resolvedRoot = [IO.Path]::GetFullPath($normalizedRoot).TrimEnd(
     [IO.Path]::DirectorySeparatorChar,
     [IO.Path]::AltDirectorySeparatorChar)
 $marker = Join-Path $resolvedRoot 'Tools\reset-instance.marker'

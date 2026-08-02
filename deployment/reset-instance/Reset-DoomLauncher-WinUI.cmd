@@ -12,7 +12,7 @@ choice /C JN /N /M "Instanz in den Auslieferungszustand zuruecksetzen? [J/N] "
 if errorlevel 2 exit /b 1
 
 :reset
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%ROOT%Tools\Reset-Instance.ps1" -Root "%ROOT%"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%ROOT%Tools\Reset-Instance.ps1" -Root "%ROOT%."
 if errorlevel 1 (
     echo.
     echo Der Reset ist fehlgeschlagen.

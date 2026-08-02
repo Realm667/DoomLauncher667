@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.2 - 2026-08-02
+
+- Fixed the portable reset launcher passing a trailing-backslash installation
+  path as a malformed PowerShell `-Root` argument.
+- Hardened the guarded reset tool against accidentally retained command-line
+  quotes before resolving its target directory.
+- Added a CI contract test covering both the portable reset wrapper and its
+  defensive root normalization.
 - Added a reproducible portable Windows x64 beta-packaging script.
 - Added a GitHub Actions release workflow that builds, tests and publishes a
   ZIP plus SHA-256 checksum whenever a semantic `vX.Y.Z` tag is pushed.

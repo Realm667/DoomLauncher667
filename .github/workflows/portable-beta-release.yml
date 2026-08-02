@@ -44,6 +44,10 @@ jobs:
       - name: Test
         run: dotnet run --project DoomLauncher.Modern.Tests/DoomLauncher.Modern.Tests.csproj -c Release --no-restore
 
+      - name: Test portable reset contract
+        shell: pwsh
+        run: ./deployment/test-reset-instance.ps1
+
       - name: Build portable package
         id: package
         shell: pwsh
