@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DoomLauncherTheme id="Realm667" name="Realm667" baseMode="Dark" order="30">
+<DoomLauncherTheme id="Realm667" name="Realm667" baseMode="Dark">
   <Colors>
     <Background>#343A40</Background>
     <Surface>#3D444C</Surface>

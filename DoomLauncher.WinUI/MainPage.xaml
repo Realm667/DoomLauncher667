@@ -509,24 +509,34 @@
                             <KeyboardAccelerator Key="I" Modifiers="Control" />
                         </Button.KeyboardAccelerators>
                     </Button>
-                    <Button
-                        AutomationProperties.Name="{Binding ImportBundle}"
-                        Click="ImportBundleButton_Click"
-                        ToolTipService.ToolTip="{Binding ImportBundle}">
+                    <DropDownButton
+                        AutomationProperties.Name="{Binding ManagePackageShort}"
+                        ToolTipService.ToolTip="{Binding ManagePackage}">
                         <StackPanel Orientation="Horizontal" Spacing="7">
-                            <FontIcon Glyph="&#xE896;" />
-                            <TextBlock Text="{Binding ImportPackageShort}" />
+                            <FontIcon Glyph="&#xE7B8;" />
+                            <TextBlock Text="{Binding ManagePackageShort}" />
                         </StackPanel>
-                    </Button>
-                    <Button
-                        AutomationProperties.Name="{Binding ExportBundle}"
-                        Click="ExportBundleButton_Click"
-                        ToolTipService.ToolTip="{Binding ExportBundle}">
-                        <StackPanel Orientation="Horizontal" Spacing="7">
-                            <FontIcon Glyph="&#xE898;" />
-                            <TextBlock Text="{Binding ExportPackageShort}" />
-                        </StackPanel>
-                    </Button>
+                        <DropDownButton.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem
+                                    AutomationProperties.Name="{Binding ImportBundle}"
+                                    Click="ImportBundleButton_Click"
+                                    Text="{Binding ImportPackageShort}">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE896;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem
+                                    AutomationProperties.Name="{Binding ExportBundle}"
+                                    Click="ExportBundleButton_Click"
+                                    Text="{Binding ExportPackageShort}">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE898;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                            </MenuFlyout>
+                        </DropDownButton.Flyout>
+                    </DropDownButton>
                     <Button
                         AutomationProperties.Name="{Binding ClassicTooltip}"
                         Click="OpenClassicButton_Click"

@@ -24,7 +24,9 @@ public sealed record UserLibraryState(
     IReadOnlySet<string> NotifiedAchievementKeys,
     IReadOnlySet<string> UnseenAchievementKeys,
     IReadOnlySet<string> CollapsedCollectionNames,
-    IReadOnlyDictionary<string, string> CollectionArtworkPaths)
+    IReadOnlyDictionary<string, string> CollectionArtworkPaths,
+    int? WindowWidth,
+    int? WindowHeight)
 {
     public static IReadOnlyList<string> DefaultVisibleColumns { get; } =
     [
@@ -57,5 +59,7 @@ public sealed record UserLibraryState(
         new HashSet<string>(StringComparer.Ordinal),
         new HashSet<string>(StringComparer.Ordinal),
         new HashSet<string>(StringComparer.OrdinalIgnoreCase),
-        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+        null,
+        null);
 }

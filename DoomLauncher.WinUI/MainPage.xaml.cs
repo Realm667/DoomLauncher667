@@ -86,7 +86,7 @@ public sealed partial class MainPage : Page
 
     private async void MainPage_Loaded(object sender, RoutedEventArgs args)
     {
-        _userState = await _app.UserLibraryStateStore.LoadAsync(_loadCancellation.Token);
+        _userState = _app.InitialUserState;
         var testedThemes = _userState.TestedThemes.ToHashSet(
             StringComparer.OrdinalIgnoreCase);
         var stateChanged = testedThemes.Add(_userState.Theme);

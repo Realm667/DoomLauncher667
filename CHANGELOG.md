@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.8.1 - 2026-08-02
+
+- The main-window size is now stored in the portable user-state file and
+  restored on the next normal launch. Debug launches deliberately use the
+  safe 1440 × 900 default and do not overwrite the saved normal size.
+- XML themes are listed alphabetically by display name. The obsolete `order`
+  attribute was removed from all bundled themes and from the theme format.
+- The separate package import and export buttons were consolidated into one
+  localized **Manage package** menu.
+- Startup state is read once during the splash screen and reused by the main
+  page; the duplicate second disk read was removed.
+- Theme discovery and validation now share one implementation for both the
+  settings list and theme application, eliminating divergent loading paths.
+- Added persistence coverage for window dimensions and updated the portable
+  runtime and reset distributions to version 0.8.1.
+
 ## 0.8 - 2026-08-02
 
 - First official open-source release of Doom Launcher 667 under the Realm667

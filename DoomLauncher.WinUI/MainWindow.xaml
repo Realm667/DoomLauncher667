@@ -21,7 +21,7 @@
         <TitleBar
             x:Name="AppTitleBar"
             Background="{StaticResource DoomSidebarBrush}"
-            Subtitle="0.8"
+            Subtitle="0.8.1"
             Title="Doom Launcher 667">
             <TitleBar.IconSource>
                 <ImageIconSource ImageSource="Assets/logo_alpha_small_cropped.png" />

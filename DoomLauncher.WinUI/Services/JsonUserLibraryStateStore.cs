@@ -53,7 +53,9 @@ public sealed class JsonUserLibraryStateStore : IUserLibraryStateStore
                 NormalizeAchievementKeys(state?.NotifiedAchievementKeys),
                 NormalizeAchievementKeys(state?.UnseenAchievementKeys),
                 NormalizeCollectionNames(state?.CollapsedCollectionNames),
-                NormalizeCollectionArtworkPaths(state?.CollectionArtworkPaths));
+                NormalizeCollectionArtworkPaths(state?.CollectionArtworkPaths),
+                NormalizeWindowDimension(state?.WindowWidth),
+                NormalizeWindowDimension(state?.WindowHeight));
         }
         catch (Exception exception) when (
             exception is JsonException
@@ -103,7 +105,9 @@ public sealed class JsonUserLibraryStateStore : IUserLibraryStateStore
                             .ToDictionary(
                                 item => item.Key,
                                 item => item.Value,
-                                StringComparer.OrdinalIgnoreCase)),
+                                StringComparer.OrdinalIgnoreCase),
+                        NormalizeWindowDimension(state.WindowWidth),
+                        NormalizeWindowDimension(state.WindowHeight)),
                     cancellationToken: cancellationToken);
             }
 
@@ -214,6 +218,9 @@ public sealed class JsonUserLibraryStateStore : IUserLibraryStateStore
         return result;
     }
 
+    private static int? NormalizeWindowDimension(int? value) =>
+        value is >= 320 and <= 16384 ? value : null;
+
     private sealed record PersistedState(
         int[] FavoriteGameFileIds,
         int[]? FinishedGameFileIds = null,
@@ -231,5 +238,7 @@ public sealed class JsonUserLibraryStateStore : IUserLibraryStateStore
         string[]? NotifiedAchievementKeys = null,
         string[]? UnseenAchievementKeys = null,
         string[]? CollapsedCollectionNames = null,
-        Dictionary<string, string>? CollectionArtworkPaths = null);
+        Dictionary<string, string>? CollectionArtworkPaths = null,
+        int? WindowWidth = null,
+        int? WindowHeight = null);
 }

@@ -44,6 +44,8 @@ public partial class App : Application
     internal IUserLibraryStateStore UserLibraryStateStore { get; }
     internal UiLocalization Localization { get; }
     internal bool IsDebugMode { get; }
+    internal UserLibraryState InitialUserState { get; private set; } =
+        UserLibraryState.Empty;
     internal Window? MainWindow => _window;
 
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
@@ -52,7 +54,12 @@ public partial class App : Application
         {
             _splashWindow = new SplashWindow();
             _splashWindow.Activate();
-            await Task.Delay(1200);
+
+            var minimumSplashTime = Task.Delay(1200);
+            var stateLoad = UserLibraryStateStore.LoadAsync(
+                CancellationToken.None);
+            await Task.WhenAll(minimumSplashTime, stateLoad);
+            InitialUserState = await stateLoad;
 
             _window = new MainWindow();
             _window.Activate();

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DoomLauncherTheme id="Dark" name="Dark" baseMode="Dark" order="10">
+<DoomLauncherTheme id="Dark" name="Dark" baseMode="Dark">
   <Colors>
     <Background>#111114</Background>
     <Surface>#E61B1B1F</Surface>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DoomLauncherTheme id="UZDoom" name="UZDoom" baseMode="Dark" order="60">
+<DoomLauncherTheme id="UZDoom" name="UZDoom" baseMode="Dark">
   <Colors>
     <Background>#212121</Background>
     <Surface>#2A2A2A</Surface>

@@ -140,6 +140,8 @@ public sealed class UiLocalization
                 ["ExportBundle"] = "Export portable mod collection",
                 ["ImportPackageShort"] = "Import package",
                 ["ExportPackageShort"] = "Export package",
+                ["ManagePackageShort"] = "Manage package",
+                ["ManagePackage"] = "Import or export portable packages",
                 ["ExportCollection"] = "Collection preset",
                 ["ManualSelection"] = "Manual selection",
                 ["BundleExportDescription"] = "Select multiple mods or choose a collection. The package contains the mod archives, metadata, artwork, screenshots, finished state and collection assignments.",
@@ -369,6 +371,7 @@ public sealed class UiLocalization
                 ["DeleteCollectionWarning"]="Sammlung „{0}“ löschen? Die Zuordnung wird aus allen Mods entfernt. Die Mods und ihre Dateien bleiben in der Bibliothek erhalten.",
                 ["Delete"]="Löschen",["PlayedMods"]="Gespielte Mods",["UnplayedMods"]="Ungespielte Mods",
                 ["ImportPackageShort"]="Paket importieren",["ExportPackageShort"]="Paket exportieren",
+                ["ManagePackageShort"]="Paket verwalten",["ManagePackage"]="Portable Pakete importieren oder exportieren",
                 ["Map"]="Map",["Difficulty"]="Schwierigkeitsgrad",["Date"]="Datum",["Automatic"]="Automatisch",
                 ["SkillOne"]="Ich bin noch zu jung zum Sterben",["SkillTwo"]="Bitte nicht zu heftig",
                 ["SkillThree"]="Zeig's mir",["SkillFour"]="Ultra-Violence",["SkillFive"]="Nightmare!",
@@ -674,6 +677,7 @@ public sealed class UiLocalization
                 ["DeleteCollectionWarning"]="Supprimer la collection « {0} » ? Son attribution sera retirée de tous les mods. Les mods et leurs fichiers resteront dans la bibliothèque.",
                 ["Delete"]="Supprimer",["PlayedMods"]="Mods joués",["UnplayedMods"]="Mods non joués",
                 ["ImportPackageShort"]="Importer paquet",["ExportPackageShort"]="Exporter paquet",
+                ["ManagePackageShort"]="Gérer le paquet",["ManagePackage"]="Importer ou exporter des paquets portables",
                 ["Map"]="Carte",["Difficulty"]="Difficulté",["Date"]="Date",["Automatic"]="Automatique",
                 ["SkillOne"]="Je suis trop jeune pour mourir",["SkillTwo"]="Pas trop brutal",["SkillThree"]="Fais-moi mal",
                 ["SkillFour"]="Ultra-Violence",["SkillFive"]="Cauchemar !",
@@ -973,6 +977,7 @@ public sealed class UiLocalization
                 ["DeleteCollectionWarning"]="¿Eliminar la colección «{0}»? Se quitará la asignación de todos los mods. Los mods y sus archivos permanecerán en la biblioteca.",
                 ["Delete"]="Eliminar",["PlayedMods"]="Mods jugados",["UnplayedMods"]="Mods sin jugar",
                 ["ImportPackageShort"]="Importar paquete",["ExportPackageShort"]="Exportar paquete",
+                ["ManagePackageShort"]="Gestionar paquete",["ManagePackage"]="Importar o exportar paquetes portátiles",
                 ["Map"]="Mapa",["Difficulty"]="Dificultad",["Date"]="Fecha",["Automatic"]="Automático",
                 ["SkillOne"]="Soy demasiado joven para morir",["SkillTwo"]="No demasiado duro",["SkillThree"]="Hazme daño",
                 ["SkillFour"]="Ultra-Violence",["SkillFive"]="¡Pesadilla!",
@@ -1334,6 +1339,8 @@ public sealed class UiText(UiLocalization localization)
     public string ExportBundle => this[nameof(ExportBundle)];
     public string ImportPackageShort => this[nameof(ImportPackageShort)];
     public string ExportPackageShort => this[nameof(ExportPackageShort)];
+    public string ManagePackageShort => this[nameof(ManagePackageShort)];
+    public string ManagePackage => this[nameof(ManagePackage)];
     public string TileSize => this[nameof(TileSize)]; public string Download => this[nameof(Download)];
     public string NoEntries => this[nameof(NoEntries)]; public string EditEntry => this[nameof(EditEntry)];
     public string Tags => this[nameof(Tags)]; public string Iwad => this[nameof(Iwad)];

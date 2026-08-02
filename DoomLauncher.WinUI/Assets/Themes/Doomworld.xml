@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DoomLauncherTheme id="Doomworld" name="Doomworld" baseMode="Dark" order="40">
+<DoomLauncherTheme id="Doomworld" name="Doomworld" baseMode="Dark">
   <Colors>
     <Background>#082939</Background>
     <Surface>#0D3446</Surface>

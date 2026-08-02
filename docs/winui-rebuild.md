@@ -2,9 +2,14 @@
 
 ## Architecture
 
-Version 1.7 Beta is a self-contained WinUI 3 client. It uses the established
+Version 0.8.1 is a self-contained WinUI 3 client. It uses the established
 `DoomLauncher.sqlite` schema as its source of truth but does not require or
 start the classic .NET Framework executable.
+
+The normal main-window size is stored in the portable user-state JSON and
+restored on the next launch. A `--debug` launch always starts at 1440 × 900
+and leaves the saved normal size unchanged. Package import and export are
+grouped under the single **Manage package** menu in the shared header.
 
 | Capability | Owner |
 | --- | --- |

@@ -10,7 +10,8 @@ The root attributes are:
 - `id`: stable identifier stored in the user settings; keep it unique.
 - `name`: label displayed in Settings.
 - `baseMode`: `Dark` or `Light`; selects the matching WinUI control behavior.
-- `order`: optional numeric position in the theme list.
+
+Themes are listed alphabetically by their displayed `name` (A to Z).
 
 All colors accept `#RRGGBB` or `#AARRGGBB`:
 

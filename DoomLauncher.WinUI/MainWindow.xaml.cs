@@ -1,24 +1,94 @@
 using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Windows.Graphics;
 using Windows.UI;
+using DoomLauncher.WinUI.Services;
 
 namespace DoomLauncher.WinUI;
 
 public sealed partial class MainWindow : Window
 {
+    private const int DefaultWindowWidth = 1440;
+    private const int DefaultWindowHeight = 900;
+    private const int MinimumWindowWidth = 800;
+    private const int MinimumWindowHeight = 600;
+    private readonly App _app;
+    private bool _allowClose;
+
     public MainWindow()
     {
         InitializeComponent();
+        _app = (App)Application.Current;
 
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
         ApplyTitleBarTheme();
 
         AppWindow.SetIcon("Assets/DoomLauncher.ico");
-        AppWindow.Resize(new SizeInt32(1440, 900));
+        RestoreWindowSize();
+        AppWindow.Closing += AppWindow_Closing;
         RootFrame.Navigate(typeof(MainPage));
+    }
+
+    private void RestoreWindowSize()
+    {
+        var width = _app.IsDebugMode
+            ? DefaultWindowWidth
+            : _app.InitialUserState.WindowWidth ?? DefaultWindowWidth;
+        var height = _app.IsDebugMode
+            ? DefaultWindowHeight
+            : _app.InitialUserState.WindowHeight ?? DefaultWindowHeight;
+
+        var displayArea = DisplayArea.GetFromWindowId(
+            AppWindow.Id,
+            DisplayAreaFallback.Primary);
+        if (displayArea is not null)
+        {
+            width = Math.Clamp(
+                width,
+                Math.Min(MinimumWindowWidth, displayArea.WorkArea.Width),
+                displayArea.WorkArea.Width);
+            height = Math.Clamp(
+                height,
+                Math.Min(MinimumWindowHeight, displayArea.WorkArea.Height),
+                displayArea.WorkArea.Height);
+        }
+
+        AppWindow.Resize(new SizeInt32(width, height));
+    }
+
+    private async void AppWindow_Closing(
+        AppWindow sender,
+        AppWindowClosingEventArgs args)
+    {
+        if (_allowClose || _app.IsDebugMode)
+            return;
+
+        args.Cancel = true;
+        try
+        {
+            var latestState = await _app.UserLibraryStateStore.LoadAsync(
+                CancellationToken.None);
+            await _app.UserLibraryStateStore.SaveAsync(
+                latestState with
+                {
+                    WindowWidth = sender.Size.Width,
+                    WindowHeight = sender.Size.Height,
+                },
+                CancellationToken.None);
+        }
+        catch (Exception exception)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Window size could not be saved: {exception}");
+        }
+        finally
+        {
+            _allowClose = true;
+            Close();
+        }
     }
 
     internal void ApplyTitleBarTheme()

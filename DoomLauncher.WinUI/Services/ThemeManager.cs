@@ -21,53 +21,20 @@ public static class ThemeManager
 
     public static IReadOnlyList<LauncherThemeInfo> GetAvailableThemes()
     {
-        EnsureDefaultThemeFiles();
-        var themes = new List<(int Order, ThemeDefinition Theme)>();
-        foreach (var file in Directory.EnumerateFiles(
-                     GetThemeDirectory(),
-                     "*.xml",
-                     SearchOption.TopDirectoryOnly))
-        {
-            try
-            {
-                var theme = LoadDefinition(file);
-                themes.Add((theme.Order, theme));
-            }
-            catch (Exception exception)
-                when (exception is IOException
-                    or UnauthorizedAccessException
-                    or System.Xml.XmlException
-                    or FormatException
-                    or InvalidDataException)
-            {
-                // One invalid user theme must not prevent all valid themes
-                // from loading. The file remains in place for correction.
-            }
-        }
-
-        return themes
-            .OrderBy(item => item.Order)
-            .ThenBy(item => item.Theme.Name, StringComparer.CurrentCultureIgnoreCase)
-            .Select(item => new LauncherThemeInfo(
-                item.Theme.Id,
-                item.Theme.Name,
-                item.Theme.BaseMode,
-                item.Theme.FilePath))
+        return LoadDefinitions()
+            .OrderBy(theme => theme.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ThenBy(theme => theme.Id, StringComparer.OrdinalIgnoreCase)
+            .Select(theme => new LauncherThemeInfo(
+                theme.Id,
+                theme.Name,
+                theme.BaseMode,
+                theme.FilePath))
             .ToArray();
     }
 
     public static void Apply(FrameworkElement root, string theme)
     {
-        EnsureDefaultThemeFiles();
-        var definitions = Directory
-            .EnumerateFiles(
-                GetThemeDirectory(),
-                "*.xml",
-                SearchOption.TopDirectoryOnly)
-            .Select(TryLoadDefinition)
-            .Where(definition => definition is not null)
-            .Cast<ThemeDefinition>()
-            .ToArray();
+        var definitions = LoadDefinitions();
         var selected = definitions.FirstOrDefault(definition =>
                 definition.Id.Equals(theme, StringComparison.OrdinalIgnoreCase))
             ?? definitions.FirstOrDefault(definition =>
@@ -86,6 +53,20 @@ public static class ThemeManager
             : ElementTheme.Dark;
         ApplyPalette(selected.Colors);
         ApplyScopedControlPalette(root.Resources, selected.Colors);
+    }
+
+    private static IReadOnlyList<ThemeDefinition> LoadDefinitions()
+    {
+        EnsureDefaultThemeFiles();
+        return Directory
+            .EnumerateFiles(
+                GetThemeDirectory(),
+                "*.xml",
+                SearchOption.TopDirectoryOnly)
+            .Select(TryLoadDefinition)
+            .Where(definition => definition is not null)
+            .Cast<ThemeDefinition>()
+            .ToArray();
     }
 
     public static string GetThemeDirectory()
@@ -181,11 +162,6 @@ public static class ThemeManager
         var baseMode = RequiredAttribute(root, "baseMode");
         if (baseMode is not ("Dark" or "Light"))
             throw new InvalidDataException("baseMode must be Dark or Light.");
-        var order = int.TryParse(
-            root.Attribute("order")?.Value,
-            out var parsedOrder)
-            ? parsedOrder
-            : 1000;
         var colors = root.Element("Colors")
             ?? throw new InvalidDataException("The Colors element is missing.");
 
@@ -193,7 +169,6 @@ public static class ThemeManager
             id,
             name,
             baseMode,
-            order,
             Path.GetFullPath(path),
             new Palette(
                 RequiredColor(colors, "Background"),
@@ -576,7 +551,6 @@ public static class ThemeManager
         string Id,
         string Name,
         string BaseMode,
-        int Order,
         string FilePath,
         Palette Colors);
 

@@ -153,6 +153,8 @@ try
                 ["Cacowards 2019"] =
                     Path.Combine("Data", "CollectionArtworks", "cacowards.png"),
             },
+            WindowWidth = 1280,
+            WindowHeight = 760,
         });
         var restoredState = await stateStore.LoadAsync();
         Check(
@@ -166,6 +168,10 @@ try
                 Path.Combine("Data", "CollectionArtworks", "cacowards.png"),
                 StringComparison.OrdinalIgnoreCase),
             "Collection-Artworks werden portabel und persistent gespeichert");
+        Check(
+            restoredState.WindowWidth == 1280
+            && restoredState.WindowHeight == 760,
+            "Die Fenstergröße wird portabel und persistent gespeichert");
     }
     finally
     {
