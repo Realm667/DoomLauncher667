@@ -1,0 +1,27 @@
+name: WinUI rebuild
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  modern-client:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: |
+          dotnet restore DoomLauncher.WinUI/DoomLauncher.WinUI.csproj
+          dotnet restore DoomLauncher.Modern.Tests/DoomLauncher.Modern.Tests.csproj
+
+      - name: Build WinUI 3
+        run: dotnet build DoomLauncher.WinUI/DoomLauncher.WinUI.csproj -c Release -p:Platform=x64 --no-restore
+
+      - name: Run modern contract tests
+        run: dotnet run --project DoomLauncher.Modern.Tests/DoomLauncher.Modern.Tests.csproj -c Release --no-restore

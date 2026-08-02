@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseSystemDrawing>true</UseSystemDrawing>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.10" />
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.12" />
+    <PackageReference Include="SharpCompress" Version="0.49.1" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.10" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\DoomLauncher.Modern.Core\Launch\*.cs">
+      <Link>Core\Launch\%(Filename)%(Extension)</Link>
+    </Compile>
+    <Compile Include="..\DoomLauncher.WinUI\Services\DoomLauncherDatabaseLocator.cs" Link="Services\DoomLauncherDatabaseLocator.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\DatabaseTextSanitizer.cs" Link="Services\DatabaseTextSanitizer.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\MapNameExtractor.cs" Link="Services\MapNameExtractor.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\IwadVersionDetector.cs" Link="Services\IwadVersionDetector.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\FirstSetupService.cs" Link="Services\FirstSetupService.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\INativeLibraryService.cs" Link="Services\INativeLibraryService.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\ILaunchService.cs" Link="Services\ILaunchService.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\IUserLibraryStateStore.cs" Link="Services\IUserLibraryStateStore.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\JsonUserLibraryStateStore.cs" Link="Services\JsonUserLibraryStateStore.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\SqliteNativeLibraryService.cs" Link="Services\SqliteNativeLibraryService.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\WinUiDatabaseSchema.cs" Link="Services\WinUiDatabaseSchema.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\TitlePicExtractor.cs" Link="Services\TitlePicExtractor.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\NativeGameLaunchService.cs" Link="Services\NativeGameLaunchService.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\SystemProcessStarter.cs" Link="Services\SystemProcessStarter.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\LegacyInstallationMigrationService.cs" Link="Services\LegacyInstallationMigrationService.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Models\IdGamesItem.cs" Link="Models\IdGamesItem.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\DoomLauncher\Resources\PLAYPAL.LMP">
+      <Link>Assets\DoomPLAYPAL.LMP</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\DoomLauncher.WinUI\Assets\iwad-hashes.json">
+      <Link>Assets\iwad-hashes.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\DoomLauncher.WinUI\Assets\DoomLauncher.Empty.sqlite">
+      <Link>Assets\DoomLauncher.Empty.sqlite</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

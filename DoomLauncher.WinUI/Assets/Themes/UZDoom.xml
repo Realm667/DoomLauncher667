@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DoomLauncherTheme id="UZDoom" name="UZDoom" baseMode="Dark" order="60">
+  <Colors>
+    <Background>#212121</Background>
+    <Surface>#2A2A2A</Surface>
+    <ElevatedSurface>#353535</ElevatedSurface>
+    <Sidebar>#171717</Sidebar>
+    <PrimaryText>#FFFFFF</PrimaryText>
+    <SecondaryText>#B8FFFFFF</SecondaryText>
+    <Accent>#20E1F8</Accent>
+    <SecondaryAccent>#65F0FF</SecondaryAccent>
+    <ControlAccent>#20E1F8</ControlAccent>
+    <Border>#4AFFFFFF</Border>
+    <Success>#6CCB5F</Success>
+    <Warning>#F07860</Warning>
+  </Colors>
+</DoomLauncherTheme>

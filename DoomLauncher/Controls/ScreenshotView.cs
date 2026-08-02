@@ -1,0 +1,532 @@
+﻿using DoomLauncher.Forms;
+using DoomLauncher.Handlers;
+using DoomLauncher.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Windows.Forms;
+
+namespace DoomLauncher
+{
+    public class RequestScreenshotsEventArgs : EventArgs
+    {
+        public RequestScreenshotsEventArgs(IGameFile gameFile) { GameFile = gameFile; }
+        public IGameFile GameFile { get; private set; }
+    }
+
+    class PictureItem
+    {
+        public PictureItem(PictureBox pb)
+        {
+            PictureBox = pb;
+        }
+
+        public PictureBox PictureBox { get; private set; }
+        public IFileData CurrentFile { get; set; }
+        public bool Skip { get; set; }
+    }
+
+    public partial class ScreenshotView : BasicFileView
+    {
+        // For some reason, Names of ToolStripItems are disappearing at runtime, 
+        // so we need to use Text as the identifier.
+        private static readonly string SetAsMainImageButtonText = "Set as main image";
+        private static readonly string RemoveAsMainImageButtonText = "Remove as main image";
+
+        private const double AspectWidth = 16;
+        private const double AspectHeight = 9;
+        private readonly Dictionary<PictureBox, IFileData> m_lookup = new Dictionary<PictureBox, IFileData>();
+        private readonly List<PictureItem> m_pictureBoxes = new List<PictureItem>();
+        private List<IFileData> m_screenshots = new List<IFileData>();
+        private int m_pictureWidth;
+        private CancellationTokenSource m_ct = new CancellationTokenSource();
+        private bool m_imageWorkerComplete = true;
+        private readonly Stopwatch m_clickStopwatch = new Stopwatch();
+        private readonly ToolTipGroup m_toolTipGroup = new ToolTipGroup();
+        private readonly GameFileImageHandler m_gameFileImageHandler;
+
+        public event EventHandler<RequestScreenshotsEventArgs> RequestScreenshots;
+
+        public ScreenshotView()
+        {
+            InitializeComponent();
+            var database = DataCache.Instance.DataSourceAdapter;
+            var config = DataCache.Instance.AppConfiguration;
+            var fileHandler = new FileHandler(database, config);
+            m_gameFileImageHandler = new GameFileImageHandler(fileHandler, database.GetIWadByIWadID, config.DeleteScreenshotsAfterImport);
+            flpScreenshots.Click += FlpScreenshots_Click;
+        }
+
+        public void SetPictureWidth(int pictureWidth)
+        {
+            m_pictureWidth = pictureWidth;
+            InitPictureBoxes();
+        }
+
+        private void FlpScreenshots_Click(object sender, EventArgs e)
+        {
+            SelectedFile = null;
+            foreach (PictureBox pbSet in m_lookup.Keys)
+                SetSelectedStyle(pbSet, false);
+        }
+
+        public override void SetData(IGameFile gameFile)
+        {
+            flpScreenshots.BackColor = ColorTheme.Current.GridBackground;
+            SelectedFile = null;
+
+            foreach (PictureBox pbSet in m_lookup.Keys)
+                SetSelectedStyle(pbSet, false);
+
+            flpScreenshots.SuspendLayout();
+            flpScreenshots.Controls.Clear();
+
+            flpScreenshots.ResumeLayout();
+
+            m_lookup.Clear();
+
+            if (gameFile != null && gameFile.GameFileID.HasValue)
+                RequestScreenshots?.Invoke(this, new RequestScreenshotsEventArgs(gameFile));
+        }
+
+        public override void ClearData()
+        {
+            SelectedFile = null;
+            flpScreenshots.SuspendLayout();
+            flpScreenshots.Controls.Clear();
+            flpScreenshots.ResumeLayout();
+            m_lookup.Clear();
+        }
+
+        public override bool ShowCreateNew(IWin32Window parent, IDataSourceAdapter adapter, ISourcePortData sourcePort, string filename, bool isMultiImport,
+            out NewFileData newFileData)
+        {
+            newFileData = null;
+            ScreenshotEditForm screenshotEditForm = new ScreenshotEditForm();
+            screenshotEditForm.StartPosition = FormStartPosition.CenterParent;
+            screenshotEditForm.SetData(adapter.GetGameFile(GameFile.FileName), null);
+
+            if (screenshotEditForm.ShowDialog() != DialogResult.OK)
+                return false;
+            
+            newFileData = new NewFileData()
+            {
+                UserTitle = screenshotEditForm.Title,
+                UserDescription = screenshotEditForm.Description,
+                Map = screenshotEditForm.Map,
+                SourcePortID = -1,
+            };
+            return true;
+        }
+
+        public override bool New()
+        {
+            if (base.New())
+            {
+                m_gameFileImageHandler.UpdateImages(GameFile);
+                return true;
+            }
+
+            return false;
+        }
+
+        public override bool Edit()
+        {
+            if (SelectedFile == null)
+                return false;
+
+            return ScreenshotEditForm.ShowDialogAndUpdate(this, DataSourceAdapter, 
+                DataSourceAdapter.GetGameFile(GameFile.FileName), SelectedFile);
+        }
+
+        public override bool Delete()
+        {
+            if (base.Delete())
+            {
+                m_gameFileImageHandler.UpdateImages(GameFile);
+                return true;
+            }
+            
+            return false;
+        }
+
+        public override bool MoveFileOrderUp()
+        {
+            if (base.MoveFileOrderUp())
+            {
+                m_gameFileImageHandler.UpdateImages(GameFile);
+                return true;
+            }
+
+            return false;
+        }
+
+        public override bool MoveFileOrderDown()
+        {
+            if (base.MoveFileOrderDown())
+            {
+                m_gameFileImageHandler.UpdateImages(GameFile);
+                return true;
+            }
+
+            return false;
+        }
+
+        public override bool SetFileOrderFirst()
+        {
+            IFileData selectedFile = GetSelectedFiles().FirstOrDefault();
+
+            if (selectedFile != null)
+            {
+                selectedFile.IsMain = !selectedFile.IsMain;
+                DataSourceAdapter.UpdateFile(selectedFile);
+
+                foreach (var file in Files)
+                {
+                    if (file.FileID != selectedFile.FileID)
+                    {
+                        file.IsMain = false;
+                        DataSourceAdapter.UpdateFile(file);
+                    }
+                }
+
+                m_gameFileImageHandler.UpdateImages(GameFile);
+                return true;
+            }
+            return false;
+        }
+
+        private void InitPictureBoxes()
+        {
+            lock (m_pictureBoxes)
+            {
+                foreach (var item in m_pictureBoxes)
+                {
+                    PictureBox pb = item.PictureBox;
+                    if (flpScreenshots.Controls.Contains(pb))
+                        flpScreenshots.Controls.Remove(pb);
+                    if (pb.Image != null)
+                        pb.Image.Dispose();
+                }
+
+                m_pictureBoxes.Clear();
+                ExpandPictureBoxes(50);
+            }
+        }
+
+        private void ExpandPictureBoxes(int count)
+        {
+            for (int i = 0; i < count; i++)
+                m_pictureBoxes.Add(new PictureItem(CreatePictureBox()));
+
+            foreach (var pb in m_pictureBoxes)
+                m_toolTipGroup.SetToolTip(pb.PictureBox, "Double-click to view");
+        }
+
+        public void SetScreenshots(List<IFileData> screenshots)
+        {
+            m_ct.Cancel();
+            while (!m_imageWorkerComplete)
+                Thread.Sleep(10);
+            m_imageWorkerComplete = false;
+            m_ct = new CancellationTokenSource();
+
+            flpScreenshots.SuspendLayout();
+
+            m_screenshots = screenshots.ToList();
+            m_lookup.Clear();
+
+            lock (m_pictureBoxes)
+            {
+                if (m_screenshots.Count > m_pictureBoxes.Count)
+                    ExpandPictureBoxes(m_screenshots.Count - m_pictureBoxes.Count);
+
+                List<PictureItem>.Enumerator enumerator = m_pictureBoxes.GetEnumerator();
+
+                foreach (IFileData screen in screenshots)
+                {
+                    enumerator.MoveNext();
+                    if (enumerator.Current == null)
+                        break;
+
+                    PictureBox pbScreen = enumerator.Current.PictureBox;
+                    enumerator.Current.Skip = true;
+                    flpScreenshots.Controls.Add(pbScreen);
+
+                    m_lookup.Add(pbScreen, screen);
+
+                    try
+                    {
+                        if (screen.IsUrl)
+                        {
+                            pbScreen.CancelAsync();
+                            pbScreen.Image = null;
+                            pbScreen.LoadAsync(screen.FileName);
+                        }
+                        else
+                        {
+                            if (screen.Equals(enumerator.Current.CurrentFile))
+                                continue;
+
+                            enumerator.Current.Skip = false;
+                            Image image = pbScreen.Image;
+                            pbScreen.Image = null;
+                            if (image != null)
+                                image.Dispose();
+                        }
+                    }
+                    catch
+                    {
+                        pbScreen.ImageLocation = string.Empty;
+                    }
+                }
+            }
+
+            var thread = new Thread(new ThreadStart(SetImages));
+            thread.Start();
+            flpScreenshots.ResumeLayout();
+        }
+
+        private void SetImages()
+        {
+            lock (m_pictureBoxes)
+            {
+                List<PictureItem>.Enumerator enumerator = m_pictureBoxes.GetEnumerator();
+                foreach (var screen in m_screenshots)
+                {
+                    enumerator.MoveNext();
+                    if (m_ct.IsCancellationRequested || enumerator.Current == null)
+                        break;
+                    if (enumerator.Current.Skip)
+                        continue;
+
+                    PictureBox pbScreen = enumerator.Current.PictureBox;
+                    string file = Path.Combine(DataDirectory.GetFullPath(), screen.FileName);
+
+                    try
+                    {
+                        using (var image = Image.FromFile(file))
+                            pbScreen.Image = image.FixedSize(pbScreen.Width, pbScreen.Height, Color.Black);
+                    }
+                    catch
+                    {
+                        // Most likely file doesn't exist...
+                        // Can also be out of memory exception
+                    }
+
+                    enumerator.Current.CurrentFile = screen;
+                }
+
+                enumerator.MoveNext();
+                while (enumerator.Current != null)
+                {
+                    enumerator.Current.CurrentFile = null;
+                    enumerator.MoveNext();
+                }
+
+                m_imageWorkerComplete = true;
+            }
+        }
+
+        private PictureBox CreatePictureBox()
+        {
+            PictureBox pbScreen = new PictureBox
+            {
+                WaitOnLoad = false,
+                BackColor = Color.Black,
+                Width = m_pictureWidth
+            };
+
+            pbScreen.Height = Convert.ToInt32(pbScreen.Width / (AspectWidth / AspectHeight));
+            pbScreen.SizeMode = PictureBoxSizeMode.Zoom;
+            pbScreen.Margin = new Padding(7);
+            pbScreen.MouseDown += pbScreen_MouseDown;
+            pbScreen.DoubleClick += PbScreen_DoubleClick;
+
+            pbScreen.Paint += PbScreen_Paint;
+            return pbScreen;
+        }
+
+        private void PbScreen_Paint(object sender, PaintEventArgs e)
+        {
+            PictureBox pb = sender as PictureBox;
+            if (pb == null || !m_lookup.TryGetValue(pb, out var fileData))
+                return;
+
+            string title = fileData.Title;
+            if (!string.IsNullOrEmpty(title))
+            {
+                Util.DrawImageTitleBar(title, pb.ClientRectangle, e, Brushes.White, Font);
+            }
+
+            if (fileData.IsMain)
+            {
+                Util.DrawImageTitleBar("Main image", pb.ClientRectangle, e, Brushes.LightGray, Font, top: true);
+            }
+        }
+
+        private void PbScreen_DoubleClick(object sender, EventArgs e)
+        {
+            HandleDoubleClick(sender);
+        }
+
+        void pbScreen_MouseDown(object sender, MouseEventArgs e)
+        {
+            HandleClick(sender, e);
+        }
+
+        private void HandleDoubleClick(object sender)
+        {
+            if (sender is PictureBox pb && m_lookup.ContainsKey(pb))
+            {
+                HandleClick(pb, null);
+                View();
+            }
+        }
+
+        public override void View()
+        {
+            if (m_screenshots.Count > 0)
+            {
+                ScreenshotViewerForm screenshotForm = new ScreenshotViewerForm();
+                screenshotForm.StartPosition = FormStartPosition.CenterParent;
+                var imagePaths = m_screenshots.Select(x => Path.Combine(DataDirectory.GetFullPath(), x.FileName)).ToArray();
+                screenshotForm.SetImageFileData(DataSourceAdapter, DataSourceAdapter.GetGameFile(GameFile.FileName), imagePaths, m_screenshots);
+                screenshotForm.WindowState = FormWindowState.Maximized;
+                screenshotForm.Shown += ScreenshotForm_Shown;
+                screenshotForm.ShowDialog(this);
+                SetData(GameFile);
+            }
+        }
+
+        private void ScreenshotForm_Shown(object sender, EventArgs e)
+        {
+            if (!(sender is ScreenshotViewerForm screenshotForm))
+                return;
+
+            if (SelectedFile != null)
+                screenshotForm.SetImage(Path.Combine(DataDirectory.GetFullPath(), SelectedFile.FileName));
+        }
+
+        private void HandleClick(object sender, MouseEventArgs e)
+        {
+            if (!(sender is PictureBox pb) || !m_lookup.TryGetValue(pb, out var fileData))
+                return;
+
+            if (SelectedFile != null && SelectedFile.FileID == fileData.FileID)
+            {
+                if (e != null && e.Button == MouseButtons.Left && m_clickStopwatch.ElapsedMilliseconds < SystemInformation.DoubleClickTime)
+                    HandleDoubleClick(sender);
+                m_clickStopwatch.Restart();
+            }
+            else
+            {
+                m_clickStopwatch.Restart();
+                foreach (var pbSet in m_lookup.Keys)
+                    SetSelectedStyle(pbSet, false);
+
+                SelectedFile = fileData;
+                SetSelectedStyle(pb, true);
+            }
+
+            if (e != null && e.Button == MouseButtons.Right)
+            {
+                ToolStripItem setAsMainItem = GetSetAsMainToolStripItem();
+
+                if (setAsMainItem != null)
+                {
+                    bool isMain = SelectedFile != null && SelectedFile.IsMain;
+                    setAsMainItem.Text = isMain ? RemoveAsMainImageButtonText : SetAsMainImageButtonText;
+                }
+
+                m_menu.Show(pb.PointToScreen(e.Location));
+            }
+        }
+
+        private ToolStripItem GetSetAsMainToolStripItem()
+        {
+            List<ToolStripItem> toolStripItems = m_menu.Items.Cast<ToolStripItem>().ToList();
+            return toolStripItems.FirstOrDefault(
+                item => item.Text == GameFileAssociationView.SetFirstButtonText
+                     || item.Text == SetAsMainImageButtonText
+                     || item.Text == RemoveAsMainImageButtonText);
+        }
+
+        private void SetSelectedStyle(PictureBox pb, bool selected)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action<PictureBox, bool>(SetSelectedStyle), pb, selected);
+                return;
+            }
+
+            if (selected)
+            {
+                pb.BackColor = ColorTheme.Current.Highlight;
+                pb.Padding = new Padding(2);
+                pb.BorderStyle = BorderStyle.Fixed3D;
+            }
+            else
+            {
+                pb.BackColor = Color.Black;
+                pb.Padding = new Padding(0);
+                pb.BorderStyle = BorderStyle.None;
+            }
+        }
+
+        protected override IFileData[] Files => m_lookup.Values.ToArray();
+
+        protected override List<IFileData> GetSelectedFiles()
+        {
+            var files = new List<IFileData>();
+            if (SelectedFile != null)
+                files.Add(SelectedFile);
+
+            return files;
+        }
+
+        private IFileData SelectedFile { get; set; }
+
+        public override bool EditAllowed => true;
+
+        public override IList<MenuOptions> MenuOptions
+        {
+            get
+            {
+                return new MenuOptions[]
+                {
+                    new MenuOptions()
+                    {
+                        Title = "Sort by Map",
+                        Action = SortByMap
+                    }
+                };
+            }
+        }
+
+        private bool SortByMap()
+        {
+            if (Files.Count() <= 1)
+                return false;
+
+            var files = Files.ToList();
+            var firstFile = files[0];
+            files.Sort(new FileMapComparer());
+            int order = 0;
+            foreach (var file in files)
+                file.FileOrder = order++;
+
+            foreach (IFileData fileUpdate in files)
+                DataSourceAdapter.UpdateFile(fileUpdate);
+
+            if (firstFile.FileOrder != 0)
+                m_gameFileImageHandler.UpdateImages(GameFile);
+
+            return true;
+        }
+    }
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DoomLauncherTheme id="Light" name="Light" baseMode="Light" order="20">
+  <Colors>
+    <Background>#F7F7F8</Background>
+    <Surface>#FFFFFFFF</Surface>
+    <ElevatedSurface>#FFE8E8EC</ElevatedSurface>
+    <Sidebar>#FFFFFFFF</Sidebar>
+    <PrimaryText>#1A1A1A</PrimaryText>
+    <SecondaryText>#A6000000</SecondaryText>
+    <Accent>#3A90BC</Accent>
+    <SecondaryAccent>#2D7398</SecondaryAccent>
+    <ControlAccent>#3A90BC</ControlAccent>
+    <Border>#22000000</Border>
+    <Success>#3A9232</Success>
+    <Warning>#B64933</Warning>
+  </Colors>
+</DoomLauncherTheme>

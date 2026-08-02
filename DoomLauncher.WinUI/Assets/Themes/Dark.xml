@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DoomLauncherTheme id="Dark" name="Dark" baseMode="Dark" order="10">
+  <Colors>
+    <Background>#111114</Background>
+    <Surface>#E61B1B1F</Surface>
+    <ElevatedSurface>#F02A2A30</ElevatedSurface>
+    <Sidebar>#0E0E11</Sidebar>
+    <PrimaryText>#FFFFFF</PrimaryText>
+    <SecondaryText>#B8FFFFFF</SecondaryText>
+    <Accent>#E35D44</Accent>
+    <SecondaryAccent>#F07860</SecondaryAccent>
+    <ControlAccent>#28A1A0</ControlAccent>
+    <Border>#3DFFFFFF</Border>
+    <Success>#6CCB5F</Success>
+    <Warning>#E35D44</Warning>
+  </Colors>
+</DoomLauncherTheme>

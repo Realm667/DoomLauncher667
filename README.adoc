@@ -1,0 +1,101 @@
+= Doom Launcher 667
+
+Doom Launcher 667 is an open-source, portable game-library launcher for Doom
+engine games and mods on Windows. It combines a modern WinUI 3 interface with
+library management, source-port and IWAD setup, /idgames integration,
+collections, statistics, achievements, screenshots, and package transfer.
+
+The current public version is *0.8*.
+
+== Modern WinUI 3 client
+
+`DoomLauncher.WinUI` is the modern, responsive launcher client. The repository
+also preserves the original Doom Launcher code and history for attribution,
+migration reference, and compatibility work.
+
+The current vertical slice includes:
+
+* a native SQLite-backed game library;
+* search, category filters, recent items, downloads, tag collections, and
+  persistent WinUI favorites;
+* game details, artwork, playtime, IWAD, and source-port context;
+* launch-time source-port and IWAD overrides;
+* monitored game sessions with automatic playtime refresh;
+* native managed-file import by file picker or drag and drop;
+* native metadata editing, setup, and portable application settings;
+* incremental loading, lazy artwork caching, sorting, and grid/list views;
+* XML-defined themes, localization, keyboard shortcuts, and automation labels;
+* a shared modern launch contract plus an executable real-database regression
+  suite.
+
+See `docs/winui-rebuild.md` for setup, deployment, and migration details.
+
+image::https://i.imgur.com/TIg4kNK.png[IWads Tile View Showcase]
+Large tile view for IWads tab. IWADs such as _Freedoom_ and _Heretic_ can be played with Doom Launcher.
+
+image::https://i.imgur.com/mYqC1QO.png[Custom Files Tile View Showcase]
+Large tile view for a custom tag named "Playing". Doom Launcher can play custom mapsets such as Eviternity, Back to Saturn X, Plutonia 2, and more!
+
+== Features
+
+* Direct download and metadata update from /idgames (through API).
+* Add ZIP archives containing WAD/PK3/DEH/TXT files.
+* Automatic scraping of title, author, release date and description
+from included text files.
+* Automatically load files when selecting an IWAD or source port.
+* Add comments and ratings for files.
+* Import screenshots directly from a source port into the database.
+* Maintain demos and saved games (DSG/ZDS supported).
+* Set launch parameters and warp into any map in a file.
+* Select specific files within a ZIP archive.
+* Tag files with custom colored tags.
+* Screen filters to simulate CRT monitors.
+* Record play-statistics for each map completed in a play session.
+Supported source ports includes ZDoom, PrBoom+, CNDoom, Chocolate Doom,
+and Crispy Doom.
+* Automatic daily database backups (SQLite database files).
+* Create shortcuts to quickly launch files.
+
+Many more features are documented in the Help file. Please read it if
+you have any concerns regarding certain features.
+
+Doom Launcher was originally created by Hobomaster22. Doom Launcher 667 builds
+on that GPL-licensed work and retains its source history and attribution.
+See `LICENSE` and `THIRD-PARTY-NOTICES.md` for licensing details.
+
+== Building Doom Launcher
+
+Clone the repository on Windows. Visual Studio 2022 with the Windows
+application development workload is recommended. The modern client requires
+the .NET 10 SDK and Windows App SDK tooling.
+
+In order to build the Setup module for Visual Studio 2022, you may need to separately install 
+support for Installer projects: 
+https://marketplace.visualstudio.com/items?itemName=VisualStudioClient.MicrosoftVisualStudio2022InstallerProjects 
+
+=== Building the WinUI client
+
+Install the .NET 10 SDK and the Windows application development workload, then:
+
+----
+dotnet restore DoomLauncher.WinUI/DoomLauncher.WinUI.csproj
+dotnet build DoomLauncher.WinUI/DoomLauncher.WinUI.csproj -c Release -p:Platform=x64
+dotnet publish DoomLauncher.WinUI/DoomLauncher.WinUI.csproj -c Release -p:Platform=x64 -p:PublishProfile=win-x64-unpackaged
+----
+
+
+== Development Tools
+
+SQLite Browser. Great tool for viewing and editing the DoomLauncher.sqlite database: 
+https://sqlitebrowser.org/
+
+SonarLint. A great code analysis extension for Visual Studio. Highly recommended and used for most of Doom Launcher's development:
+https://www.sonarlint.org/visualstudio/
+
+== Doom Launcher Links
+
+GitHub Repository: https://github.com/Realm667/DoomLauncher667
+
+Doomworld Thread: https://www.doomworld.com/vb/doom-general/69346-doom-launcher-doom-frontend-database/
+
+Realm667: https://realm667.com/index.php/en/kunena/doom-launcher 

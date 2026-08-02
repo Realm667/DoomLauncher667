@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DoomLauncherTheme id="Realm667" name="Realm667" baseMode="Dark" order="30">
+  <Colors>
+    <Background>#343A40</Background>
+    <Surface>#3D444C</Surface>
+    <ElevatedSurface>#2E343A</ElevatedSurface>
+    <Sidebar>#24292E</Sidebar>
+    <PrimaryText>#FFFFFF</PrimaryText>
+    <SecondaryText>#B8FFFFFF</SecondaryText>
+    <Accent>#3F81AC</Accent>
+    <SecondaryAccent>#4CAA9F</SecondaryAccent>
+    <ControlAccent>#4CAA9F</ControlAccent>
+    <Border>#5CFFFFFF</Border>
+    <Success>#6CCB5F</Success>
+    <Warning>#D8914E</Warning>
+  </Colors>
+</DoomLauncherTheme>

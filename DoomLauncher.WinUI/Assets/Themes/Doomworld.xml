@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DoomLauncherTheme id="Doomworld" name="Doomworld" baseMode="Dark" order="40">
+  <Colors>
+    <Background>#082939</Background>
+    <Surface>#0D3446</Surface>
+    <ElevatedSurface>#164154</ElevatedSurface>
+    <Sidebar>#061F2B</Sidebar>
+    <PrimaryText>#FFFFFF</PrimaryText>
+    <SecondaryText>#B8FFFFFF</SecondaryText>
+    <Accent>#189BD8</Accent>
+    <SecondaryAccent>#45B6EB</SecondaryAccent>
+    <ControlAccent>#189BD8</ControlAccent>
+    <Border>#52FFFFFF</Border>
+    <Success>#6CCB5F</Success>
+    <Warning>#F07860</Warning>
+  </Colors>
+</DoomLauncherTheme>

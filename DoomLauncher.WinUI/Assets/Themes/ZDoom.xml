@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DoomLauncherTheme id="ZDoom" name="ZDoom" baseMode="Dark" order="50">
+  <Colors>
+    <Background>#242629</Background>
+    <Surface>#2D3034</Surface>
+    <ElevatedSurface>#393C40</ElevatedSurface>
+    <Sidebar>#1C1E20</Sidebar>
+    <PrimaryText>#FFFFFF</PrimaryText>
+    <SecondaryText>#B8FFFFFF</SecondaryText>
+    <Accent>#9D0005</Accent>
+    <SecondaryAccent>#C4262B</SecondaryAccent>
+    <ControlAccent>#9D0005</ControlAccent>
+    <Border>#4AFFFFFF</Border>
+    <Success>#6CCB5F</Success>
+    <Warning>#E0573C</Warning>
+  </Colors>
+</DoomLauncherTheme>

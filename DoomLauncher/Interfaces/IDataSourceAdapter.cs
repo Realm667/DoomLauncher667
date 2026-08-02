@@ -1,0 +1,47 @@
+﻿using DoomLauncher.DataSources;
+using System.Collections.Generic;
+
+namespace DoomLauncher.Interfaces
+{
+    public interface IDataSourceAdapter : IGameFileDataSourceAdapter, IIWadDataSourceAdapter, IConfigurationDataSourceAdapter, IStatsDataSourceAdapter
+    {
+        void UpdateGameFiles(GameFileFieldType ftWhere, GameFileFieldType ftSet, object fWhere, object fSet);
+
+        IEnumerable<ISourcePortData> GetSourcePorts(bool loadArchived = false);
+        IEnumerable<ISourcePortData> GetUtilities(bool loadArchived = false);
+
+        IEnumerable<ISourcePortData> GetDoom64(bool loadArchived = false);
+
+        ISourcePortData GetSourcePort(int sourcePortID);
+        void InsertSourcePort(ISourcePortData sourcePort);
+        void UpdateSourcePort(ISourcePortData sourcePort);
+        void DeleteSourcePort(ISourcePortData sourcePort);
+
+        
+        IEnumerable<IFileData> GetFiles();
+        // Only returns GameFileID, FileID, FileName, FileTypeID
+        IEnumerable<IFileData> GetFilesTrimmed(IEnumerable<IGameFile> gameFiles, params FileType[] fileTypes);
+        IEnumerable<IFileData> GetFiles(IGameFile gameFile);
+        IEnumerable<IFileData> GetFiles(IGameFile gameFile, FileType fileTypeID);
+        IEnumerable<IFileData> GetFiles(FileType fileTypeID);
+        IEnumerable<IFileData> GetDerivedFiles(IFileData file);
+
+        void UpdateFile(IFileData file);
+        void UpdateFiles(int sourcePortID_Where, int? sourcePortID_Set);
+        void InsertFile(IFileData file);
+        void DeleteFile(IFileData file);
+        void DeleteFile(IGameFile file);
+        void DeleteFiles(ISourcePortData sourcePort, FileType fileTypeID);
+
+        IEnumerable<IGameFile> GetGameFiles(ITagData tag);
+        IEnumerable<IGameFile> GetGameFiles(IGameFileGetOptions options, ITagData tag);
+
+        IEnumerable<CleanupFile> GetCleanupFiles();
+        void InsertCleanupFile(CleanupFile file);
+        void DeleteCleanupFile(CleanupFile file);
+
+        //IEnumerable<ICustomParamDataSource> GetCustomParameters(int gameFileID);
+        //void InsertCustomParameter(ICustomParamDataSource data);
+        //void DeleteCustomParameter(ICustomParamDataSource data);
+    }
+}

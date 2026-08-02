@@ -1,0 +1,108 @@
+﻿using DoomLauncher.Archive.Rar;
+using SevenZip;
+using System;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+
+namespace DoomLauncher
+{
+    internal class ArchiveUtil
+    {
+        public static readonly string[] Exenstions = new string[] { ".7z", ".rar" };
+        private static readonly string[] CoreExtensions = new string[] { ".zip", ".7z", ".rar" };
+
+        public static bool IsTransformableToZip(string extension) => Exenstions.Contains(extension, StringComparer.OrdinalIgnoreCase);
+
+        // If this is an archive that packages files together that Doom Launcher should read the contents of (".zip", ".7z", ".rar")
+        public static bool ShouldReadPackagedArchive(string file) => CoreExtensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase);
+
+        public static bool CreateZipFrom(FileInfo fi, string tempDirectory, out FileInfo fileInfo)
+        {
+            fileInfo = null;
+            try
+            {
+                if (fi.Extension.Equals(".7z", StringComparison.OrdinalIgnoreCase))
+                    fileInfo = CreateZipFromSevenZip(fi, tempDirectory);
+                else if (fi.Extension.Equals(".rar", StringComparison.OrdinalIgnoreCase))
+                    fileInfo = CreateZipFromRar(fi, tempDirectory);
+
+                if (fileInfo != null)
+                    return true;
+            }
+            catch
+            {
+            }
+
+            return false;
+        }
+
+        private static FileInfo CreateZipFromSevenZip(FileInfo fi, string tempDirectory)
+        {
+            SevenZipBase.SetLibraryPath(Path.Combine(Util.GetInteropDirectory(), "7z.dll"));
+            using (SevenZipExtractor extractor = new SevenZipExtractor(fi.FullName))
+            {
+                DirectoryInfo dir = Directory.CreateDirectory(Path.Combine(tempDirectory, Guid.NewGuid().ToString()));
+                extractor.ExtractArchive(dir.FullName);
+
+                string zipFile = Path.Combine(tempDirectory, fi.Name.Replace(fi.Extension, ".zip"));
+                ZipFile.CreateFromDirectory(dir.FullName, zipFile);
+
+                Directory.Delete(dir.FullName, true);
+                return new FileInfo(zipFile);
+            }
+        }
+
+        private static FileInfo CreateZipFromRar(FileInfo fi, string tempDirectory)
+        {
+            using (RarArchiveReader archive = new RarArchiveReader(fi.FullName))
+            {
+                DirectoryInfo dir = Directory.CreateDirectory(Path.Combine(tempDirectory, Guid.NewGuid().ToString()));
+
+                var directoryEntries = archive.Entries.Where(entry => entry.IsDirectory);
+                foreach (var dirEntry in directoryEntries)
+                    Directory.CreateDirectory(Path.Combine(dir.FullName, dirEntry.FullName));
+
+                foreach (var entry in archive.Entries)
+                {
+                    if (entry.IsDirectory)
+                        continue;
+
+                    try
+                    { 
+                        string path = dir.FullName;
+                        if (entry.FullName.Contains(Path.DirectorySeparatorChar) || entry.FullName.Contains(Path.AltDirectorySeparatorChar))
+                            path = Path.Combine(dir.FullName, GetSubDirectoryPath(entry));
+
+                        entry.ExtractToFile(Path.Combine(path, entry.Name), true);
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                string zipFile = Path.Combine(tempDirectory, fi.Name.Replace(fi.Extension, ".zip"));
+                if (File.Exists(zipFile))
+                    File.Delete(zipFile);
+                ZipFile.CreateFromDirectory(dir.FullName, zipFile);
+
+                Directory.Delete(dir.FullName, true);
+                return new FileInfo(zipFile);
+            }
+        }
+
+        private static string GetSubDirectoryPath(IArchiveEntry entry)
+        {
+            int index;
+            if (entry.FullName.Contains(Path.DirectorySeparatorChar))
+                index = entry.FullName.LastIndexOf(Path.DirectorySeparatorChar);
+            else
+                index = entry.FullName.LastIndexOf(Path.AltDirectorySeparatorChar);
+
+            if (index == -1)
+                return string.Empty;
+            
+            return entry.FullName.Substring(0, index);
+        }
+    }
+}

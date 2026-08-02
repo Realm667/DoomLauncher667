@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "DoomLauncher.WinUI (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "DoomLauncher.WinUI (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

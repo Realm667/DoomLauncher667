@@ -1,0 +1,1136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{938B529A-9AFD-4AE0-9F0F-5CB9527AD2F1}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DoomLauncher</RootNamespace>
+    <AssemblyName>DoomLauncher</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+    <FileAlignment>512</FileAlignment>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>DoomLauncher.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="Gameloop.Vdf, Version=0.6.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Gameloop.Vdf.0.6.2\lib\net45\Gameloop.Vdf.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Octokit, Version=0.50.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Octokit.0.50.0\lib\net46\Octokit.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="SevenZipSharp, Version=0.64.3890.29348, Culture=neutral, PublicKeyToken=20de82c62b055c88, processorArchitecture=MSIL">
+      <HintPath>..\packages\SevenZipSharp.0.64\lib\SevenZipSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpCompress, Version=0.49.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCompress.0.49.1\lib\net48\SharpCompress.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.SQLite, Version=1.0.115.5, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\lib\net46\System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.EF6, Version=1.0.115.5, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SQLite.EF6.1.0.115.5\lib\net46\System.Data.SQLite.EF6.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.Linq, Version=1.0.115.5, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SQLite.Linq.1.0.115.5\lib\net46\System.Data.SQLite.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Resources.Extensions, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Resources.Extensions.4.7.1\lib\net461\System.Resources.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Encoding.CodePages, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Encoding.CodePages.8.0.0\lib\net462\System.Text.Encoding.CodePages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Adapters\Launch\GameFilesLaunchFeature.cs" />
+    <Compile Include="Adapters\Launch\LaunchResult.cs" />
+    <Compile Include="Adapters\Launch\UtilityFilesLaunchFeature.cs" />
+    <Compile Include="Adapters\Launch\IWadLaunchFeature.cs" />
+    <Compile Include="Adapters\Launch\LoadSaveLaunchFeature.cs" />
+    <Compile Include="Adapters\Launch\StatisticsReaderLaunchFeature.cs" />
+    <Compile Include="Adapters\Launch\SourcePortExtraParametersLaunchFeature.cs" />
+    <Compile Include="Adapters\Launch\ILaunchFeature.cs" />
+    <Compile Include="Adapters\Launch\LaunchParameters.cs" />
+    <Compile Include="Adapters\Launch\PlayDemoLaunchFeature.cs" />
+    <Compile Include="Adapters\Launch\ExtraParametersLaunchFeature.cs" />
+    <Compile Include="Adapters\Launch\RecordLaunchFeature.cs" />
+    <Compile Include="Adapters\Launch\MapSkillLaunchFeature.cs" />
+    <Compile Include="Adapters\PlaySession.cs" />
+    <Compile Include="Adapters\WadArchiveDataAdapter.cs" />
+    <Compile Include="Archive\ArchiveReader.cs" />
+    <Compile Include="Archive\Directory\DirectoryArchiveEntry.cs" />
+    <Compile Include="Archive\EmptyArchiveReader.cs" />
+    <Compile Include="Archive\FileArchiveReader.cs" />
+    <Compile Include="Archive\Directory\DirectoryArchiveReader.cs" />
+    <Compile Include="Archive\IArchiveEntry.cs" />
+    <Compile Include="Archive\RecursiveArchiveReader.cs" />
+    <Compile Include="Config\ColorTheme.cs" />
+    <Compile Include="Config\ColorThemeType.cs" />
+    <Compile Include="Config\IDirectoriesConfiguration.cs" />
+    <Compile Include="Controls\CCheckBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\CComboBox.cs" />
+    <Compile Include="Controls\CheckBoxList.cs" />
+    <Compile Include="Controls\CheckBoxList.Designer.cs">
+      <DependentUpon>CheckBoxList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\CPictureBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\CProgressBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\CTabControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Archive\Rar\RarArchiveEntry.cs" />
+    <Compile Include="Archive\Rar\RarArchiveReader.cs" />
+    <Compile Include="Archive\SevenZip\SevenZipArchiveEntry.cs" />
+    <Compile Include="Archive\SevenZip\SevenZipArchiveReader.cs" />
+    <Compile Include="Archive\Wad\WadArchiveReader.cs" />
+    <Compile Include="Archive\Wad\WadEntry.cs" />
+    <Compile Include="Archive\Zip\ZipArchiveReader.cs" />
+    <Compile Include="Archive\Zip\ZipArchiveReaderEntry.cs" />
+    <Compile Include="Controls\FormButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\GameFileTile.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\GameFileTile.Designer.cs">
+      <DependentUpon>GameFileTile.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\GlowButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\TagSelectControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\TagSelectControl.Designer.cs">
+      <DependentUpon>TagSelectControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TitleBarControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\TitleBarControl.Designer.cs">
+      <DependentUpon>TitleBarControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\UpdateControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\UpdateControl.Designer.cs">
+      <DependentUpon>UpdateControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\DataCache.cs" />
+    <Compile Include="DataSources\CleanupFile.cs" />
+    <Compile Include="DataSources\GameProfile.cs" />
+    <Compile Include="Config\FileManagement.cs" />
+    <Compile Include="Controls\FlowLayoutPanelDB.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\FlowLayoutPanelDB.Designer.cs">
+      <DependentUpon>FlowLayoutPanelDB.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DataSources\NewFileData.cs" />
+    <Compile Include="DataSources\PreviewImage.cs" />
+    <Compile Include="Forms\FileManagementSelect.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FileManagementSelect.Designer.cs">
+      <DependentUpon>FileManagementSelect.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Archive\IArchiveReader.cs" />
+    <Compile Include="Controls\GameFileTileViewControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\GameFileTileViewControl.Designer.cs">
+      <DependentUpon>GameFileTileViewControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\GameFileTileBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\GameFileTileExpanded.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\GameFileTileExpanded.Designer.cs">
+      <DependentUpon>GameFileTileExpanded.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\GameFileListEventArgs.cs" />
+    <Compile Include="Forms\PlayRandomForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PlayRandomForm.Designer.cs">
+      <DependentUpon>PlayRandomForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SaveInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SaveInfo.Designer.cs">
+      <DependentUpon>SaveInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ScreenshotEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ScreenshotEditForm.Designer.cs">
+      <DependentUpon>ScreenshotEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\TextBoxForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TextBoxForm.Designer.cs">
+      <DependentUpon>TextBoxForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GameFileView\GameFileViewFactory.cs" />
+    <Compile Include="GameFileView\GameFileViewType.cs" />
+    <Compile Include="GameStores\Steam\SteamFileUtils.cs" />
+    <Compile Include="GameStores\Steam\SteamLoader.cs" />
+    <Compile Include="Handlers\AutoCompleteCombo.cs" />
+    <Compile Include="Handlers\ExceptionExtensions.cs" />
+    <Compile Include="Handlers\Files\FileHandler.cs" />
+    <Compile Include="Handlers\Files\GameFileImageHandler.cs" />
+    <Compile Include="Handlers\Files\IFileHandler.cs" />
+    <Compile Include="Handlers\Files\LegacyTitlePicMigration.cs" />
+    <Compile Include="GameStores\Steam\SteamRegistry.cs" />
+    <Compile Include="Handlers\Sync\StartupImageSyncAction.cs" />
+    <Compile Include="Handlers\Sync\Doom64TitlePicSyncAction.cs" />
+    <Compile Include="Handlers\Sync\GameConfSyncAction.cs" />
+    <Compile Include="Handlers\Sync\GameInfoSyncAction.cs" />
+    <Compile Include="Handlers\Sync\IntendedIwadSyncAction.cs" />
+    <Compile Include="Handlers\Sync\ISyncAction.cs" />
+    <Compile Include="Handlers\Sync\IWadTitlesSyncAction.cs" />
+    <Compile Include="Handlers\Sync\KnownWadsSyncAction.cs" />
+    <Compile Include="Handlers\Sync\MapInfoUtil.cs" />
+    <Compile Include="Handlers\Sync\MapStringSyncAction.cs" />
+    <Compile Include="Handlers\Sync\SyncResult.cs" />
+    <Compile Include="Handlers\Sync\Doom64SyncAction.cs" />
+    <Compile Include="Handlers\Sync\TextFileSyncAction.cs" />
+    <Compile Include="Handlers\Sync\TitlePicUtil.cs" />
+    <Compile Include="Handlers\FileMapComparer.cs" />
+    <Compile Include="Handlers\GameFileTileManager.cs" />
+    <Compile Include="Config\Icons.cs" />
+    <Compile Include="Handlers\GameProfileUtil.cs" />
+    <Compile Include="Handlers\Sync\TitlePicSyncAction.cs" />
+    <Compile Include="Handlers\Sync\IdGamesTextInfo.cs" />
+    <Compile Include="Handlers\ImageExtensions.cs" />
+    <Compile Include="Handlers\MenuConstants.cs" />
+    <Compile Include="Handlers\ArchiveUtil.cs" />
+    <Compile Include="Handlers\PathExtensions.cs" />
+    <Compile Include="Handlers\ToolTipGroup.cs" />
+    <Compile Include="Handlers\VersionUpdateResults.cs" />
+    <Compile Include="Interfaces\IGameFileSortableView.cs" />
+    <Compile Include="Interfaces\IGameFileTile.cs" />
+    <Compile Include="Interfaces\IGameFileColumnView.cs" />
+    <Compile Include="Interfaces\IGameFileView.cs" />
+    <Compile Include="Interfaces\IGameProfile.cs" />
+    <Compile Include="IWad\IWadInfo.cs" />
+    <Compile Include="Controls\PagingControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\PagingControl.Designer.cs">
+      <DependentUpon>PagingControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handlers\ToolTipDisplayHandler.cs" />
+    <Compile Include="Controls\SlideShowPictureBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\SlideShowPictureBox.Designer.cs">
+      <DependentUpon>SlideShowPictureBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handlers\TabKeys.cs" />
+    <Compile Include="Forms\TagSelectForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TagSelectForm.Designer.cs">
+      <DependentUpon>TagSelectForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DataSources\StaticTagData.cs" />
+    <Compile Include="LaunchArgs.cs" />
+    <Compile Include="Program.Init.cs" />
+    <Compile Include="ProgressBarType.cs" />
+    <Compile Include="SaveGame\HelionSaveGameReader.cs" />
+    <Compile Include="SourcePort\HelionSourcePortFlavor.cs" />
+    <Compile Include="SourcePort\LevelstatSourcePortFlavor.cs" />
+    <Compile Include="SourcePort\StatdumpSourcePortFlavor.cs" />
+    <Compile Include="GameStores\AutomaticGameStoreCheck.cs" />
+    <Compile Include="GameStores\StoreGame.cs" />
+    <Compile Include="GameStores\StoreGameLoader.cs" />
+    <Compile Include="GameStores\GameStoreFiles.cs" />
+    <Compile Include="Stylize\CToolStripRenderer.cs" />
+    <Compile Include="Stylize\DarkTheme.cs" />
+    <Compile Include="Stylize\DefaultTheme.cs" />
+    <Compile Include="Stylize\ImmersiveDarkMode.cs" />
+    <Compile Include="Stylize\StyledMessageBox.cs" />
+    <Compile Include="Stylize\Stylizer.cs" />
+    <Compile Include="Stylize\IThemeColors.cs" />
+    <Compile Include="Update\ApplicationUpdater.cs" />
+    <Compile Include="Update\ApplicationUpdateInfo.cs" />
+    <Compile Include="Controls\ColumnField.cs" />
+    <Compile Include="Controls\CRichTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\CRichTextBox.Designer.cs">
+      <DependentUpon>CRichTextBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dpi\DpiScale.cs" />
+    <Compile Include="Forms\FilterForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FilterForm.Designer.cs">
+      <DependentUpon>FilterForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FilterSettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FilterSettingsForm.Designer.cs">
+      <DependentUpon>FilterSettingsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ScreenshotViewerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ScreenshotViewerForm.Designer.cs">
+      <DependentUpon>ScreenshotViewerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Welcome.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Welcome.Designer.cs">
+      <DependentUpon>Welcome.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handlers\FIleAddResults.cs" />
+    <Compile Include="DataSources\CustomParam.cs" />
+    <Compile Include="Demo\CldDemoParser.cs" />
+    <Compile Include="Demo\DemoUtil.cs" />
+    <Compile Include="Demo\IDemoParser.cs" />
+    <Compile Include="Forms\DirectoriesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\DirectoriesForm.Designer.cs">
+      <DependentUpon>DirectoriesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handlers\AddFileType.cs" />
+    <Compile Include="Config\ConfigType.cs" />
+    <Compile Include="Controls\BasicFileView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\FilesCtrl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\FilesCtrl.Designer.cs">
+      <DependentUpon>FilesCtrl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DataSources\WadArchiveFile.cs" />
+    <Compile Include="DataSources\WadArchiveGameFile.cs" />
+    <Compile Include="Forms\CumulativeStats.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\CumulativeStats.Designer.cs">
+      <DependentUpon>CumulativeStats.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handlers\FileLoadHandler.cs" />
+    <Compile Include="Handlers\FileLoadHandlerLegacy.cs" />
+    <Compile Include="Interfaces\ICustomParam.cs" />
+    <Compile Include="Interfaces\IStatsDataSourceAdapter.cs" />
+    <Compile Include="Controls\StatisticsView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\StatisticsView.Designer.cs">
+      <DependentUpon>StatisticsView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\LauncherPath.cs" />
+    <Compile Include="DataSources\SourcePortLaunchType.cs" />
+    <Compile Include="Forms\SimpleFileSelectForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SimpleFileSelectForm.Designer.cs">
+      <DependentUpon>SimpleFileSelectForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handlers\LaunchData.cs" />
+    <Compile Include="Handlers\NativeMethods.cs" />
+    <Compile Include="SaveGame\DsgSaveGameReader.cs" />
+    <Compile Include="SaveGame\ISaveGameReader.cs" />
+    <Compile Include="SaveGame\ZDoomSaveGameReader.cs" />
+    <Compile Include="Controls\StatBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\ScreenFilter.cs" />
+    <Compile Include="SourcePort\DoomsdaySourcePortFlavor.cs" />
+    <Compile Include="SourcePort\GenericSourcePortFlavor.cs" />
+    <Compile Include="SourcePort\ISourcePortFlavor.cs" />
+    <Compile Include="SourcePort\SpData.cs" />
+    <Compile Include="SourcePort\ZDoomSourcePortFlavor.cs" />
+    <Compile Include="Statistics\LevelstatReader.cs" />
+    <Compile Include="Config\AppVersion.cs" />
+    <Compile Include="Config\ColumnConfig.cs" />
+    <Compile Include="DataSources\StatsData.cs" />
+    <Compile Include="DataSources\TagData.cs" />
+    <Compile Include="DataSources\TagMapping.cs" />
+    <Compile Include="Handlers\Files\FileType.cs" />
+    <Compile Include="Forms\FileDetailsEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FileDetailsEditForm.Designer.cs">
+      <DependentUpon>FileDetailsEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MessageCheckBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MessageCheckBox.Designer.cs">
+      <DependentUpon>MessageCheckBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SplashScreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SplashScreen.Designer.cs">
+      <DependentUpon>SplashScreen.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RatingControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\RatingControl.Designer.cs">
+      <DependentUpon>RatingControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MainForm_Config.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainForm_Init.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainForm_Sync.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainForm_Play.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IStatsData.cs" />
+    <Compile Include="Interfaces\ITagData.cs" />
+    <Compile Include="Interfaces\ITagMapping.cs" />
+    <Compile Include="Controls\TagEdit.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\TagEdit.Designer.cs">
+      <DependentUpon>TagEdit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\TagForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TagForm.Designer.cs">
+      <DependentUpon>TagForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Interfaces\ITagMapLookup.cs" />
+    <Compile Include="Forms\SpecificFilesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SpecificFilesForm.Designer.cs">
+      <DependentUpon>SpecificFilesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MetaDataForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MetaDataForm.Designer.cs">
+      <DependentUpon>MetaDataForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handlers\InvalidFile.cs" />
+    <Compile Include="Forms\MainForm_Meta.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Statistics\StatdumpReader.cs" />
+    <Compile Include="Statistics\IStatisticsReader.cs" />
+    <Compile Include="Statistics\MultiLineStatReader.cs" />
+    <Compile Include="Statistics\NewStatisticsEventArgs.cs" />
+    <Compile Include="Statistics\StatFileScanner.cs" />
+    <Compile Include="Statistics\ZDoomStatsReader.cs" />
+    <Compile Include="Forms\StatsInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\StatsInfo.Designer.cs">
+      <DependentUpon>StatsInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\StatsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\StatsControl.Designer.cs">
+      <DependentUpon>StatsControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SyncStatusForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SyncStatusForm.Designer.cs">
+      <DependentUpon>SyncStatusForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handlers\SyncFileData.cs" />
+    <Compile Include="Handlers\SyncFileOption.cs" />
+    <Compile Include="TabViews\LocalTabViewCtrl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TabViews\IdGamesTabViewCtrl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TabViews\IdGamesTabViewCtrl.Designer.cs">
+      <DependentUpon>IdGamesTabViewCtrl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TabViews\BasicTabViewCtrl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TabViews\BasicTabViewCtrl.Designer.cs">
+      <DependentUpon>BasicTabViewCtrl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\AboutBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\AboutBox.Designer.cs">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\AppConfiguration.cs" />
+    <Compile Include="DataSources\ConfigurationData.cs" />
+    <Compile Include="DataSources\IdGamesGameFile.cs" />
+    <Compile Include="DataSources\FileData.cs" />
+    <Compile Include="DataSources\SourcePortData.cs" />
+    <Compile Include="Adapters\GameLauncher.cs" />
+    <Compile Include="Adapters\IdGamesDataAdapater.cs" />
+    <Compile Include="Controls\GameFileEdit.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\GameFileEdit.Designer.cs">
+      <DependentUpon>GameFileEdit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\GenericFileView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\GenericFileView.Designer.cs">
+      <DependentUpon>GenericFileView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DownloadView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\DownloadView.Designer.cs">
+      <DependentUpon>DownloadView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DownloadViewItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\DownloadViewItem.Designer.cs">
+      <DependentUpon>DownloadViewItem.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FileSelectForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FileSelectForm.Designer.cs">
+      <DependentUpon>FileSelectForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SettingsForm.Designer.cs">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Interfaces\IConfigurationData.cs" />
+    <Compile Include="Interfaces\IConfigurationDataSourceAdapter.cs" />
+    <Compile Include="Handlers\Files\SaveGameHandler.cs" />
+    <Compile Include="Interfaces\ITabView.cs" />
+    <Compile Include="TabViews\OptionsTabViewCtrl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TabViews\OptionsTabViewCtrl.Designer.cs">
+      <DependentUpon>OptionsTabViewCtrl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TabViews\IWadTabViewCtrl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TabViews\IWadTabViewCtrl.Designer.cs">
+      <DependentUpon>IWadTabViewCtrl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Search\GameFileGetOptions.cs" />
+    <Compile Include="Handlers\Files\DemoHandler.cs" />
+    <Compile Include="Handlers\DownloadHandler.cs" />
+    <Compile Include="Forms\GameFileEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\GameFileEditForm.Designer.cs">
+      <DependentUpon>GameFileEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\GameFileAssociationView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\GameFileAssociationView.Designer.cs">
+      <DependentUpon>GameFileAssociationView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Search\IGameFileGetOptions.cs" />
+    <Compile Include="Interfaces\IFileAssociationView.cs" />
+    <Compile Include="Interfaces\IIWadDataSourceAdapter.cs" />
+    <Compile Include="DataSources\IWadData.cs" />
+    <Compile Include="Interfaces\IFileData.cs" />
+    <Compile Include="Interfaces\INewFileDetector.cs" />
+    <Compile Include="Handlers\NewFileDetector.cs" />
+    <Compile Include="Controls\ScreenshotView.cs" />
+    <Compile Include="Controls\ScreenshotView.Designer.cs">
+      <DependentUpon>ScreenshotView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ProgressBarForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ProgressBarForm.Designer.cs">
+      <DependentUpon>ProgressBarForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Search\OrderType.cs" />
+    <Compile Include="Search\GameFileSearchOp.cs" />
+    <Compile Include="Search\GameFileSearchField.cs" />
+    <Compile Include="Search\GameFileFieldType.cs" />
+    <Compile Include="Controls\GameFileViewControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\GameFileViewControl.Designer.cs">
+      <DependentUpon>GameFileViewControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\GameFileSummary.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\GameFileSummary.Designer.cs">
+      <DependentUpon>GameFileSummary.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\GrowLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\GrowLabel.Designer.cs">
+      <DependentUpon>GrowLabel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Interfaces\IDataSourceAdapter.cs" />
+    <Compile Include="Forms\PlayForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PlayForm.Designer.cs">
+      <DependentUpon>PlayForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Interfaces\IGameFileDownloadable.cs" />
+    <Compile Include="Controls\TableLayoutPanelDB.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\TableLayoutPanelDB.Designer.cs">
+      <DependentUpon>TableLayoutPanelDB.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\CDataGridView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Adapters\DataAccess.cs" />
+    <Compile Include="Adapters\DbDataSourceAdapter.cs" />
+    <Compile Include="Adapters\DirectoryDataSourceAdapter.cs" />
+    <Compile Include="DataSources\GameFile.cs" />
+    <Compile Include="Adapters\MSSQLDataAdapter.cs" />
+    <Compile Include="Adapters\SqliteDatabaseAdapter.cs" />
+    <Compile Include="Forms\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Interfaces\IDatabaseAdapter.cs" />
+    <Compile Include="Interfaces\IGameFileDataSourceAdapter.cs" />
+    <Compile Include="Interfaces\IGameFile.cs" />
+    <Compile Include="Interfaces\IIWadData.cs" />
+    <Compile Include="Interfaces\ISourcePortData.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Controls\SearchControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\SearchControl.Designer.cs">
+      <DependentUpon>SearchControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handlers\SyncLibraryHandler.cs" />
+    <Compile Include="Forms\SourcePortViewForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SourcePortViewForm.Designer.cs">
+      <DependentUpon>SourcePortViewForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SourcePortEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SourcePortEditForm.Designer.cs">
+      <DependentUpon>SourcePortEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SourcePortEdit.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\SourcePortEdit.Designer.cs">
+      <DependentUpon>SourcePortEdit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handlers\TabHandler.cs" />
+    <Compile Include="TabViews\TagTabView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TabViews\TagTabView.Designer.cs">
+      <DependentUpon>TagTabView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TagControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\TagControl.Designer.cs">
+      <DependentUpon>TagControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\TagEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TagEditForm.Designer.cs">
+      <DependentUpon>TagEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\TagMapLookup.cs" />
+    <Compile Include="Handlers\Sync\IdGamesTextFileParser.cs" />
+    <Compile Include="Handlers\ToolTipHandler.cs" />
+    <Compile Include="Forms\TxtGenerator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TxtGenerator.Designer.cs">
+      <DependentUpon>TxtGenerator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handlers\Util.cs" />
+    <Compile Include="Handlers\VersionHandler.cs" />
+    <Compile Include="TextFileParsers\ZdlParser.cs" />
+    <Compile Include="Handlers\UtilityHandler.cs" />
+    <Compile Include="TabViews\UntaggedTabView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Update\ApplicationUpdate.cs" />
+    <Compile Include="WindowsVersion\WindowsVersion.cs" />
+    <EmbeddedResource Include="Controls\CheckBoxList.resx">
+      <DependentUpon>CheckBoxList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\FilesCtrl.resx">
+      <DependentUpon>FilesCtrl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\GameFileTile.resx">
+      <DependentUpon>GameFileTile.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\GameFileTileViewControl.resx">
+      <DependentUpon>GameFileTileViewControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\StatisticsView.resx">
+      <DependentUpon>StatisticsView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\StatsControl.resx">
+      <DependentUpon>StatsControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\TagSelectControl.resx">
+      <DependentUpon>TagSelectControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\TitleBarControl.resx">
+      <DependentUpon>TitleBarControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FileManagementSelect.resx">
+      <DependentUpon>FileManagementSelect.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FilterForm.resx">
+      <DependentUpon>FilterForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\CumulativeStats.resx">
+      <DependentUpon>CumulativeStats.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\DirectoriesForm.resx">
+      <DependentUpon>DirectoriesForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FileDetailsEditForm.resx">
+      <DependentUpon>FileDetailsEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FilterSettingsForm.resx">
+      <DependentUpon>FilterSettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MessageCheckBox.resx">
+      <DependentUpon>MessageCheckBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MetaDataForm.resx">
+      <DependentUpon>MetaDataForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\PlayRandomForm.resx">
+      <DependentUpon>PlayRandomForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SaveInfo.resx">
+      <DependentUpon>SaveInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ScreenshotEditForm.resx">
+      <DependentUpon>ScreenshotEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ScreenshotViewerForm.resx">
+      <DependentUpon>ScreenshotViewerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SplashScreen.resx">
+      <DependentUpon>SplashScreen.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\RatingControl.resx">
+      <DependentUpon>RatingControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SpecificFilesForm.resx">
+      <DependentUpon>SpecificFilesForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\StatsInfo.resx">
+      <DependentUpon>StatsInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SyncStatusForm.resx">
+      <DependentUpon>SyncStatusForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SimpleFileSelectForm.resx">
+      <DependentUpon>SimpleFileSelectForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TextBoxForm.resx">
+      <DependentUpon>TextBoxForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Welcome.resx">
+      <DependentUpon>Welcome.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\PagingControl.resx">
+      <DependentUpon>PagingControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\GameFileTileExpanded.resx">
+      <DependentUpon>GameFileTileExpanded.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\SlideShowPictureBox.resx">
+      <DependentUpon>SlideShowPictureBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TabViews\BasicTabViewCtrl.resx">
+      <DependentUpon>BasicTabViewCtrl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\AboutBox.resx">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\GenericFileView.resx">
+      <DependentUpon>GenericFileView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\DownloadView.resx">
+      <DependentUpon>DownloadView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\DownloadViewItem.resx">
+      <DependentUpon>DownloadViewItem.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FileSelectForm.resx">
+      <DependentUpon>FileSelectForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\GameFileEditForm.resx">
+      <DependentUpon>GameFileEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\GameFileViewControl.resx">
+      <DependentUpon>GameFileViewControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\GameFileSummary.resx">
+      <DependentUpon>GameFileSummary.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\GameFileEdit.resx">
+      <DependentUpon>GameFileEdit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\GameFileAssociationView.resx">
+      <DependentUpon>GameFileAssociationView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ProgressBarForm.resx">
+      <DependentUpon>ProgressBarForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SettingsForm.resx">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SourcePortViewForm.resx">
+      <DependentUpon>SourcePortViewForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="Forms\PlayForm.resx">
+      <DependentUpon>PlayForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\SearchControl.resx">
+      <DependentUpon>SearchControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ScreenshotView.resx">
+      <DependentUpon>ScreenshotView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SourcePortEditForm.resx">
+      <DependentUpon>SourcePortEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\SourcePortEdit.resx">
+      <DependentUpon>SourcePortEdit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\TagControl.resx">
+      <DependentUpon>TagControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\TagEdit.resx">
+      <DependentUpon>TagEdit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TagForm.resx">
+      <DependentUpon>TagForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TagEditForm.resx">
+      <DependentUpon>TagEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TxtGenerator.resx">
+      <DependentUpon>TxtGenerator.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\UpdateControl.resx">
+      <DependentUpon>UpdateControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TagSelectForm.resx">
+      <DependentUpon>TagSelectForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="app.manifest" />
+    <None Include="DoomLauncher.sqlite" />
+    <None Include="Help.docx" />
+    <None Include="Help.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BindingListView\BindingListView.csproj">
+      <Project>{75af36a8-7797-4023-b183-5b63d448420a}</Project>
+      <Name>BindingListView</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CheckBoxComboBox\CheckBoxComboBox.csproj">
+      <Project>{70a25201-8ea4-48f8-a4a6-ed13adf8823c}</Project>
+      <Name>CheckBoxComboBox</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WadReader\WadReader.csproj">
+      <Project>{15a9a8fc-096e-4458-ab7f-02386740cf4e}</Project>
+      <Name>WadReader</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\HereticPalette.pal" />
+    <None Include="Resources\HexenPalette.pal" />
+    <None Include="Resources\PLAYPAL.LMP" />
+    <None Include="Resources\th.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DoomLauncher.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="DoomLauncher.VisualElementsManifest.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\sync.png" />
+    <Content Include="TileImages\doom64.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TileImages\heretic.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TileImages\hexen.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TileImages\plutonia.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TileImages\strife.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TileImages\tnt.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Resources\DoomLauncherTile.png" />
+    <None Include="Resources\map.bmp" />
+    <None Include="Resources\PMAPA0.png" />
+    <None Include="Resources\DownArrow.bmp" />
+    <None Include="Resources\arrow-down-solid.png" />
+    <None Include="Resources\Delete.png" />
+    <None Include="Resources\DownArrow.png" />
+    <None Include="Resources\Edit.png" />
+    <None Include="Resources\Export.png" />
+    <None Include="Resources\ExportAll.png" />
+    <None Include="Resources\Save.png" />
+    <None Include="Resources\UpArrow.png" />
+    <None Include="Resources\File.png" />
+    <None Include="Resources\FolderOpen.png" />
+    <None Include="Resources\Video.png" />
+    <None Include="Resources\StepBack.png" />
+    <None Include="Resources\Search.png" />
+    <None Include="Resources\Play.png" />
+    <None Include="Resources\Bars.png" />
+    <None Include="Resources\Tags.png" />
+    <None Include="Resources\Pin.png" />
+    <None Include="Resources\BackgroundImage.png" />
+    <Content Include="TileImages\chexquest.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TileImages\chexquest3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TileImages\doom.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TileImages\doom2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TileImages\DoomLauncherTile.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TileImages\DoomLauncherTileSmall.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Resources\SOULB0.png" />
+    <None Include="Resources\POSSL0.png" />
+    <None Include="Resources\bon2a_extra.png" />
+    <None Include="Resources\bon2d.png" />
+    <None Include="Resources\bon2a_.png" />
+    <None Include="Resources\bona.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if $(ConfigurationName) == Release $(SolutionDir)DoomLauncherRelease\bin\$(ConfigurationName)\DoomLauncherRelease.exe
+</PostBuildEvent>
+  </PropertyGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.targets'))" />
+    <Error Condition="!Exists('..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets'))" />
+    <Error Condition="!Exists('..\packages\SevenZipSharp.Interop.19.0.2\build\SevenZipSharp.Interop.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SevenZipSharp.Interop.19.0.2\build\SevenZipSharp.Interop.targets'))" />
+  </Target>
+  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" />
+  <Import Project="..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
+  <Import Project="..\packages\SevenZipSharp.Interop.19.0.2\build\SevenZipSharp.Interop.targets" Condition="Exists('..\packages\SevenZipSharp.Interop.19.0.2\build\SevenZipSharp.Interop.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
