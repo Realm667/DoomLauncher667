@@ -335,6 +335,7 @@
         </Style>
     </Page.Resources>
 
+    <Grid>
     <NavigationView
         x:Name="ShellNavigation"
         AlwaysShowHeader="False"
@@ -1625,6 +1626,17 @@
                                 <Button
                                     Height="40"
                                     Padding="12,6"
+                                    AutomationProperties.Name="{Binding AddModsToCollection}"
+                                    Click="CollectionDetailAddModsButton_Click"
+                                    ToolTipService.ToolTip="{Binding AddModsToCollection}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon FontSize="15" Glyph="&#xE710;" />
+                                        <TextBlock Text="{Binding AddModsToCollection}" />
+                                    </StackPanel>
+                                </Button>
+                                <Button
+                                    Height="40"
+                                    Padding="12,6"
                                     AutomationProperties.Name="{Binding ChooseCollectionArtwork}"
                                     Click="CollectionDetailArtworkButton_Click"
                                     ToolTipService.ToolTip="{Binding ChooseCollectionArtwork}">
@@ -2360,4 +2372,40 @@
             </StackPanel>
         </Grid>
     </NavigationView>
+        <Grid
+            x:Name="BlockingOperationOverlay"
+            Canvas.ZIndex="1000"
+            Background="#99000000"
+            IsHitTestVisible="True"
+            Visibility="Collapsed">
+            <Border
+                Width="440"
+                Padding="28"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{StaticResource DoomSurfaceElevatedBrush}"
+                CornerRadius="14">
+                <StackPanel Spacing="16">
+                    <TextBlock
+                        x:Name="BlockingOperationTitle"
+                        HorizontalAlignment="Center"
+                        FontFamily="{StaticResource DoomHeadlineFontFamily}"
+                        FontSize="22"
+                        FontWeight="SemiBold"
+                        Text="{Binding RefreshingMetadataArtwork}" />
+                    <ProgressBar
+                        x:Name="BlockingOperationProgress"
+                        Height="5"
+                        Minimum="0"
+                        Maximum="100" />
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        Style="{StaticResource MetaTextStyle}"
+                        Text="{Binding RefreshingMetadataArtworkHint}"
+                        TextAlignment="Center"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
 </Page>

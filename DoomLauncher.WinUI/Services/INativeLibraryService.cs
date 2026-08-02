@@ -42,6 +42,11 @@ public interface INativeLibraryService
         string? newCollectionName,
         CancellationToken cancellationToken = default);
 
+    Task AddGamesToCollectionAsync(
+        string collectionName,
+        IReadOnlySet<int> gameFileIds,
+        CancellationToken cancellationToken = default);
+
     Task CreateCollectionAsync(
         string name,
         CancellationToken cancellationToken = default);
@@ -163,6 +168,10 @@ public interface INativeLibraryService
     Task<int> BackfillMapMetadataAsync(
         CancellationToken cancellationToken = default);
 
+    Task<LaunchDefinitionInferenceResult> InferLaunchDefinitionsAsync(
+        int? gameFileId = null,
+        CancellationToken cancellationToken = default);
+
     Task<DatabaseHealthReport> CheckDatabaseHealthAsync(
         bool repair,
         CancellationToken cancellationToken = default);
@@ -236,6 +245,13 @@ public sealed record NativeTag(int TagId, string Name);
 public sealed record GameCollectionsData(
     IReadOnlyList<NativeTag> Collections,
     IReadOnlySet<int> SelectedTagIds);
+
+public sealed record LaunchDefinitionInferenceResult(
+    int Processed,
+    int AssignedSourcePorts,
+    int AssignedIwads,
+    int Unchanged,
+    int Failed);
 
 public sealed record NativeMediaFile(
     int FileId,

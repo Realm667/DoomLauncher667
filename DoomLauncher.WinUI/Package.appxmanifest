@@ -10,7 +10,7 @@
   <Identity
     Name="5BC9E475-1B6C-4680-B7CC-EEADD0645AD2"
     Publisher="CN=Realm667"
-    Version="0.8.8.0" />
+    Version="0.8.9.0" />
 
   <mp:PhoneIdentity PhoneProductId="5BC9E475-1B6C-4680-B7CC-EEADD0645AD2" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

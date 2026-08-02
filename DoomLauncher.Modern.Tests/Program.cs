@@ -99,6 +99,34 @@ if (args.Length == 2
 
 if (args.Length == 2
     && args[0].Equals(
+        "--infer-launch-definitions",
+        StringComparison.OrdinalIgnoreCase))
+{
+    var targetDatabase = Path.GetFullPath(args[1]);
+    Environment.SetEnvironmentVariable(
+        DoomLauncherDatabaseLocator.DatabaseEnvironmentVariable,
+        targetDatabase);
+    try
+    {
+        var service = new SqliteNativeLibraryService(
+            new DoomLauncherDatabaseLocator());
+        var result = await service.InferLaunchDefinitionsAsync();
+        Console.WriteLine(
+            $"LAUNCH_INFERENCE processed={result.Processed} " +
+            $"sourceports={result.AssignedSourcePorts} iwads={result.AssignedIwads} " +
+            $"unchanged={result.Unchanged} failed={result.Failed}");
+        return result.Failed == 0 ? 0 : 1;
+    }
+    finally
+    {
+        Environment.SetEnvironmentVariable(
+            DoomLauncherDatabaseLocator.DatabaseEnvironmentVariable,
+            null);
+    }
+}
+
+if (args.Length == 2
+    && args[0].Equals(
         "--verify-legacy-database",
         StringComparison.OrdinalIgnoreCase))
 {
@@ -158,7 +186,7 @@ void Check(bool condition, string message)
 try
 {
     Check(
-        AppVersion.Current == "0.8.8",
+        AppVersion.Current == "0.8.9",
         "Die sichtbare Version stammt aus der zentralen Buildversion");
     VerifyTileImageDefaults();
     Check(
@@ -171,13 +199,32 @@ try
     var parsedArchiveMetadata = ArchiveTextMetadataReader.Parse(
         "Title : A Better Title\nAuthor : Test Author\n" +
         "Description : First line\n  second line\n" +
-        "Date Finished : 2024-05-06");
+        "Date Finished : 2024-05-06\nGame : Doom II\n" +
+        "Advanced engine needed : GZDoom");
     Check(
         parsedArchiveMetadata.Title == "A Better Title"
         && parsedArchiveMetadata.Author == "Test Author"
         && parsedArchiveMetadata.Description.Contains("second line")
-        && parsedArchiveMetadata.ReleaseDate == new DateTime(2024, 5, 6),
+        && parsedArchiveMetadata.ReleaseDate == new DateTime(2024, 5, 6)
+        && parsedArchiveMetadata.Game == "Doom II"
+        && parsedArchiveMetadata.SourcePort == "GZDoom",
         "Archiv-Textmetadaten werden als Bibliotheksdaten erkannt");
+    var inferredDefinitions = LaunchDefinitionMatcher.Infer(
+        parsedArchiveMetadata,
+        new LauncherDefinitionsData(
+            [
+                new NativeSourcePortDefinition(
+                    3, "GZDoom", "", "gzdoom.exe", "", "-file", "", "4.12.1"),
+                new NativeSourcePortDefinition(
+                    4, "GZDoom", "", "gzdoom.exe", "", "-file", "", "4.13.2"),
+            ],
+            [
+                new NativeIwadDefinition(7, "Doom II", "DOOM2.zip", "DOOM2.WAD", "1.9"),
+            ]));
+    Check(
+        inferredDefinitions.SourcePortId == 4
+        && inferredDefinitions.IwadId == 7,
+        "Launch-Zuordnungen verwenden eindeutige Angaben und die neueste Definition");
     var englishLocalization = new UiLocalization();
     englishLocalization.SetLanguage("en-US");
     Check(
@@ -529,6 +576,17 @@ static async Task ExerciseNativeWritesAsync(string sourceDatabasePath)
         }
         var disposableTag = collections.Collections.First(
             tag => tag.Name == "Modern Integration Test");
+        await service.AddGamesToCollectionAsync(
+            disposableTag.Name,
+            new HashSet<int> { migrationGameFileId });
+        await using (var connection = await OpenReadOnlyAsync(scratchDatabase))
+        {
+            var assignments = await ScalarIntAsync(
+                connection,
+                $"SELECT COUNT(*) FROM TagMapping WHERE TagID={disposableTag.TagId};");
+            if (assignments != 2)
+                throw new InvalidOperationException("Mehrere Mods wurden nicht gemeinsam zur Sammlung hinzugefügt.");
+        }
         await service.DeleteCollectionAsync(disposableTag.TagId);
         await using (var connection = await OpenReadOnlyAsync(scratchDatabase))
         {
@@ -545,6 +603,20 @@ static async Task ExerciseNativeWritesAsync(string sourceDatabasePath)
             }
         }
 
+        await using (var writable = new SqliteConnection(
+                         new SqliteConnectionStringBuilder
+                         {
+                             DataSource = scratchDatabase,
+                             Mode = SqliteOpenMode.ReadWrite,
+                             Pooling = false,
+                         }.ToString()))
+        {
+            await writable.OpenAsync();
+            await using var staleMaps = writable.CreateCommand();
+            staleMaps.CommandText =
+                $"UPDATE GameFiles SET Map='MAP01, MAP99', MapCount=99 WHERE GameFileID={import.GameFileId};";
+            await staleMaps.ExecuteNonQueryAsync();
+        }
         await service.UpdateGameFromIdGamesAsync(
             import.GameFileId,
             new DoomLauncher.WinUI.Models.IdGamesItem
@@ -576,11 +648,15 @@ static async Task ExerciseNativeWritesAsync(string sourceDatabasePath)
             var finished = await ScalarIntAsync(
                 connection,
                 $"SELECT Finished FROM WinUI_GameState WHERE GameFileID={import.GameFileId};");
+            var refreshedMapCount = await ScalarIntAsync(
+                connection,
+                $"SELECT MapCount FROM GameFiles WHERE GameFileID={import.GameFileId};");
             if (title != "Improved Title"
                 || author != "Better Author"
                 || description != $"Updated metadata{Environment.NewLine}without local state loss"
                 || metadataCount != 1
-                || finished != 1)
+                || finished != 1
+                || refreshedMapCount != 1)
             {
                 throw new InvalidOperationException(
                     "Die /idgames-Metadatenverbesserung oder der lokale Zustand wurde nicht korrekt gespeichert.");

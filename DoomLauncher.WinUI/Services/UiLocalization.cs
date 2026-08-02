@@ -61,6 +61,15 @@ public sealed class UiLocalization
                 ["RemoveTitleArtwork"] = "Remove title artwork",
                 ["ChooseCollectionArtwork"] = "Choose collection artwork",
                 ["RemoveCollectionArtwork"] = "Remove collection artwork",
+                ["AddModsToCollection"] = "Add mods to collection",
+                ["AddSelectedMods"] = "Add selected mods",
+                ["FilterMods"] = "Filter mods by title",
+                ["NoMatchingMods"] = "No matching mods were found.",
+                ["CollectionUpdated"] = "Collection updated",
+                ["CollectionUpdateFailed"] = "Collection could not be updated",
+                ["ModsAddedToCollection"] = "{0} mods were added to {1}.",
+                ["RefreshingMetadataArtwork"] = "Refreshing metadata, artwork and maps",
+                ["RefreshingMetadataArtworkHint"] = "Doom Launcher 667 is temporarily locked while the archive and /idgames data are processed.",
                 ["PlaceholderArtworkStyle"] = "Missing artwork style",
                 ["GrayscaleArtwork"] = "Grayscale",
                 ["ColoredArtwork"] = "Colored",
@@ -499,6 +508,15 @@ public sealed class UiLocalization
                 ["RemoveTitleArtwork"]="Titelbild löschen",
                 ["ChooseCollectionArtwork"]="Collection-Artwork auswählen",
                 ["RemoveCollectionArtwork"]="Collection-Artwork entfernen",
+                ["AddModsToCollection"]="Mods zur Sammlung hinzufügen",
+                ["AddSelectedMods"]="Ausgewählte Mods hinzufügen",
+                ["FilterMods"]="Mods nach Titel filtern",
+                ["NoMatchingMods"]="Keine passenden Mods gefunden.",
+                ["CollectionUpdated"]="Sammlung aktualisiert",
+                ["CollectionUpdateFailed"]="Sammlung konnte nicht aktualisiert werden",
+                ["ModsAddedToCollection"]="{0} Mods wurden zu {1} hinzugefügt.",
+                ["RefreshingMetadataArtwork"]="Metadaten, Artwork und Maps werden aktualisiert",
+                ["RefreshingMetadataArtworkHint"]="Doom Launcher 667 ist gesperrt, während das Archiv und die /idgames-Daten verarbeitet werden.",
                 ["PlaceholderArtworkStyle"]="Platzhalter für fehlende Artworks",
                 ["GrayscaleArtwork"]="Graustufen",
                 ["ColoredArtwork"]="Farbig",
@@ -743,6 +761,15 @@ public sealed class UiLocalization
                 ["RemoveTitleArtwork"]="Supprimer l’illustration principale",
                 ["ChooseCollectionArtwork"]="Choisir l’illustration de la collection",
                 ["RemoveCollectionArtwork"]="Supprimer l’illustration de la collection",
+                ["AddModsToCollection"]="Ajouter des mods à la collection",
+                ["AddSelectedMods"]="Ajouter les mods sélectionnés",
+                ["FilterMods"]="Filtrer les mods par titre",
+                ["NoMatchingMods"]="Aucun mod correspondant n’a été trouvé.",
+                ["CollectionUpdated"]="Collection mise à jour",
+                ["CollectionUpdateFailed"]="Impossible de mettre à jour la collection",
+                ["ModsAddedToCollection"]="{0} mods ont été ajoutés à {1}.",
+                ["RefreshingMetadataArtwork"]="Actualisation des métadonnées, illustrations et cartes",
+                ["RefreshingMetadataArtworkHint"]="Doom Launcher 667 est temporairement verrouillé pendant le traitement de l’archive et des données /idgames.",
                 ["PlaceholderArtworkStyle"]="Style des illustrations manquantes",
                 ["GrayscaleArtwork"]="Niveaux de gris",
                 ["ColoredArtwork"]="Couleur",
@@ -1051,6 +1078,15 @@ public sealed class UiLocalization
                 ["RemoveTitleArtwork"]="Eliminar portada",
                 ["ChooseCollectionArtwork"]="Elegir portada de la colección",
                 ["RemoveCollectionArtwork"]="Quitar portada de la colección",
+                ["AddModsToCollection"]="Añadir mods a la colección",
+                ["AddSelectedMods"]="Añadir mods seleccionados",
+                ["FilterMods"]="Filtrar mods por título",
+                ["NoMatchingMods"]="No se encontraron mods coincidentes.",
+                ["CollectionUpdated"]="Colección actualizada",
+                ["CollectionUpdateFailed"]="No se pudo actualizar la colección",
+                ["ModsAddedToCollection"]="Se añadieron {0} mods a {1}.",
+                ["RefreshingMetadataArtwork"]="Actualizando metadatos, portada y mapas",
+                ["RefreshingMetadataArtworkHint"]="Doom Launcher 667 está bloqueado temporalmente mientras se procesan el archivo y los datos de /idgames.",
                 ["PlaceholderArtworkStyle"]="Estilo de portadas ausentes",
                 ["GrayscaleArtwork"]="Escala de grises",
                 ["ColoredArtwork"]="Color",
@@ -1345,6 +1381,9 @@ public sealed class UiText(UiLocalization localization)
     public string ChooseTitleArtwork => this[nameof(ChooseTitleArtwork)];
     public string ChooseCollectionArtwork => this[nameof(ChooseCollectionArtwork)];
     public string RemoveCollectionArtwork => this[nameof(RemoveCollectionArtwork)];
+    public string AddModsToCollection => this[nameof(AddModsToCollection)];
+    public string RefreshingMetadataArtwork => this[nameof(RefreshingMetadataArtwork)];
+    public string RefreshingMetadataArtworkHint => this[nameof(RefreshingMetadataArtworkHint)];
     public string Author => this[nameof(Author)]; public string ReleaseDate => this[nameof(ReleaseDate)];
     public string Maps => this[nameof(Maps)]; public string Rating => this[nameof(Rating)];
     public string Downloaded => this[nameof(Downloaded)]; public string SourcePort => this[nameof(SourcePort)];

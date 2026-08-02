@@ -750,6 +750,21 @@ public sealed class MainViewModel(
         await LoadCatalogAsync(true, gameFileId, cancellationToken);
     }
 
+    public async Task AddGamesToCollectionAsync(
+        string collectionName,
+        IReadOnlySet<int> gameFileIds,
+        CancellationToken cancellationToken = default)
+    {
+        await nativeLibraryService.AddGamesToCollectionAsync(
+            collectionName,
+            gameFileIds,
+            cancellationToken);
+        int? selectedId = SelectedGame.IsPlaceholder
+            ? null
+            : SelectedGame.GameFileId;
+        await LoadCatalogAsync(true, selectedId, cancellationToken);
+    }
+
     public async Task EnsureDiscoverLoadedAsync(
         CancellationToken cancellationToken = default)
     {
@@ -1088,6 +1103,7 @@ public sealed class MainViewModel(
 
     public async Task ApplySelectedIdGamesMetadataAsync(
         IdGamesItem item,
+        IProgress<double>? progress = null,
         CancellationToken cancellationToken = default)
     {
         if (SelectedGame.IsPlaceholder)
@@ -1097,6 +1113,7 @@ public sealed class MainViewModel(
             gameFileId,
             item,
             downloadRemoteArtwork: true,
+            progress,
             cancellationToken);
         LaunchErrorMessage = string.Empty;
         LaunchStatus = localization.Format(
@@ -1142,6 +1159,7 @@ public sealed class MainViewModel(
                         game.GameFileId,
                         item,
                         downloadRemoteArtwork: false,
+                        progress: null,
                         cancellationToken))
                 {
                     artworkImported++;
@@ -1176,12 +1194,15 @@ public sealed class MainViewModel(
         int gameFileId,
         IdGamesItem item,
         bool downloadRemoteArtwork,
+        IProgress<double>? progress,
         CancellationToken cancellationToken)
     {
+        progress?.Report(0.08);
         await nativeLibraryService.UpdateGameFromIdGamesAsync(
             gameFileId,
             item,
             cancellationToken);
+        progress?.Report(0.55);
         var artworkImported = false;
         try
         {
@@ -1197,6 +1218,7 @@ public sealed class MainViewModel(
                         gameFileId,
                         localArchive,
                         cancellationToken);
+                progress?.Report(0.78);
             }
             if (!artworkImported && downloadRemoteArtwork)
             {
@@ -1228,6 +1250,7 @@ public sealed class MainViewModel(
             // Metadata remains authoritative even if optional artwork is absent
             // or the remote archive cannot be inspected.
         }
+        progress?.Report(1.0);
         return artworkImported;
     }
 

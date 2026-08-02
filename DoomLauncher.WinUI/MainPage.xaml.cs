@@ -817,6 +817,7 @@ public sealed partial class MainPage : Page
             return;
 
         _isRescraping = true;
+        var isBlocking = false;
         try
         {
             var matches = await ViewModel.FindSelectedIdGamesMatchesAsync(
@@ -886,8 +887,13 @@ public sealed partial class MainPage : Page
                 return;
             }
 
+            SetBlockingMetadataRefresh(true, 0);
+            isBlocking = true;
+            var progress = new Progress<double>(value =>
+                SetBlockingMetadataRefresh(true, value));
             await ViewModel.ApplySelectedIdGamesMetadataAsync(
                 selected,
+                progress,
                 _loadCancellation.Token);
             SyncSelection();
         }
@@ -896,14 +902,30 @@ public sealed partial class MainPage : Page
         }
         catch (Exception exception)
         {
+            if (isBlocking)
+            {
+                SetBlockingMetadataRefresh(false);
+                isBlocking = false;
+            }
             await ShowErrorAsync(
                 Strings["IdGamesMetadataFailed"],
                 exception.Message);
         }
         finally
         {
+            if (isBlocking)
+                SetBlockingMetadataRefresh(false);
             _isRescraping = false;
         }
+    }
+
+    private void SetBlockingMetadataRefresh(bool isVisible, double progress = 0)
+    {
+        ShellNavigation.IsEnabled = !isVisible;
+        BlockingOperationOverlay.Visibility = isVisible
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        BlockingOperationProgress.Value = Math.Clamp(progress, 0, 1) * 100;
     }
 
     private async void ImportButton_Click(object sender, RoutedEventArgs args)
@@ -1281,6 +1303,123 @@ public sealed partial class MainPage : Page
         if (_selectedCollectionGroup is null)
             return;
         await RemoveCollectionArtworkAsync(_selectedCollectionGroup.Title);
+    }
+
+    private async void CollectionDetailAddModsButton_Click(
+        object sender,
+        RoutedEventArgs args)
+    {
+        if (_selectedCollectionGroup is null)
+            return;
+
+        var collectionName = _selectedCollectionGroup.Title;
+        var existingIds = _selectedCollectionGroup.Items
+            .Select(item => item.GameFileId)
+            .ToHashSet();
+        var selectedIds = new HashSet<int>();
+        var candidates = ViewModel.CatalogItems
+            .Where(item => string.Equals(
+                item.Category,
+                "Mod",
+                StringComparison.OrdinalIgnoreCase))
+            .OrderBy(item => item.Title, StringComparer.CurrentCultureIgnoreCase)
+            .ToArray();
+        var filter = new TextBox
+        {
+            PlaceholderText = Strings["FilterMods"],
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+        AutomationProperties.SetName(filter, Strings["FilterMods"]);
+        var entries = new StackPanel { Spacing = 2 };
+
+        void RebuildEntries()
+        {
+            entries.Children.Clear();
+            var query = filter.Text.Trim();
+            foreach (var item in candidates.Where(item =>
+                         query.Length == 0
+                         || item.Title.Contains(
+                             query,
+                             StringComparison.CurrentCultureIgnoreCase)))
+            {
+                var alreadyAssigned = existingIds.Contains(item.GameFileId);
+                var checkBox = new CheckBox
+                {
+                    Content = item.Title,
+                    IsChecked = alreadyAssigned || selectedIds.Contains(item.GameFileId),
+                    IsEnabled = !alreadyAssigned,
+                    Tag = item.GameFileId,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                };
+                ApplyGreenCheckBox(checkBox);
+                checkBox.Checked += (_, _) => selectedIds.Add(item.GameFileId);
+                checkBox.Unchecked += (_, _) => selectedIds.Remove(item.GameFileId);
+                entries.Children.Add(checkBox);
+            }
+            if (entries.Children.Count == 0)
+            {
+                entries.Children.Add(new TextBlock
+                {
+                    Text = Strings["NoMatchingMods"],
+                    Margin = new Thickness(4, 10, 4, 10),
+                });
+            }
+        }
+
+        filter.TextChanged += (_, _) => RebuildEntries();
+        RebuildEntries();
+        var content = new StackPanel
+        {
+            Width = 520,
+            Spacing = 12,
+            Children =
+            {
+                filter,
+                new ScrollViewer
+                {
+                    MaxHeight = 520,
+                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                    Content = entries,
+                },
+            },
+        };
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            RequestedTheme = EffectiveDialogTheme,
+            Title = Strings["AddModsToCollection"],
+            Content = content,
+            PrimaryButtonText = Strings["AddSelectedMods"],
+            CloseButtonText = Strings["Cancel"],
+            DefaultButton = ContentDialogButton.Primary,
+        };
+        ApplyDialogTheme(dialog);
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary
+            || selectedIds.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            await ViewModel.AddGamesToCollectionAsync(
+                collectionName,
+                selectedIds,
+                _loadCancellation.Token);
+            RefreshSelectedCollectionGroup();
+            SyncSelection();
+            await ShowActionMessageAsync(
+                Strings["CollectionUpdated"],
+                _app.Localization.Format(
+                    "ModsAddedToCollection",
+                    selectedIds.Count,
+                    collectionName),
+                Strings["Close"]);
+        }
+        catch (Exception exception)
+        {
+            await ShowErrorAsync(Strings["CollectionUpdateFailed"], exception.Message);
+        }
     }
 
     private void UpdateCollectionsViewControls()

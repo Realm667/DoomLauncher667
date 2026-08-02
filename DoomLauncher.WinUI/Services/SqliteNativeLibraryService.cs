@@ -373,6 +373,9 @@ public sealed class SqliteNativeLibraryService(
                 refresh.Parameters.AddWithValue("$mapCount", detectedMaps.Count);
                 refresh.Parameters.AddWithValue("$id", existingGameFileId.Value);
                 await refresh.ExecuteNonQueryAsync(cancellationToken);
+                await InferLaunchDefinitionsAsync(
+                    existingGameFileId.Value,
+                    cancellationToken);
                 return new NativeImportResult(
                     existingGameFileId.Value,
                     destinationFileName,
@@ -426,6 +429,7 @@ public sealed class SqliteNativeLibraryService(
             var gameFileId = Convert.ToInt32(
                 await command.ExecuteScalarAsync(cancellationToken),
                 CultureInfo.InvariantCulture);
+            await InferLaunchDefinitionsAsync(gameFileId, cancellationToken);
             return new NativeImportResult(gameFileId, destinationFileName, destinationPath);
         }
         catch
@@ -550,6 +554,52 @@ public sealed class SqliteNativeLibraryService(
             await insert.ExecuteNonQueryAsync(cancellationToken);
         }
 
+        await transaction.CommitAsync(cancellationToken);
+    }
+
+    public async Task AddGamesToCollectionAsync(
+        string collectionName,
+        IReadOnlySet<int> gameFileIds,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedName = DatabaseTextSanitizer.SingleLine(collectionName);
+        if (normalizedName.Length == 0 || gameFileIds.Count == 0)
+            return;
+
+        await using var connection = await OpenConnectionAsync(cancellationToken);
+        await using var transaction =
+            (SqliteTransaction)await connection.BeginTransactionAsync(cancellationToken);
+        int tagId;
+        await using (var tag = connection.CreateCommand())
+        {
+            tag.Transaction = transaction;
+            tag.CommandText =
+                "SELECT TagID FROM Tags WHERE Name=$name COLLATE NOCASE LIMIT 1;";
+            tag.Parameters.AddWithValue("$name", normalizedName);
+            var value = await tag.ExecuteScalarAsync(cancellationToken);
+            if (value is null || value == DBNull.Value)
+                throw new InvalidOperationException("The collection was not found.");
+            tagId = Convert.ToInt32(value, CultureInfo.InvariantCulture);
+        }
+
+        foreach (var gameFileId in gameFileIds)
+        {
+            await using var insert = connection.CreateCommand();
+            insert.Transaction = transaction;
+            insert.CommandText =
+                """
+                INSERT INTO TagMapping (FileID, TagID)
+                SELECT $gameFileId, $tagId
+                WHERE EXISTS (SELECT 1 FROM GameFiles WHERE GameFileID=$gameFileId)
+                  AND NOT EXISTS (
+                      SELECT 1 FROM TagMapping
+                      WHERE FileID=$gameFileId AND TagID=$tagId
+                  );
+                """;
+            insert.Parameters.AddWithValue("$gameFileId", gameFileId);
+            insert.Parameters.AddWithValue("$tagId", tagId);
+            await insert.ExecuteNonQueryAsync(cancellationToken);
+        }
         await transaction.CommitAsync(cancellationToken);
     }
 
@@ -809,6 +859,7 @@ public sealed class SqliteNativeLibraryService(
         }
         await transaction.CommitAsync(cancellationToken);
         await RefreshMapMetadataAsync(gameFileId, cancellationToken);
+        await InferLaunchDefinitionsAsync(gameFileId, cancellationToken);
     }
 
     public async Task<string?> ResolveManagedGameFileAsync(
@@ -2236,6 +2287,108 @@ public sealed class SqliteNativeLibraryService(
         return updated;
     }
 
+    public async Task<LaunchDefinitionInferenceResult> InferLaunchDefinitionsAsync(
+        int? gameFileId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var definitions = await LoadLauncherDefinitionsAsync(cancellationToken);
+        var databasePath = databaseLocator.FindDatabase();
+        await using var connection = await OpenConnectionAsync(cancellationToken);
+        var values = await LoadConfigurationAsync(connection, cancellationToken);
+        var gameFileDirectory = ResolveGameFileDirectory(databasePath, values);
+        var entries = new List<(int Id, string FileName, int? SourcePortId, int? IwadId)>();
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText =
+                """
+                SELECT game.GameFileID, game.FileName,
+                       game.SourcePortID, game.IWadID
+                FROM GameFiles game
+                LEFT JOIN IWads ownIwad ON ownIwad.GameFileID=game.GameFileID
+                WHERE ownIwad.IWadID IS NULL
+                  AND ($gameFileId IS NULL OR game.GameFileID=$gameFileId)
+                ORDER BY game.GameFileID;
+                """;
+            command.Parameters.AddWithValue(
+                "$gameFileId",
+                gameFileId.HasValue ? gameFileId.Value : DBNull.Value);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                entries.Add((
+                    reader.GetInt32(0),
+                    reader.GetString(1),
+                    reader.IsDBNull(2) ? null : reader.GetInt32(2),
+                    reader.IsDBNull(3) ? null : reader.GetInt32(3)));
+            }
+        }
+
+        var assignedSourcePorts = 0;
+        var assignedIwads = 0;
+        var unchanged = 0;
+        var failed = 0;
+        foreach (var entry in entries)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (entry.SourcePortId.HasValue && entry.IwadId.HasValue)
+            {
+                unchanged++;
+                continue;
+            }
+            try
+            {
+                var archivePath = Path.Combine(gameFileDirectory, entry.FileName);
+                if (!File.Exists(archivePath))
+                {
+                    failed++;
+                    continue;
+                }
+                var metadata = await ArchiveTextMetadataReader.ReadAsync(
+                    archivePath,
+                    cancellationToken);
+                var inferred = LaunchDefinitionMatcher.Infer(metadata, definitions);
+                var sourcePortId = entry.SourcePortId ?? inferred.SourcePortId;
+                var iwadId = entry.IwadId ?? inferred.IwadId;
+                if (sourcePortId == entry.SourcePortId && iwadId == entry.IwadId)
+                {
+                    unchanged++;
+                    continue;
+                }
+                await using var update = connection.CreateCommand();
+                update.CommandText =
+                    """
+                    UPDATE GameFiles
+                    SET SourcePortID=$sourcePortId,
+                        IWadID=$iwadId,
+                        IsSyncNeeded=1
+                    WHERE GameFileID=$gameFileId;
+                    """;
+                update.Parameters.AddWithValue("$sourcePortId", DbValue(sourcePortId));
+                update.Parameters.AddWithValue("$iwadId", DbValue(iwadId));
+                update.Parameters.AddWithValue("$gameFileId", entry.Id);
+                await update.ExecuteNonQueryAsync(cancellationToken);
+                if (!entry.SourcePortId.HasValue && sourcePortId.HasValue)
+                    assignedSourcePorts++;
+                if (!entry.IwadId.HasValue && iwadId.HasValue)
+                    assignedIwads++;
+            }
+            catch (Exception exception) when (
+                exception is IOException
+                or InvalidDataException
+                or UnauthorizedAccessException
+                or NotSupportedException)
+            {
+                failed++;
+            }
+        }
+        return new LaunchDefinitionInferenceResult(
+            entries.Count,
+            assignedSourcePorts,
+            assignedIwads,
+            unchanged,
+            failed);
+    }
+
     public async Task<DatabaseHealthReport> CheckDatabaseHealthAsync(
         bool repair,
         CancellationToken cancellationToken = default)
@@ -3434,32 +3587,15 @@ public sealed class SqliteNativeLibraryService(
             archivePath,
             cancellationToken);
         await using var connection = await OpenConnectionAsync(cancellationToken);
-        string? storedMapNames = null;
-        var storedMapCount = 0;
-        await using (var existing = connection.CreateCommand())
-        {
-            existing.CommandText =
-                "SELECT Map, COALESCE(MapCount, 0) FROM GameFiles WHERE GameFileID=$gameFileId;";
-            existing.Parameters.AddWithValue("$gameFileId", gameFileId);
-            await using var reader = await existing.ExecuteReaderAsync(cancellationToken);
-            if (await reader.ReadAsync(cancellationToken))
-            {
-                storedMapNames = GetNullableString(reader, 0);
-                storedMapCount = reader.GetInt32(1);
-            }
-        }
-        var mergedMaps = MapNameExtractor.ParseStored(storedMapNames)
-            .Concat(maps)
+        var detectedMaps = maps
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(map => map, StringComparer.OrdinalIgnoreCase)
             .ToArray();
-        if (mergedMaps.Length == 0)
-            return;
         await UpdateMapMetadataAsync(
             connection,
             gameFileId,
-            mergedMaps,
-            Math.Max(storedMapCount, mergedMaps.Length),
+            detectedMaps,
+            detectedMaps.Length,
             cancellationToken);
     }
 

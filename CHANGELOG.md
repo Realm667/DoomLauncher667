@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+## 0.8.9 - 2026-08-02
+
+- Changed **Refresh metadata & artwork** into a blocking, progress-aware
+  operation. While metadata, TITLEPIC artwork and map information are being
+  refreshed, the launcher is visibly dimmed and protected against concurrent
+  input.
+- Replaced the previous cumulative map update with a fresh archive scan, so a
+  refreshed entry now stores the actual detected map names and count instead
+  of retaining stale or inflated values.
+- Added **Add mods to collection** to collection details, with an alphabetical
+  multi-selection dialog and live title filter. Existing assignments remain
+  visible and protected from accidental removal.
+- Extended embedded TXT metadata parsing with game/IWAD and tested-engine
+  fields. New imports and refreshed entries now receive an IWAD and source port
+  automatically when a unique configured definition can be identified.
+- Added a conservative bulk inference migration for existing libraries. It
+  preserves every manual launch-option assignment, leaves ambiguous metadata
+  untouched and selects the newest configured version when multiple matching
+  definitions exist.
+- Hardened TXT inspection against malformed ZIP entries and added integration
+  coverage for map recounting, bulk collection assignment and launch-definition
+  inference.
+
 ## 0.8.8 - 2026-08-02
 
 - Restored the improved 1280x800 `colored` and `grayscale` placeholder artwork

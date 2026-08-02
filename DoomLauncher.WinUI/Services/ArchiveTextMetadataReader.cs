@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using SharpCompress.Archives;
 
 namespace DoomLauncher.WinUI.Services;
@@ -8,16 +9,20 @@ internal sealed record ArchiveTextMetadata(
     string Title,
     string Author,
     string Description,
-    DateTime? ReleaseDate)
+    DateTime? ReleaseDate,
+    string Game,
+    string SourcePort)
 {
     public static ArchiveTextMetadata Empty { get; } =
-        new(string.Empty, string.Empty, string.Empty, null);
+        new(string.Empty, string.Empty, string.Empty, null, string.Empty, string.Empty);
 
     public int Quality =>
         (string.IsNullOrWhiteSpace(Title) ? 0 : 4)
         + (string.IsNullOrWhiteSpace(Author) ? 0 : 2)
         + (string.IsNullOrWhiteSpace(Description) ? 0 : 1)
-        + (ReleaseDate.HasValue ? 1 : 0);
+        + (ReleaseDate.HasValue ? 1 : 0)
+        + (string.IsNullOrWhiteSpace(Game) ? 0 : 1)
+        + (string.IsNullOrWhiteSpace(SourcePort) ? 0 : 1);
 }
 
 internal static class ArchiveTextMetadataReader
@@ -77,7 +82,8 @@ internal static class ArchiveTextMetadataReader
         catch (Exception exception) when (
             exception is IOException
             or InvalidDataException
-            or NotSupportedException)
+            or NotSupportedException
+            or SharpCompress.Common.ArchiveOperationException)
         {
             return ArchiveTextMetadata.Empty;
         }
@@ -97,11 +103,22 @@ internal static class ArchiveTextMetadataReader
             "date finished",
             "release date",
             "date");
+        var game = FindSingleLine(lines, "game", "iwad");
+        var sourcePort = string.Join(
+            " | ",
+            FindValues(
+                lines,
+                "advanced engine needed",
+                "tested with",
+                "may not run with")
+                .Distinct(StringComparer.OrdinalIgnoreCase));
         return new ArchiveTextMetadata(
             DatabaseTextSanitizer.SingleLine(title),
             DatabaseTextSanitizer.SingleLine(author),
             DatabaseTextSanitizer.Multiline(description),
-            ParseDate(dateText));
+            ParseDate(dateText),
+            DatabaseTextSanitizer.SingleLine(game),
+            DatabaseTextSanitizer.SingleLine(sourcePort));
     }
 
     private static bool IsMetadataText(string? key)
@@ -129,6 +146,21 @@ internal static class ArchiveTextMetadataReader
                 return value;
         }
         return string.Empty;
+    }
+
+    private static IEnumerable<string> FindValues(
+        IReadOnlyList<string> lines,
+        params string[] labels)
+    {
+        foreach (var line in lines)
+        {
+            if (TrySplitField(line, out var label, out var value)
+                && labels.Contains(label, StringComparer.OrdinalIgnoreCase)
+                && !string.IsNullOrWhiteSpace(value))
+            {
+                yield return value;
+            }
+        }
     }
 
     private static string FindDescription(IReadOnlyList<string> lines)
@@ -195,5 +227,149 @@ internal static class ArchiveTextMetadataReader
             out var result)
             ? result
             : null;
+    }
+}
+
+internal sealed record InferredLaunchDefinitions(
+    int? SourcePortId,
+    int? IwadId,
+    string SourcePortName,
+    string IwadName);
+
+internal static partial class LaunchDefinitionMatcher
+{
+    public static InferredLaunchDefinitions Infer(
+        ArchiveTextMetadata metadata,
+        LauncherDefinitionsData definitions)
+    {
+        var iwadKey = DetectIwadKey(metadata.Game);
+        var iwad = iwadKey is null
+            ? null
+            : definitions.Iwads
+                .Where(item => item.IwadId.HasValue && MatchesIwad(item, iwadKey))
+                .OrderByDescending(item => item.Version, NaturalVersionComparer.Instance)
+                .FirstOrDefault();
+
+        var sourceText = Normalize(metadata.SourcePort);
+        var sourcePort = sourceText.Length == 0
+            ? null
+            : definitions.SourcePorts
+                .Where(item => item.SourcePortId.HasValue)
+                .Select(item => new
+                {
+                    Item = item,
+                    Score = SourcePortScore(sourceText, Normalize(item.Name)),
+                })
+                .Where(candidate => candidate.Score > 0)
+                .OrderByDescending(candidate => candidate.Score)
+                .ThenByDescending(
+                    candidate => candidate.Item.Version,
+                    NaturalVersionComparer.Instance)
+                .Select(candidate => candidate.Item)
+                .FirstOrDefault();
+
+        return new InferredLaunchDefinitions(
+            sourcePort?.SourcePortId,
+            iwad?.IwadId,
+            sourcePort?.Name ?? string.Empty,
+            iwad?.Name ?? string.Empty);
+    }
+
+    private static string? DetectIwadKey(string game)
+    {
+        var value = Normalize(game);
+        if (value.Length == 0)
+            return null;
+        if (Contains(value, "plutonia"))
+            return "plutonia";
+        if (Contains(value, "tnt evolution") || Contains(value, "tnt"))
+            return "tnt";
+        if (Contains(value, "doom ii") || Contains(value, "doom 2") || Contains(value, "doom2"))
+            return "doom2";
+        if (Contains(value, "ultimate doom") || value == "doom" || Contains(value, "doom 1"))
+            return "doom";
+        if (Contains(value, "heretic"))
+            return "heretic";
+        if (Contains(value, "hexen"))
+            return "hexen";
+        if (Contains(value, "strife"))
+            return "strife1";
+        return null;
+    }
+
+    private static bool MatchesIwad(NativeIwadDefinition definition, string key)
+    {
+        var values = new[]
+        {
+            Normalize(Path.GetFileNameWithoutExtension(definition.InternalFileName)),
+            Normalize(Path.GetFileNameWithoutExtension(definition.ArchiveFileName)),
+            Normalize(definition.Name),
+            Normalize(definition.CatalogLabel),
+        };
+        return key switch
+        {
+            "doom" => values.Any(value => value == "doom" || Contains(value, "ultimate doom")),
+            "doom2" => values.Any(value => value == "doom2" || Contains(value, "doom 2")),
+            "strife1" => values.Any(value => value == "strife1" || Contains(value, "strife")),
+            _ => values.Any(value => value == key || Contains(value, key)),
+        };
+    }
+
+    private static int SourcePortScore(string sourceText, string definitionName)
+    {
+        if (definitionName.Length < 3)
+            return 0;
+        if (sourceText == definitionName)
+            return 1000 + definitionName.Length;
+        return Contains(sourceText, definitionName)
+            ? 500 + definitionName.Length
+            : 0;
+    }
+
+    private static bool Contains(string text, string phrase) =>
+        (" " + text + " ").Contains(
+            " " + phrase + " ",
+            StringComparison.Ordinal);
+
+    private static string Normalize(string? value) =>
+        WhitespaceRegex().Replace(
+            NonAlphaNumericRegex().Replace(
+                (value ?? string.Empty).ToLowerInvariant(),
+                " "),
+            " ").Trim();
+
+    [GeneratedRegex("[^a-z0-9]+", RegexOptions.CultureInvariant)]
+    private static partial Regex NonAlphaNumericRegex();
+
+    [GeneratedRegex("\\s+", RegexOptions.CultureInvariant)]
+    private static partial Regex WhitespaceRegex();
+
+    private sealed partial class NaturalVersionComparer : IComparer<string>
+    {
+        public static NaturalVersionComparer Instance { get; } = new();
+
+        public int Compare(string? left, string? right)
+        {
+            var leftParts = VersionParts(left);
+            var rightParts = VersionParts(right);
+            for (var index = 0; index < Math.Max(leftParts.Length, rightParts.Length); index++)
+            {
+                var leftValue = index < leftParts.Length ? leftParts[index] : 0;
+                var rightValue = index < rightParts.Length ? rightParts[index] : 0;
+                var result = leftValue.CompareTo(rightValue);
+                if (result != 0)
+                    return result;
+            }
+            return StringComparer.OrdinalIgnoreCase.Compare(left, right);
+        }
+
+        private static int[] VersionParts(string? value) =>
+            NumberRegex().Matches(value ?? string.Empty)
+                .Cast<Match>()
+                .Select(match => int.TryParse(match.Value, out var number) ? number : 0)
+                .ToArray();
+
+        [GeneratedRegex("\\d+", RegexOptions.CultureInvariant)]
+        private static partial Regex NumberRegex();
     }
 }
