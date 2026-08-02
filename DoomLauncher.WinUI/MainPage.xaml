@@ -31,6 +31,23 @@
             <MenuFlyoutSeparator />
             <MenuFlyoutItem Click="ContextDelete_Click" />
         </MenuFlyout>
+        <MenuFlyout
+            x:Key="CollectionContextMenu"
+            Opening="CollectionContextMenu_Opening">
+            <MenuFlyoutItem Click="CollectionContextAddMods_Click">
+                <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE710;" /></MenuFlyoutItem.Icon>
+            </MenuFlyoutItem>
+            <MenuFlyoutItem Click="CollectionContextChooseArtwork_Click">
+                <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE91B;" /></MenuFlyoutItem.Icon>
+            </MenuFlyoutItem>
+            <MenuFlyoutItem Click="CollectionContextRemoveArtwork_Click">
+                <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE74D;" /></MenuFlyoutItem.Icon>
+            </MenuFlyoutItem>
+            <MenuFlyoutSeparator />
+            <MenuFlyoutItem Click="CollectionContextDelete_Click">
+                <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE107;" /></MenuFlyoutItem.Icon>
+            </MenuFlyoutItem>
+        </MenuFlyout>
         <Style x:Key="RoundedTileItemStyle" TargetType="GridViewItem">
             <Setter Property="Padding" Value="0" />
             <Setter Property="Margin" Value="0,0,14,14" />
@@ -286,6 +303,7 @@
                     <ColumnDefinition Width="{Binding SourcePortWidth, Source={StaticResource CollectionListColumnLayout}}" />
                     <ColumnDefinition Width="{Binding PlaytimeWidth, Source={StaticResource CollectionListColumnLayout}}" />
                     <ColumnDefinition Width="{Binding FinishedWidth, Source={StaticResource CollectionListColumnLayout}}" />
+                    <ColumnDefinition Width="{Binding FavoritesWidth, Source={StaticResource CollectionListColumnLayout}}" />
                 </Grid.ColumnDefinitions>
                 <Border
                     Width="{Binding ArtworkWidth, Source={StaticResource ListDensityLayout}}"
@@ -320,6 +338,19 @@
                         <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="{ThemeResource DoomSuccessColor}" />
                         <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="{ThemeResource DoomSuccessColor}" />
                         <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="{ThemeResource DoomSuccessColor}" />
+                    </CheckBox.Resources>
+                </CheckBox>
+                <CheckBox
+                    Grid.Column="10"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Click="FavoriteCheckBox_Click"
+                    IsChecked="{x:Bind IsFavorite, Mode=OneWay}"
+                    Tag="{x:Bind GameFileId}">
+                    <CheckBox.Resources>
+                        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="{ThemeResource DoomControlAccentColor}" />
+                        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="{ThemeResource DoomControlAccentColor}" />
+                        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="{ThemeResource DoomControlAccentColor}" />
                     </CheckBox.Resources>
                 </CheckBox>
             </Grid>
@@ -633,6 +664,7 @@
                                 <ToggleMenuFlyoutItem x:Name="SourcePortColumnItem" Click="ColumnToggle_Click" IsChecked="True" Tag="SourcePort" Text="{Binding SourcePort}" />
                                 <ToggleMenuFlyoutItem x:Name="PlaytimeColumnItem" Click="ColumnToggle_Click" IsChecked="True" Tag="Playtime" Text="{Binding Playtime}" />
                                 <ToggleMenuFlyoutItem x:Name="FinishedColumnItem" Click="ColumnToggle_Click" IsChecked="True" Tag="Finished" Text="{Binding Finished}" />
+                                <ToggleMenuFlyoutItem x:Name="FavoritesColumnItem" Click="ColumnToggle_Click" IsChecked="True" Tag="Favorites" Text="{Binding Favorites}" />
                             </MenuFlyout>
                         </DropDownButton.Flyout>
                     </DropDownButton>
@@ -729,6 +761,7 @@
                                 <ToggleMenuFlyoutItem x:Name="CollectionSourcePortColumnItem" Click="CollectionColumnToggle_Click" IsChecked="True" Tag="SourcePort" Text="{Binding SourcePort}" />
                                 <ToggleMenuFlyoutItem x:Name="CollectionPlaytimeColumnItem" Click="CollectionColumnToggle_Click" IsChecked="True" Tag="Playtime" Text="{Binding Playtime}" />
                                 <ToggleMenuFlyoutItem x:Name="CollectionFinishedColumnItem" Click="CollectionColumnToggle_Click" IsChecked="True" Tag="Finished" Text="{Binding Finished}" />
+                                <ToggleMenuFlyoutItem x:Name="CollectionFavoritesColumnItem" Click="CollectionColumnToggle_Click" IsChecked="True" Tag="Favorites" Text="{Binding Favorites}" />
                             </MenuFlyout>
                         </DropDownButton.Flyout>
                     </DropDownButton>
@@ -818,6 +851,7 @@
                                     <ColumnDefinition Width="{Binding SourcePortWidth, Source={StaticResource ListColumnLayout}}" />
                                     <ColumnDefinition Width="{Binding PlaytimeWidth, Source={StaticResource ListColumnLayout}}" />
                                     <ColumnDefinition Width="{Binding FinishedWidth, Source={StaticResource ListColumnLayout}}" />
+                                    <ColumnDefinition Width="{Binding FavoritesWidth, Source={StaticResource ListColumnLayout}}" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding Artwork}" />
                                 <Button x:Name="TitleHeader" Grid.Column="1" Click="ColumnHeader_Click" Content="{Binding Title}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Title" />
@@ -829,6 +863,7 @@
                                 <Button x:Name="SourcePortHeader" Grid.Column="7" Click="ColumnHeader_Click" Content="{Binding SourcePort}" Style="{StaticResource TableHeaderButtonStyle}" Tag="SourcePort" />
                                 <Button x:Name="PlaytimeHeader" Grid.Column="8" Click="ColumnHeader_Click" Content="{Binding Playtime}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Playtime" />
                                 <Button x:Name="FinishedHeader" Grid.Column="9" Click="ColumnHeader_Click" Content="{Binding Finished}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Finished" />
+                                <TextBlock Grid.Column="10" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding Favorites}" />
                             </Grid>
                         </ScrollViewer>
                         <ListView
@@ -893,6 +928,7 @@
                                             <ColumnDefinition Width="{Binding SourcePortWidth, Source={StaticResource ListColumnLayout}}" />
                                             <ColumnDefinition Width="{Binding PlaytimeWidth, Source={StaticResource ListColumnLayout}}" />
                                             <ColumnDefinition Width="{Binding FinishedWidth, Source={StaticResource ListColumnLayout}}" />
+                                            <ColumnDefinition Width="{Binding FavoritesWidth, Source={StaticResource ListColumnLayout}}" />
                                         </Grid.ColumnDefinitions>
                                         <Border
                                             Width="{Binding ArtworkWidth, Source={StaticResource ListDensityLayout}}"
@@ -935,6 +971,19 @@
                                                 <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="{ThemeResource DoomSuccessColor}" />
                                                 <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="{ThemeResource DoomSuccessColor}" />
                                                 <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="{ThemeResource DoomSuccessColor}" />
+                                            </CheckBox.Resources>
+                                        </CheckBox>
+                                        <CheckBox
+                                            Grid.Column="10"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Click="FavoriteCheckBox_Click"
+                                            IsChecked="{x:Bind IsFavorite, Mode=OneWay}"
+                                            Tag="{x:Bind GameFileId}">
+                                            <CheckBox.Resources>
+                                                <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="{ThemeResource DoomControlAccentColor}" />
+                                                <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="{ThemeResource DoomControlAccentColor}" />
+                                                <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="{ThemeResource DoomControlAccentColor}" />
                                             </CheckBox.Resources>
                                         </CheckBox>
                                     </Grid>
@@ -1056,33 +1105,39 @@
                                 </Border>
                             </StackPanel>
 
-                            <Button
-                                HorizontalAlignment="Stretch"
-                                AutomationProperties.Name="{x:Bind ViewModel.FavoriteButtonText, Mode=OneWay}"
-                                Click="FavoriteButton_Click"
-                                IsEnabled="{x:Bind ViewModel.CanLaunch, Mode=OneWay}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon
-                                        FontSize="14"
-                                        Foreground="{StaticResource DoomAccentBrush}"
-                                        Glyph="{x:Bind ViewModel.FavoriteGlyph, Mode=OneWay}" />
-                                    <TextBlock Text="{x:Bind ViewModel.FavoriteButtonText, Mode=OneWay}" />
-                                </StackPanel>
-                            </Button>
-
-                            <Button
-                                HorizontalAlignment="Stretch"
-                                AutomationProperties.Name="{x:Bind ViewModel.FinishedButtonText, Mode=OneWay}"
-                                Click="FinishedButton_Click"
-                                IsEnabled="{x:Bind ViewModel.CanLaunch, Mode=OneWay}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon
-                                        FontSize="14"
-                                        Foreground="{ThemeResource DoomSuccessBrush}"
-                                        Glyph="{x:Bind ViewModel.FinishedGlyph, Mode=OneWay}" />
-                                    <TextBlock Text="{x:Bind ViewModel.FinishedButtonText, Mode=OneWay}" />
-                                </StackPanel>
-                            </Button>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Button
+                                    HorizontalAlignment="Stretch"
+                                    AutomationProperties.Name="{x:Bind ViewModel.FavoriteButtonText, Mode=OneWay}"
+                                    Click="FavoriteButton_Click"
+                                    IsEnabled="{x:Bind ViewModel.CanLaunch, Mode=OneWay}">
+                                    <StackPanel Orientation="Horizontal" Spacing="7">
+                                        <FontIcon
+                                            FontSize="14"
+                                            Foreground="{StaticResource DoomAccentBrush}"
+                                            Glyph="{x:Bind ViewModel.FavoriteGlyph, Mode=OneWay}" />
+                                        <TextBlock Text="{x:Bind ViewModel.FavoriteButtonText, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Button>
+                                <Button
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Stretch"
+                                    AutomationProperties.Name="{x:Bind ViewModel.FinishedButtonText, Mode=OneWay}"
+                                    Click="FinishedButton_Click"
+                                    IsEnabled="{x:Bind ViewModel.CanLaunch, Mode=OneWay}">
+                                    <StackPanel Orientation="Horizontal" Spacing="7">
+                                        <FontIcon
+                                            FontSize="14"
+                                            Foreground="{ThemeResource DoomSuccessBrush}"
+                                            Glyph="{x:Bind ViewModel.FinishedGlyph, Mode=OneWay}" />
+                                        <TextBlock Text="{x:Bind ViewModel.FinishedButtonText, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
 
                             <Button
                                 HorizontalAlignment="Stretch"
@@ -1119,11 +1174,22 @@
                                 </StackPanel>
                             </Button>
 
-                            <TextBlock
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                LineHeight="21"
-                                Text="{x:Bind ViewModel.SelectedGame.Description, Mode=OneWay}"
-                                TextWrapping="Wrap" />
+                            <StackPanel Spacing="6">
+                                <TextBlock
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    LineHeight="21"
+                                    Text="{x:Bind ViewModel.SelectedGame.DescriptionPreview, Mode=OneWay}"
+                                    TextWrapping="Wrap" />
+                                <Button
+                                    Padding="0,4"
+                                    HorizontalAlignment="Left"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Click="ReadMoreButton_Click"
+                                    Content="{Binding ReadMore}"
+                                    Foreground="{ThemeResource DoomControlAccentBrush}"
+                                    Visibility="{x:Bind ViewModel.SelectedGame.ReadMoreVisibility, Mode=OneWay}" />
+                            </StackPanel>
 
                             <StackPanel Spacing="4">
                                 <TextBlock Style="{StaticResource MetaTextStyle}" Text="{Binding Tags}" />
@@ -1500,6 +1566,7 @@
                                     <Grid
                                         Width="{Binding CardWidth, Source={StaticResource TileLayout}}"
                                         Height="{Binding CardHeight, Source={StaticResource TileLayout}}"
+                                        ContextFlyout="{StaticResource CollectionContextMenu}"
                                         ToolTipService.ToolTip="{x:Bind Title}">
                                         <Button
                                             Padding="0"
@@ -1658,6 +1725,17 @@
                                         <TextBlock Text="{Binding RemoveCollectionArtwork}" />
                                     </StackPanel>
                                 </Button>
+                                <Button
+                                    Height="40"
+                                    Padding="12,6"
+                                    AutomationProperties.Name="{Binding DeleteCollection}"
+                                    Click="CollectionDetailDeleteButton_Click"
+                                    ToolTipService.ToolTip="{Binding DeleteCollection}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon FontSize="15" Glyph="&#xE74D;" />
+                                        <TextBlock Text="{Binding DeleteCollection}" />
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </Grid>
 
@@ -1696,6 +1774,7 @@
                                     LaunchWithOptionsRequested="LaunchWithOptionsButton_Click"
                                     ManageCollectionsRequested="ManageCollectionsButton_Click"
                                     PlayRequested="PlayButton_Click"
+                                    ReadMoreRequested="ReadMoreButton_Click"
                                     RescrapeRequested="RescrapeIdGamesButton_Click" />
                             </Grid>
 
@@ -1730,6 +1809,7 @@
                                             <ColumnDefinition Width="{Binding SourcePortWidth, Source={StaticResource CollectionListColumnLayout}}" />
                                             <ColumnDefinition Width="{Binding PlaytimeWidth, Source={StaticResource CollectionListColumnLayout}}" />
                                             <ColumnDefinition Width="{Binding FinishedWidth, Source={StaticResource CollectionListColumnLayout}}" />
+                                            <ColumnDefinition Width="{Binding FavoritesWidth, Source={StaticResource CollectionListColumnLayout}}" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding DataContext.Artwork, ElementName=RootPage}" />
                                         <TextBlock Grid.Column="1" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.Title, ElementName=RootPage}" />
@@ -1741,6 +1821,7 @@
                                         <TextBlock Grid.Column="7" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.SourcePort, ElementName=RootPage}" />
                                         <TextBlock Grid.Column="8" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.Playtime, ElementName=RootPage}" />
                                         <TextBlock Grid.Column="9" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.Finished, ElementName=RootPage}" />
+                                        <TextBlock Grid.Column="10" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.Favorites, ElementName=RootPage}" />
                                     </Grid>
                                     <ListView
                                         x:Name="CollectionDetailGameList"
@@ -1796,6 +1877,7 @@
                                     LaunchWithOptionsRequested="LaunchWithOptionsButton_Click"
                                     ManageCollectionsRequested="ManageCollectionsButton_Click"
                                     PlayRequested="PlayButton_Click"
+                                    ReadMoreRequested="ReadMoreButton_Click"
                                     RescrapeRequested="RescrapeIdGamesButton_Click" />
                             </Grid>
                         </Grid>
@@ -1815,6 +1897,7 @@
                                     Margin="{Binding CardMargin, Source={StaticResource AccordionDensityLayout}}"
                                     Background="{StaticResource DoomSurfaceBrush}"
                                     BorderThickness="0"
+                                    ContextFlyout="{StaticResource CollectionContextMenu}"
                                     CornerRadius="12"
                                     Loaded="CollectionAccordion_Loaded"
                                     Tag="{x:Bind Title}">
@@ -1888,6 +1971,7 @@
                                                             <ColumnDefinition Width="{Binding SourcePortWidth, Source={StaticResource CollectionListColumnLayout}}" />
                                                             <ColumnDefinition Width="{Binding PlaytimeWidth, Source={StaticResource CollectionListColumnLayout}}" />
                                                             <ColumnDefinition Width="{Binding FinishedWidth, Source={StaticResource CollectionListColumnLayout}}" />
+                                                            <ColumnDefinition Width="{Binding FavoritesWidth, Source={StaticResource CollectionListColumnLayout}}" />
                                                         </Grid.ColumnDefinitions>
                                                         <TextBlock Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding DataContext.Artwork, ElementName=RootPage}" />
                                                         <TextBlock Grid.Column="1" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding DataContext.Title, ElementName=RootPage}" />
@@ -1899,6 +1983,7 @@
                                                         <TextBlock Grid.Column="7" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding DataContext.SourcePort, ElementName=RootPage}" />
                                                         <TextBlock Grid.Column="8" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding DataContext.Playtime, ElementName=RootPage}" />
                                                         <TextBlock Grid.Column="9" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding DataContext.Finished, ElementName=RootPage}" />
+                                                        <TextBlock Grid.Column="10" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding DataContext.Favorites, ElementName=RootPage}" />
                                                     </Grid>
                                                     <ListView
                                                         HorizontalContentAlignment="Left"
@@ -1939,6 +2024,7 @@
                                                                         <ColumnDefinition Width="{Binding SourcePortWidth, Source={StaticResource CollectionListColumnLayout}}" />
                                                                         <ColumnDefinition Width="{Binding PlaytimeWidth, Source={StaticResource CollectionListColumnLayout}}" />
                                                                         <ColumnDefinition Width="{Binding FinishedWidth, Source={StaticResource CollectionListColumnLayout}}" />
+                                                                        <ColumnDefinition Width="{Binding FavoritesWidth, Source={StaticResource CollectionListColumnLayout}}" />
                                                                     </Grid.ColumnDefinitions>
                                                                     <Border
                                                                         Width="{Binding ArtworkWidth, Source={StaticResource ListDensityLayout}}"
@@ -1973,6 +2059,19 @@
                                                                             <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="{ThemeResource DoomSuccessColor}" />
                                                                             <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="{ThemeResource DoomSuccessColor}" />
                                                                             <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="{ThemeResource DoomSuccessColor}" />
+                                                                        </CheckBox.Resources>
+                                                                    </CheckBox>
+                                                                    <CheckBox
+                                                                        Grid.Column="10"
+                                                                        HorizontalAlignment="Center"
+                                                                        VerticalAlignment="Center"
+                                                                        Click="FavoriteCheckBox_Click"
+                                                                        IsChecked="{x:Bind IsFavorite, Mode=OneWay}"
+                                                                        Tag="{x:Bind GameFileId}">
+                                                                        <CheckBox.Resources>
+                                                                            <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="{ThemeResource DoomControlAccentColor}" />
+                                                                            <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="{ThemeResource DoomControlAccentColor}" />
+                                                                            <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="{ThemeResource DoomControlAccentColor}" />
                                                                         </CheckBox.Resources>
                                                                     </CheckBox>
                                                                 </Grid>
@@ -2214,6 +2313,7 @@
                                             </Grid.ColumnDefinitions>
                                             <ProgressBar
                                                 VerticalAlignment="Center"
+                                                Foreground="{ThemeResource DoomControlAccentBrush}"
                                                 Maximum="100"
                                                 Value="{Binding ProgressPercent}" />
                                             <TextBlock
@@ -2396,6 +2496,7 @@
                     <ProgressBar
                         x:Name="BlockingOperationProgress"
                         Height="5"
+                        Foreground="{ThemeResource DoomControlAccentBrush}"
                         Minimum="0"
                         Maximum="100" />
                     <TextBlock

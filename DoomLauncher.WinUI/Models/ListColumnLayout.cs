@@ -23,6 +23,7 @@ public sealed class ListColumnLayout : INotifyPropertyChanged
     public GridLength SourcePortWidth => Width("SourcePort", 140);
     public GridLength PlaytimeWidth => Width("Playtime", 110);
     public GridLength FinishedWidth => Width("Finished", 90);
+    public GridLength FavoritesWidth => Width("Favorites", 90);
 
     public IReadOnlySet<string> VisibleColumns => _visible;
 
@@ -58,7 +59,7 @@ public sealed class ListColumnLayout : INotifyPropertyChanged
                      nameof(ArtworkWidth), nameof(TitleWidth), nameof(AuthorWidth),
                      nameof(ReleaseDateWidth), nameof(MapsWidth), nameof(RatingWidth),
                      nameof(DownloadedWidth), nameof(SourcePortWidth), nameof(PlaytimeWidth),
-                     nameof(FinishedWidth),
+                     nameof(FinishedWidth), nameof(FavoritesWidth),
                  })
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));

@@ -836,9 +836,24 @@ public sealed class MainViewModel(
         IdGamesStatus = localization.Format("IdGamesDownloading", item.Title);
         try
         {
-            var downloadItem = string.IsNullOrWhiteSpace(item.FileName)
-                ? await idGamesService.GetByIdAsync(item.Id, cancellationToken)
-                : item;
+            IdGamesItem? detailedItem = null;
+            if (item.Id > 0)
+            {
+                try
+                {
+                    detailedItem = await idGamesService.RefreshByIdAsync(
+                        item.Id,
+                        cancellationToken);
+                }
+                catch (Exception exception)
+                    when (exception is not OperationCanceledException
+                          && !string.IsNullOrWhiteSpace(item.FileName))
+                {
+                    // The fully populated Discover result is still a valid
+                    // import source if the detail endpoint is temporarily down.
+                }
+            }
+            var downloadItem = detailedItem ?? item;
             if (downloadItem is null
                 || string.IsNullOrWhiteSpace(downloadItem.FileName))
             {
@@ -874,6 +889,10 @@ public sealed class MainViewModel(
                 IdGamesStatus = localization.Get("ImportSkipped");
                 return;
             }
+            await nativeLibraryService.UpdateGameFromIdGamesAsync(
+                imported.GameFileId,
+                downloadItem,
+                cancellationToken);
             try
             {
                 await nativeLibraryService.TryImportTitlePicAsync(

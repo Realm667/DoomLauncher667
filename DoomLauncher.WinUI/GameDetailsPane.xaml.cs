@@ -32,6 +32,7 @@ public sealed partial class GameDetailsPane : UserControl
     public event RoutedEventHandler? EditRequested;
     public event RoutedEventHandler? RescrapeRequested;
     public event RoutedEventHandler? ManageCollectionsRequested;
+    public event RoutedEventHandler? ReadMoreRequested;
 
     public void CloseLaunchOptions() => LaunchOptionsFlyout.Hide();
 
@@ -76,4 +77,7 @@ public sealed partial class GameDetailsPane : UserControl
         object sender,
         RoutedEventArgs args) =>
         ManageCollectionsRequested?.Invoke(this, args);
+
+    private void ReadMoreButton_Click(object sender, RoutedEventArgs args) =>
+        ReadMoreRequested?.Invoke(this, args);
 }

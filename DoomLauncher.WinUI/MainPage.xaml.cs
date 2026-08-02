@@ -679,7 +679,10 @@ public sealed partial class MainPage : Page
             return;
         var target = flyout.Target as FrameworkElement;
         var item = target?.DataContext as LibraryItem
-            ?? target?.Tag as LibraryItem;
+            ?? target?.Tag as LibraryItem
+            ?? (!ViewModel.SelectedGame.IsPlaceholder
+                ? ViewModel.SelectedGame
+                : null);
         if (item is null || item.IsPlaceholder)
             return;
 
@@ -701,7 +704,69 @@ public sealed partial class MainPage : Page
             ? Visibility.Collapsed
             : Visibility.Visible;
         foreach (var action in actions)
+        {
+            action.Visibility = Visibility.Visible;
             action.Tag = item;
+        }
+        actions[4].Visibility = item.Category.Equals(
+            "IWAD",
+            StringComparison.OrdinalIgnoreCase)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+    }
+
+    private void CollectionContextMenu_Opening(object sender, object args)
+    {
+        if (sender is not MenuFlyout flyout)
+            return;
+        var target = flyout.Target as FrameworkElement;
+        var group = target?.DataContext as LibraryGroup
+            ?? target?.Tag as LibraryGroup
+            ?? _selectedCollectionGroup;
+        var actions = flyout.Items.OfType<MenuFlyoutItem>().ToArray();
+        if (group is null || actions.Length < 4)
+        {
+            foreach (var action in actions)
+                action.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        actions[0].Text = Strings["AddModsToCollection"];
+        actions[1].Text = Strings["ChooseCollectionArtwork"];
+        actions[2].Text = Strings["RemoveCollectionArtwork"];
+        actions[2].Visibility = group.HasCustomArtwork
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        actions[3].Text = Strings["DeleteCollection"];
+        foreach (var action in actions)
+            action.Tag = group;
+    }
+
+    private static LibraryGroup? CollectionFromMenu(object sender) =>
+        (sender as MenuFlyoutItem)?.Tag as LibraryGroup;
+
+    private async void CollectionContextAddMods_Click(object sender, RoutedEventArgs args)
+    {
+        if (CollectionFromMenu(sender) is { } group)
+            await ShowAddModsToCollectionDialogAsync(group);
+    }
+
+    private async void CollectionContextChooseArtwork_Click(object sender, RoutedEventArgs args)
+    {
+        if (CollectionFromMenu(sender) is { } group)
+            await ChooseCollectionArtworkAsync(group);
+    }
+
+    private async void CollectionContextRemoveArtwork_Click(object sender, RoutedEventArgs args)
+    {
+        if (CollectionFromMenu(sender) is { } group)
+            await RemoveCollectionArtworkAsync(group.Title);
+    }
+
+    private async void CollectionContextDelete_Click(object sender, RoutedEventArgs args)
+    {
+        if (CollectionFromMenu(sender) is { } group)
+            await ConfirmDeleteCollectionAsync(group);
     }
 
     private void SelectContextItem(object sender)
@@ -1305,15 +1370,117 @@ public sealed partial class MainPage : Page
         await RemoveCollectionArtworkAsync(_selectedCollectionGroup.Title);
     }
 
+    private async void CollectionDetailDeleteButton_Click(
+        object sender,
+        RoutedEventArgs args)
+    {
+        if (_selectedCollectionGroup is not null)
+            await ConfirmDeleteCollectionAsync(_selectedCollectionGroup);
+    }
+
+    private async Task ConfirmDeleteCollectionAsync(LibraryGroup group)
+    {
+        var confirm = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            RequestedTheme = EffectiveDialogTheme,
+            Title = Strings["DeleteCollection"],
+            Content = new TextBlock
+            {
+                Text = _app.Localization.Format(
+                    "DeleteCollectionWarning",
+                    group.Title),
+                TextWrapping = TextWrapping.Wrap,
+            },
+            PrimaryButtonText = Strings["Delete"],
+            CloseButtonText = Strings["Cancel"],
+            DefaultButton = ContentDialogButton.Close,
+        };
+        ApplyDialogTheme(confirm);
+        if (await confirm.ShowAsync() != ContentDialogResult.Primary)
+            return;
+
+        try
+        {
+            var collections = await _app.NativeLibraryService.LoadGameCollectionsAsync(
+                0,
+                _loadCancellation.Token);
+            var tag = collections.Collections.FirstOrDefault(item =>
+                string.Equals(
+                    item.Name,
+                    group.Title,
+                    StringComparison.OrdinalIgnoreCase));
+            if (tag is null)
+                return;
+
+            await ViewModel.DeleteCollectionAsync(tag.TagId, _loadCancellation.Token);
+            var state = await _app.UserLibraryStateStore.LoadAsync(
+                _loadCancellation.Token);
+            state.CollectionArtworkPaths.TryGetValue(group.Title, out var artwork);
+            _userState = state with
+            {
+                LibraryFilterTags = state.LibraryFilterTags
+                    .Where(name => !string.Equals(
+                        name,
+                        group.Title,
+                        StringComparison.OrdinalIgnoreCase))
+                    .ToArray(),
+                CollapsedCollectionNames = state.CollapsedCollectionNames
+                    .Where(name => !string.Equals(
+                        name,
+                        group.Title,
+                        StringComparison.OrdinalIgnoreCase))
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase),
+                CollectionArtworkPaths = state.CollectionArtworkPaths
+                    .Where(item => !string.Equals(
+                        item.Key,
+                        group.Title,
+                        StringComparison.OrdinalIgnoreCase))
+                    .ToDictionary(
+                        item => item.Key,
+                        item => item.Value,
+                        StringComparer.OrdinalIgnoreCase),
+            };
+            await _app.UserLibraryStateStore.SaveAsync(
+                _userState,
+                _loadCancellation.Token);
+            if (!string.IsNullOrWhiteSpace(artwork))
+                DeleteManagedCollectionArtwork(artwork);
+            ViewModel.SetCollectionArtworkPaths(_userState.CollectionArtworkPaths);
+            if (_selectedCollectionGroup is not null
+                && string.Equals(
+                    _selectedCollectionGroup.Title,
+                    group.Title,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                _selectedCollectionGroup = null;
+                CollectionDetailGameGrid.ItemsSource = null;
+                CollectionDetailGameList.ItemsSource = null;
+            }
+            RebuildCollectionFilterButtons();
+            UpdateCollectionsViewControls();
+            UpdateCollapseAllCollectionsState();
+            SyncSelection();
+        }
+        catch (Exception exception)
+        {
+            await ShowErrorAsync(Strings["CollectionsSaveFailed"], exception.Message);
+        }
+    }
+
     private async void CollectionDetailAddModsButton_Click(
         object sender,
         RoutedEventArgs args)
     {
         if (_selectedCollectionGroup is null)
             return;
+        await ShowAddModsToCollectionDialogAsync(_selectedCollectionGroup);
+    }
 
-        var collectionName = _selectedCollectionGroup.Title;
-        var existingIds = _selectedCollectionGroup.Items
+    private async Task ShowAddModsToCollectionDialogAsync(LibraryGroup group)
+    {
+        var collectionName = group.Title;
+        var existingIds = group.Items
             .Select(item => item.GameFileId)
             .ToHashSet();
         var selectedIds = new HashSet<int>();
@@ -2127,7 +2294,7 @@ public sealed partial class MainPage : Page
                  {
                      ArtworkColumnItem, TitleColumnItem, AuthorColumnItem, ReleaseDateColumnItem,
                      MapsColumnItem, RatingColumnItem, DownloadedColumnItem, SourcePortColumnItem,
-                     PlaytimeColumnItem, FinishedColumnItem,
+                     PlaytimeColumnItem, FinishedColumnItem, FavoritesColumnItem,
                  })
         {
             item.IsChecked = item.Tag is string column
@@ -2144,6 +2311,7 @@ public sealed partial class MainPage : Page
                      CollectionMapsColumnItem, CollectionRatingColumnItem,
                      CollectionDownloadedColumnItem, CollectionSourcePortColumnItem,
                      CollectionPlaytimeColumnItem, CollectionFinishedColumnItem,
+                     CollectionFavoritesColumnItem,
                  })
         {
             item.IsChecked = item.Tag is string column
@@ -2211,6 +2379,7 @@ public sealed partial class MainPage : Page
                 7 => "SourcePort",
                 8 => "Playtime",
                 9 => "Finished",
+                10 => "Favorites",
                 _ => null,
             };
             if (key is not null)
@@ -2448,6 +2617,53 @@ public sealed partial class MainPage : Page
     private async void ManageCollectionsButton_Click(object sender, RoutedEventArgs args) =>
         await ShowManageCollectionsDialogAsync();
 
+    private async void ReadMoreButton_Click(object sender, RoutedEventArgs args)
+    {
+        if (ViewModel.SelectedGame.IsPlaceholder)
+            return;
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            RequestedTheme = EffectiveDialogTheme,
+            Title = ViewModel.SelectedGame.Title,
+            Content = new ScrollViewer
+            {
+                MaxWidth = 680,
+                MaxHeight = 560,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                Content = new TextBlock
+                {
+                    Text = ViewModel.SelectedGame.Description,
+                    TextWrapping = TextWrapping.Wrap,
+                    LineHeight = 22,
+                },
+            },
+            CloseButtonText = Strings["Close"],
+            DefaultButton = ContentDialogButton.Close,
+        };
+        ApplyDialogTheme(dialog);
+        await dialog.ShowAsync();
+    }
+
+    private async void FavoriteCheckBox_Click(object sender, RoutedEventArgs args)
+    {
+        if (sender is not CheckBox checkBox
+            || checkBox.Tag is not int gameFileId)
+        {
+            return;
+        }
+
+        var item = ViewModel.CatalogItems.FirstOrDefault(
+            candidate => candidate.GameFileId == gameFileId);
+        if (item is null || item.IsFavorite == (checkBox.IsChecked == true))
+            return;
+        ViewModel.SelectedGame = item;
+        await ViewModel.ToggleSelectedFavoriteAsync(_loadCancellation.Token);
+        _userState = await _app.UserLibraryStateStore.LoadAsync(
+            _loadCancellation.Token);
+        SyncSelection();
+    }
+
     private async void NewCollectionButton_Click(
         object sender,
         RoutedEventArgs args) =>
@@ -2588,212 +2804,86 @@ public sealed partial class MainPage : Page
         try
         {
             var data = await ViewModel.LoadSelectedCollectionsAsync(_loadCancellation.Token);
-            var content = new StackPanel { Width = 440, Spacing = 8 };
-            var boxes = new List<(
-                NativeTag Tag,
-                CheckBox Membership,
-                CheckBox LibraryFilter)>();
-            NativeTag? deleteRequested = null;
-            ContentDialog? dialog = null;
-            var enabledFilters = _userState.LibraryFilterTags.ToHashSet(
-                StringComparer.OrdinalIgnoreCase);
-            foreach (var tag in data.Collections)
+            var filter = new TextBox
             {
-                var membership = new CheckBox
+                PlaceholderText = Strings["FilterCollections"],
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
+            AutomationProperties.SetName(filter, Strings["FilterCollections"]);
+            var entries = new StackPanel { Spacing = 2 };
+            var selected = data.SelectedTagIds.ToHashSet();
+
+            void RebuildEntries()
+            {
+                entries.Children.Clear();
+                var query = filter.Text.Trim();
+                foreach (var tag in data.Collections
+                             .Where(tag => query.Length == 0
+                                 || tag.Name.Contains(
+                                     query,
+                                     StringComparison.CurrentCultureIgnoreCase))
+                             .OrderBy(
+                                 tag => tag.Name,
+                                 StringComparer.CurrentCultureIgnoreCase))
                 {
-                    Content = tag.Name,
-                    IsChecked = data.SelectedTagIds.Contains(tag.TagId),
-                };
-                ApplyGreenCheckBox(membership);
-                var libraryFilter = new CheckBox
+                    var membership = new CheckBox
+                    {
+                        Content = tag.Name,
+                        IsChecked = selected.Contains(tag.TagId),
+                        Tag = tag.TagId,
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                    };
+                    ApplyGreenCheckBox(membership);
+                    membership.Checked += (_, _) => selected.Add(tag.TagId);
+                    membership.Unchecked += (_, _) => selected.Remove(tag.TagId);
+                    entries.Children.Add(membership);
+                }
+                if (entries.Children.Count == 0)
                 {
-                    Content = Strings["ShowAsLibraryFilter"],
-                    IsChecked = enabledFilters.Contains(tag.Name),
-                    VerticalAlignment = VerticalAlignment.Center,
-                };
-                ApplyGreenCheckBox(libraryFilter);
-                var row = new Grid { ColumnSpacing = 12 };
-                row.ColumnDefinitions.Add(new ColumnDefinition());
-                row.ColumnDefinitions.Add(new ColumnDefinition
-                {
-                    Width = GridLength.Auto,
-                });
-                row.ColumnDefinitions.Add(new ColumnDefinition
-                {
-                    Width = GridLength.Auto,
-                });
-                var deleteButton = new Button
-                {
-                    Width = 38,
-                    Height = 38,
-                    Padding = new Thickness(0),
-                    Content = new FontIcon { Glyph = "\uE74D" },
-                };
-                AutomationProperties.SetName(
-                    deleteButton,
-                    _app.Localization.Format("DeleteCollectionNamed", tag.Name));
-                ToolTipService.SetToolTip(deleteButton, Strings["DeleteCollection"]);
-                deleteButton.Click += (_, _) =>
-                {
-                    deleteRequested = tag;
-                    dialog?.Hide();
-                };
-                Grid.SetColumn(libraryFilter, 1);
-                Grid.SetColumn(deleteButton, 2);
-                row.Children.Add(membership);
-                row.Children.Add(libraryFilter);
-                row.Children.Add(deleteButton);
-                boxes.Add((tag, membership, libraryFilter));
-                content.Children.Add(row);
+                    entries.Children.Add(new TextBlock
+                    {
+                        Text = Strings["NoMatchingCollections"],
+                        Margin = new Thickness(4, 10, 4, 10),
+                    });
+                }
             }
 
-            var newCollectionEditor = CreateNewCollectionEditor();
-            newCollectionEditor.Content.Margin = new Thickness(0, 10, 0, 0);
-            content.Children.Add(newCollectionEditor.Content);
-            dialog = new ContentDialog
+            filter.TextChanged += (_, _) => RebuildEntries();
+            RebuildEntries();
+            var content = new StackPanel
+            {
+                Width = 440,
+                Spacing = 12,
+                Children =
+                {
+                    filter,
+                    new ScrollViewer
+                    {
+                        MaxHeight = 460,
+                        VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                        Content = entries,
+                    },
+                },
+            };
+            var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,
                 RequestedTheme = EffectiveDialogTheme,
                 Title = Strings["ManageCollections"],
-                Content = new ScrollViewer
-                {
-                    MaxHeight = 460,
-                    Content = content,
-                },
+                Content = content,
                 PrimaryButtonText = Strings["Save"],
                 CloseButtonText = Strings["Cancel"],
                 DefaultButton = ContentDialogButton.Primary,
             };
             ApplyDialogTheme(dialog);
-            var dialogResult = await dialog.ShowAsync();
-            if (deleteRequested is not null)
-            {
-                var confirm = new ContentDialog
-                {
-                    XamlRoot = XamlRoot,
-                    Title = Strings["DeleteCollection"],
-                    Content = new TextBlock
-                    {
-                        Text = _app.Localization.Format(
-                            "DeleteCollectionWarning",
-                            deleteRequested.Name),
-                        TextWrapping = TextWrapping.Wrap,
-                    },
-                    PrimaryButtonText = Strings["Delete"],
-                    CloseButtonText = Strings["Cancel"],
-                    DefaultButton = ContentDialogButton.Close,
-                };
-                ApplyDialogTheme(confirm);
-                if (await confirm.ShowAsync() == ContentDialogResult.Primary)
-                {
-                    await ViewModel.DeleteCollectionAsync(
-                        deleteRequested.TagId,
-                        _loadCancellation.Token);
-                    var deleteState = await _app.UserLibraryStateStore.LoadAsync(
-                        _loadCancellation.Token);
-                    deleteState.CollectionArtworkPaths.TryGetValue(
-                        deleteRequested.Name,
-                        out var deletedArtwork);
-                    _userState = deleteState with
-                    {
-                        LibraryFilterTags = deleteState.LibraryFilterTags
-                            .Where(name => !string.Equals(
-                                name,
-                                deleteRequested.Name,
-                                StringComparison.OrdinalIgnoreCase))
-                            .ToArray(),
-                        CollapsedCollectionNames =
-                            deleteState.CollapsedCollectionNames
-                                .Where(name => !string.Equals(
-                                    name,
-                                    deleteRequested.Name,
-                                    StringComparison.OrdinalIgnoreCase))
-                                .ToHashSet(StringComparer.OrdinalIgnoreCase),
-                        CollectionArtworkPaths =
-                            deleteState.CollectionArtworkPaths
-                                .Where(item => !string.Equals(
-                                    item.Key,
-                                    deleteRequested.Name,
-                                    StringComparison.OrdinalIgnoreCase))
-                                .ToDictionary(
-                                    item => item.Key,
-                                    item => item.Value,
-                                    StringComparer.OrdinalIgnoreCase),
-                    };
-                    await _app.UserLibraryStateStore.SaveAsync(
-                        _userState,
-                        _loadCancellation.Token);
-                    if (!string.IsNullOrWhiteSpace(deletedArtwork))
-                        DeleteManagedCollectionArtwork(deletedArtwork);
-                    ViewModel.SetCollectionArtworkPaths(
-                        _userState.CollectionArtworkPaths);
-                    if (_selectedCollectionGroup is not null
-                        && string.Equals(
-                            _selectedCollectionGroup.Title,
-                            deleteRequested.Name,
-                            StringComparison.OrdinalIgnoreCase))
-                    {
-                        _selectedCollectionGroup = null;
-                        CollectionDetailGameGrid.ItemsSource = null;
-                        CollectionDetailGameList.ItemsSource = null;
-                        UpdateCollectionsViewControls();
-                    }
-                    RebuildCollectionFilterButtons();
-                    UpdateCollapseAllCollectionsState();
-                    SyncSelection();
-                    await ShowManageCollectionsDialogAsync();
-                }
-                return;
-            }
-            if (dialogResult != ContentDialogResult.Primary)
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary)
                 return;
 
-            var selected = boxes
-                .Where(item => item.Membership.IsChecked == true)
-                .Select(item => item.Tag.TagId)
-                .ToHashSet();
             await ViewModel.SaveSelectedCollectionsAsync(
                 selected,
-                newCollectionEditor.Name.Text,
+                string.Empty,
                 _loadCancellation.Token);
-            var filterTags = boxes
-                .Where(item => item.LibraryFilter.IsChecked == true)
-                .Select(item => item.Tag.Name)
-                .ToList();
-            if (newCollectionEditor.ShowAsFilter.IsChecked == true
-                && !string.IsNullOrWhiteSpace(newCollectionEditor.Name.Text))
-            {
-                filterTags.Add(DatabaseTextSanitizer.SingleLine(
-                    newCollectionEditor.Name.Text));
-            }
-            var collectionState = await _app.UserLibraryStateStore.LoadAsync(
-                _loadCancellation.Token);
-            _userState = collectionState with
-            {
-                LibraryFilterTags = filterTags
-                    .Where(tag => tag.Length > 0)
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .OrderBy(
-                        tag => tag,
-                        StringComparer.CurrentCultureIgnoreCase)
-                    .ToArray(),
-            };
-            await _app.UserLibraryStateStore.SaveAsync(
-                _userState,
-                _loadCancellation.Token);
-            ViewModel.SetCollectionFilter(null);
-            AllFilterButton.IsChecked = true;
-            RebuildCollectionFilterButtons();
-            var newCollectionName = DatabaseTextSanitizer.SingleLine(
-                newCollectionEditor.Name.Text);
-            if (newCollectionName.Length > 0
-                && !string.IsNullOrWhiteSpace(
-                    newCollectionEditor.ArtworkPath))
-            {
-                await SaveCollectionArtworkAsync(
-                    newCollectionName,
-                    newCollectionEditor.ArtworkPath);
-            }
+            RefreshSelectedCollectionGroup();
             SyncSelection();
         }
         catch (Exception exception)
@@ -5581,6 +5671,8 @@ public sealed partial class MainPage : Page
             Maximum = 100,
             Value = 0,
             MinWidth = 440,
+            Foreground = (Brush)Application.Current.Resources[
+                "DoomControlAccentBrush"],
         };
         var percentage = new TextBlock
         {

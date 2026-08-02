@@ -83,33 +83,39 @@
                     </Border>
                 </StackPanel>
 
-                <Button
-                    HorizontalAlignment="Stretch"
-                    AutomationProperties.Name="{Binding ViewModel.FavoriteButtonText, ElementName=DetailsRoot}"
-                    Click="FavoriteButton_Click"
-                    IsEnabled="{Binding ViewModel.CanLaunch, ElementName=DetailsRoot}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon
-                            FontSize="14"
-                            Foreground="{StaticResource DoomAccentBrush}"
-                            Glyph="{Binding ViewModel.FavoriteGlyph, ElementName=DetailsRoot}" />
-                        <TextBlock Text="{Binding ViewModel.FavoriteButtonText, ElementName=DetailsRoot}" />
-                    </StackPanel>
-                </Button>
-
-                <Button
-                    HorizontalAlignment="Stretch"
-                    AutomationProperties.Name="{Binding ViewModel.FinishedButtonText, ElementName=DetailsRoot}"
-                    Click="FinishedButton_Click"
-                    IsEnabled="{Binding ViewModel.CanLaunch, ElementName=DetailsRoot}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon
-                            FontSize="14"
-                            Foreground="{ThemeResource DoomSuccessBrush}"
-                            Glyph="{Binding ViewModel.FinishedGlyph, ElementName=DetailsRoot}" />
-                        <TextBlock Text="{Binding ViewModel.FinishedButtonText, ElementName=DetailsRoot}" />
-                    </StackPanel>
-                </Button>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        HorizontalAlignment="Stretch"
+                        AutomationProperties.Name="{Binding ViewModel.FavoriteButtonText, ElementName=DetailsRoot}"
+                        Click="FavoriteButton_Click"
+                        IsEnabled="{Binding ViewModel.CanLaunch, ElementName=DetailsRoot}">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <FontIcon
+                                FontSize="14"
+                                Foreground="{StaticResource DoomAccentBrush}"
+                                Glyph="{Binding ViewModel.FavoriteGlyph, ElementName=DetailsRoot}" />
+                            <TextBlock Text="{Binding ViewModel.FavoriteButtonText, ElementName=DetailsRoot}" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Grid.Column="1"
+                        HorizontalAlignment="Stretch"
+                        AutomationProperties.Name="{Binding ViewModel.FinishedButtonText, ElementName=DetailsRoot}"
+                        Click="FinishedButton_Click"
+                        IsEnabled="{Binding ViewModel.CanLaunch, ElementName=DetailsRoot}">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <FontIcon
+                                FontSize="14"
+                                Foreground="{ThemeResource DoomSuccessBrush}"
+                                Glyph="{Binding ViewModel.FinishedGlyph, ElementName=DetailsRoot}" />
+                            <TextBlock Text="{Binding ViewModel.FinishedButtonText, ElementName=DetailsRoot}" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
 
                 <Button
                     HorizontalAlignment="Stretch"
@@ -146,11 +152,22 @@
                     </StackPanel>
                 </Button>
 
-                <TextBlock
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    LineHeight="21"
-                    Text="{Binding ViewModel.SelectedGame.Description, ElementName=DetailsRoot}"
-                    TextWrapping="Wrap" />
+                <StackPanel Spacing="6">
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        LineHeight="21"
+                        Text="{Binding ViewModel.SelectedGame.DescriptionPreview, ElementName=DetailsRoot}"
+                        TextWrapping="Wrap" />
+                    <Button
+                        Padding="0,4"
+                        HorizontalAlignment="Left"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Click="ReadMoreButton_Click"
+                        Content="{Binding ReadMore}"
+                        Foreground="{ThemeResource DoomControlAccentBrush}"
+                        Visibility="{Binding ViewModel.SelectedGame.ReadMoreVisibility, ElementName=DetailsRoot}" />
+                </StackPanel>
 
                 <StackPanel Spacing="4">
                     <TextBlock Style="{StaticResource MetaTextStyle}" Text="{Binding Tags}" />

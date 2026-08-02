@@ -40,6 +40,7 @@ public sealed record UserLibraryState(
         "SourcePort",
         "Playtime",
         "Finished",
+        "Favorites",
     ];
 
     public static UserLibraryState Empty { get; } = new(

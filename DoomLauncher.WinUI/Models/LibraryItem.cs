@@ -49,6 +49,7 @@ public sealed class LibraryItem : INotifyPropertyChanged
         Rating = entry.Rating;
         Downloaded = entry.Downloaded;
         Description = entry.Description;
+        DescriptionPreview = CreateDescriptionPreview(entry.Description);
         SourcePort = entry.SourcePort;
         Iwad = entry.Iwad;
         Playtime = entry.Playtime;
@@ -89,6 +90,7 @@ public sealed class LibraryItem : INotifyPropertyChanged
         Year = "—";
         Meta = "No entries yet";
         Description = "Import a game or mod, or migrate an existing DoomLauncher library.";
+        DescriptionPreview = Description;
         SourcePort = "—";
         Iwad = "—";
         Playtime = "—";
@@ -108,6 +110,10 @@ public sealed class LibraryItem : INotifyPropertyChanged
     public string Downloaded { get; } = "—";
     public string Meta { get; }
     public string Description { get; }
+    public string DescriptionPreview { get; } = string.Empty;
+    public bool HasLongDescription => DescriptionPreview.Length < Description.Length;
+    public Visibility ReadMoreVisibility =>
+        HasLongDescription ? Visibility.Visible : Visibility.Collapsed;
     public string SourcePort { get; }
     public string Iwad { get; }
     public string Playtime { get; }
@@ -203,6 +209,20 @@ public sealed class LibraryItem : INotifyPropertyChanged
         OnPropertyChanged(nameof(CurrentImage));
         OnPropertyChanged(nameof(CurrentImageStretch));
         OnPropertyChanged(nameof(ImageCounter));
+    }
+
+    private static string CreateDescriptionPreview(string description)
+    {
+        const int maximumLength = 620;
+        var value = description.Trim();
+        if (value.Length <= maximumLength)
+            return value;
+        var cut = value.LastIndexOfAny(
+            [' ', '\r', '\n', '\t'],
+            maximumLength);
+        if (cut < maximumLength / 2)
+            cut = maximumLength;
+        return value[..cut].TrimEnd() + "…";
     }
 
     private static BitmapImage GetArtwork(

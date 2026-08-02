@@ -239,6 +239,7 @@ public static class ThemeManager
             WithAlpha(palette.ControlAccent, 51);
         resources["DoomControlAccentMediumColor"] =
             WithAlpha(palette.ControlAccent, 68);
+        resources["DoomControlAccentColor"] = palette.ControlAccent;
         resources["DoomSuccessColor"] = palette.Success;
 
         var selectionHover = Scale(palette.ControlAccent, 0.84);

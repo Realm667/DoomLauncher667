@@ -59,6 +59,7 @@
             <SolidColorBrush x:Key="DoomWarningBrush" Color="#FFE35D44" />
             <Color x:Key="DoomControlAccentLowColor">#3328A1A0</Color>
             <Color x:Key="DoomControlAccentMediumColor">#4428A1A0</Color>
+            <Color x:Key="DoomControlAccentColor">#FF28A1A0</Color>
             <Color x:Key="DoomSuccessColor">#FF6CCB5F</Color>
             <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="#FF28A1A0" />
             <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="#FF208887" />

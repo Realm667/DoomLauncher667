@@ -63,13 +63,9 @@ internal static class ArchiveTextMetadataReader
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 await using var stream = entry.OpenEntryStream();
-                using var reader = new StreamReader(
-                    stream,
-                    Encoding.UTF8,
-                    detectEncodingFromByteOrderMarks: true,
-                    bufferSize: 4096,
-                    leaveOpen: false);
-                var text = await reader.ReadToEndAsync(cancellationToken);
+                using var memory = new MemoryStream((int)entry.Size);
+                await stream.CopyToAsync(memory, cancellationToken);
+                var text = DecodeText(memory.GetBuffer().AsSpan(0, (int)memory.Length));
                 var metadata = Parse(text);
                 if (metadata.Quality > 0)
                     candidates.Add(metadata);
@@ -119,6 +115,31 @@ internal static class ArchiveTextMetadataReader
             ParseDate(dateText),
             DatabaseTextSanitizer.SingleLine(game),
             DatabaseTextSanitizer.SingleLine(sourcePort));
+    }
+
+    internal static string DecodeText(ReadOnlySpan<byte> bytes)
+    {
+        if (bytes.StartsWith(new byte[] { 0xEF, 0xBB, 0xBF }))
+            return Encoding.UTF8.GetString(bytes[3..]);
+        if (bytes.StartsWith(new byte[] { 0xFF, 0xFE }))
+            return Encoding.Unicode.GetString(bytes[2..]);
+        if (bytes.StartsWith(new byte[] { 0xFE, 0xFF }))
+            return Encoding.BigEndianUnicode.GetString(bytes[2..]);
+
+        try
+        {
+            return new UTF8Encoding(
+                encoderShouldEmitUTF8Identifier: false,
+                throwOnInvalidBytes: true).GetString(bytes);
+        }
+        catch (DecoderFallbackException)
+        {
+            // Most classic /idgames TXT files predate Unicode and use the
+            // Windows ANSI code page. Falling back instead of accepting UTF-8
+            // replacement characters preserves names such as Jägermörder.
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            return Encoding.GetEncoding(1252).GetString(bytes);
+        }
     }
 
     private static bool IsMetadataText(string? key)

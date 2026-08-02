@@ -3,6 +3,38 @@ using DoomLauncher.WinUI.Services;
 using Microsoft.Data.Sqlite;
 
 if (args.Length == 1
+    && args[0].Equals(
+        "--verify-archive-text-encoding",
+        StringComparison.OrdinalIgnoreCase))
+{
+    byte[] legacyText =
+    [
+        0x54, 0x69, 0x74, 0x6C, 0x65, 0x20, 0x3A, 0x20,
+        0x4A, 0xE4, 0x67, 0x65, 0x72, 0x6D, 0xF6, 0x72,
+        0x64, 0x65, 0x72, 0x20, 0x30, 0x32,
+    ];
+    var decoded = ArchiveTextMetadataReader.DecodeText(legacyText);
+    var metadata = ArchiveTextMetadataReader.Parse(decoded);
+    if (!metadata.Title.Equals(
+            "Jägermörder 02",
+            StringComparison.Ordinal))
+    {
+        throw new InvalidOperationException(
+            $"Legacy text decoding failed: {metadata.Title}");
+    }
+    var unicode = ArchiveTextMetadataReader.DecodeText(
+        System.Text.Encoding.UTF8.GetBytes("Title : Jägermörder 02"));
+    if (!ArchiveTextMetadataReader.Parse(unicode).Title.Equals(
+            "Jägermörder 02",
+            StringComparison.Ordinal))
+    {
+        throw new InvalidOperationException("UTF-8 text decoding failed.");
+    }
+    Console.WriteLine("ARCHIVE_TEXT_ENCODING PASS");
+    return 0;
+}
+
+if (args.Length == 1
     && args[0].Equals("--verify-first-setup", StringComparison.OrdinalIgnoreCase))
 {
     await VerifyFirstSetupAsync();
@@ -186,7 +218,7 @@ void Check(bool condition, string message)
 try
 {
     Check(
-        AppVersion.Current == "0.8.9",
+        AppVersion.Current == "0.8.10",
         "Die sichtbare Version stammt aus der zentralen Buildversion");
     VerifyTileImageDefaults();
     Check(
@@ -209,6 +241,17 @@ try
         && parsedArchiveMetadata.Game == "Doom II"
         && parsedArchiveMetadata.SourcePort == "GZDoom",
         "Archiv-Textmetadaten werden als Bibliotheksdaten erkannt");
+    byte[] legacyIdGamesText =
+    [
+        0x54, 0x69, 0x74, 0x6C, 0x65, 0x20, 0x3A, 0x20,
+        0x4A, 0xE4, 0x67, 0x65, 0x72, 0x6D, 0xF6, 0x72,
+        0x64, 0x65, 0x72, 0x20, 0x30, 0x32,
+    ];
+    Check(
+        ArchiveTextMetadataReader.Parse(
+            ArchiveTextMetadataReader.DecodeText(legacyIdGamesText)).Title
+        == "Jägermörder 02",
+        "Windows-1252-Metadaten aus klassischen /idgames-Archiven bleiben lesbar");
     var inferredDefinitions = LaunchDefinitionMatcher.Infer(
         parsedArchiveMetadata,
         new LauncherDefinitionsData(

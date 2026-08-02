@@ -41,7 +41,10 @@ public sealed class UiLocalization
                 ["Author"] = "Author", ["ReleaseDate"] = "Release date", ["Maps"] = "Maps",
                 ["Rating"] = "Rating", ["Downloaded"] = "Downloaded", ["SourcePort"] = "Source port",
                 ["Finished"] = "Finished", ["PreviousImage"] = "Previous image",
-                ["NextImage"] = "Next image", ["ManageCollections"] = "Manage collections",
+                ["NextImage"] = "Next image", ["ManageCollections"] = "Add to collection",
+                ["FilterCollections"] = "Filter collections by title",
+                ["NoMatchingCollections"] = "No matching collections were found.",
+                ["ReadMore"] = "Read more",
                 ["CollapseAllCollections"] = "Collapse all",
                 ["ExpandAllCollections"] = "Open all",
                 ["DeleteCollection"] = "Delete collection",
@@ -346,7 +349,7 @@ public sealed class UiLocalization
                 ["IdGamesMetadataUpdatedArtwork"] = "{0} was updated from /idgames and TITLEPIC artwork was imported.",
                 ["MigrationFirstStart"] = "Welcome to Doom Launcher 667",
                 ["MigrationFirstStartPrompt"] = "Do you already have a classic DoomLauncher installation? Doom Launcher 667 can import its database and managed files now.",
-                ["Skip"] = "Not now",
+                ["Skip"] = "Skip",
                 ["MigrationWarning"] = "Select an existing DoomLauncher installation to import its database and referenced library files. The source installation is not modified.",
                 ["MigrationPortableNotice"] = "The database, IWADs, source ports, mods, title artwork, screenshots and other managed media are copied into the portable Doom Launcher 667 Data folders. The original installation remains untouched and is no longer required afterwards.",
                 ["ChooseOriginalDoomLauncherFolder"] = "Choose original Doom Launcher folder",
@@ -544,7 +547,8 @@ public sealed class UiLocalization
                 ["IdGamesLoadFailed"]="/idgames konnte nicht geladen werden: {0}",
                 ["ImportScreenshots"]="Beim Spielen erstellte Screenshots importieren",
                 ["Finished"]="Abgeschlossen",["PreviousImage"]="Vorheriges Bild",["NextImage"]="Nächstes Bild",
-                ["ManageCollections"]="Sammlungen verwalten",["NewCollection"]="Neue Sammlung",
+                ["ManageCollections"]="Zu Sammlung hinzufügen",["NewCollection"]="Neue Sammlung",
+                ["FilterCollections"]="Sammlungen nach Titel filtern",["NoMatchingCollections"]="Keine passenden Sammlungen gefunden.",["ReadMore"]="Weiterlesen",
                 ["NewCollectionPlaceholder"]="Name der Sammlung",["CollectionsSaveFailed"]="Sammlungen konnten nicht gespeichert werden",
                 ["FinishedSaveFailed"]="Abgeschlossen-Status konnte nicht gespeichert werden",
                 ["Home"]="Start",["Library"]="Bibliothek",["MyLibrary"]="Meine Bibliothek",["Discover"]="Entdecken",
@@ -677,7 +681,7 @@ public sealed class UiLocalization
                 ["IdGamesMetadataUpdatedArtwork"]="{0} wurde über /idgames aktualisiert und das TITLEPIC-Artwork wurde importiert.",
                 ["MigrationFirstStart"]="Willkommen bei Doom Launcher 667",
                 ["MigrationFirstStartPrompt"]="Ist der klassische DoomLauncher bereits installiert? Doom Launcher 667 kann dessen Datenbank und verwaltete Dateien jetzt übernehmen.",
-                ["Skip"]="Nicht jetzt",
+                ["Skip"]="Überspringen",
                 ["MigrationWarning"]="Wähle eine bestehende DoomLauncher-Installation aus, um deren Datenbank und referenzierte Bibliotheksdateien zu importieren. Die Quellinstallation wird nicht verändert.",
                 ["MigrationTitle"]="Bestehende Installation migrieren",
                 ["Migrate"]="Migrieren",["MigrationComplete"]="Migration abgeschlossen",
@@ -789,7 +793,8 @@ public sealed class UiLocalization
                 ["TotalPlayedHours"]="Heures jouées",["Download"]="Télécharger",
                 ["ImportScreenshots"]="Importer les captures créées pendant le jeu",
                 ["Finished"]="Terminé",["PreviousImage"]="Image précédente",["NextImage"]="Image suivante",
-                ["ManageCollections"]="Gérer les collections",["NewCollection"]="Nouvelle collection",
+                ["ManageCollections"]="Ajouter à une collection",["NewCollection"]="Nouvelle collection",
+                ["FilterCollections"]="Filtrer les collections par titre",["NoMatchingCollections"]="Aucune collection correspondante.",["ReadMore"]="Lire la suite",
                 ["NewCollectionPlaceholder"]="Nom de la collection",["CollectionsSaveFailed"]="Impossible d’enregistrer les collections",
                 ["FinishedSaveFailed"]="Impossible d’enregistrer l’état terminé",
                 ["Home"]="Accueil",["Library"]="Bibliothèque",["MyLibrary"]="Ma bibliothèque",["Discover"]="Découvrir",
@@ -994,7 +999,7 @@ public sealed class UiLocalization
                 ["IdGamesMetadataUpdatedArtwork"]="{0} a été mis à jour via /idgames et l’illustration TITLEPIC a été importée.",
                 ["MigrationFirstStart"]="Bienvenue dans Doom Launcher 667",
                 ["MigrationFirstStartPrompt"]="Disposez-vous déjà d’une installation classique de DoomLauncher ? Doom Launcher 667 peut maintenant importer sa base de données et ses fichiers gérés.",
-                ["Skip"]="Pas maintenant",
+                ["Skip"]="Ignorer",
                 ["MigrationWarning"]="Sélectionnez une installation DoomLauncher existante pour importer sa base de données et les fichiers référencés. L’installation source ne sera pas modifiée.",
                 ["MigrationTitle"]="Migrer une installation existante",
                 ["Migrate"]="Migrer",["MigrationComplete"]="Migration terminée",
@@ -1106,7 +1111,8 @@ public sealed class UiLocalization
                 ["TotalPlayedHours"]="Horas jugadas",["Download"]="Descargar",
                 ["ImportScreenshots"]="Importar capturas creadas durante el juego",
                 ["Finished"]="Completado",["PreviousImage"]="Imagen anterior",["NextImage"]="Imagen siguiente",
-                ["ManageCollections"]="Gestionar colecciones",["NewCollection"]="Nueva colección",
+                ["ManageCollections"]="Añadir a una colección",["NewCollection"]="Nueva colección",
+                ["FilterCollections"]="Filtrar colecciones por título",["NoMatchingCollections"]="No se encontraron colecciones coincidentes.",["ReadMore"]="Leer más",
                 ["NewCollectionPlaceholder"]="Nombre de la colección",["CollectionsSaveFailed"]="No se pudieron guardar las colecciones",
                 ["FinishedSaveFailed"]="No se pudo guardar el estado completado",
                 ["Home"]="Inicio",["Library"]="Biblioteca",["MyLibrary"]="Mi biblioteca",["Discover"]="Descubrir",
@@ -1311,7 +1317,7 @@ public sealed class UiLocalization
                 ["IdGamesMetadataUpdatedArtwork"]="{0} se actualizó mediante /idgames y se importó la portada TITLEPIC.",
                 ["MigrationFirstStart"]="Bienvenido a Doom Launcher 667",
                 ["MigrationFirstStartPrompt"]="¿Ya tienes una instalación clásica de DoomLauncher? Doom Launcher 667 puede importar ahora su base de datos y sus archivos administrados.",
-                ["Skip"]="Ahora no",
+                ["Skip"]="Omitir",
                 ["MigrationWarning"]="Selecciona una instalación existente de DoomLauncher para importar su base de datos y los archivos referenciados. La instalación de origen no se modificará.",
                 ["MigrationTitle"]="Migrar instalación existente",
                 ["Migrate"]="Migrar",["MigrationComplete"]="Migración completada",
@@ -1382,6 +1388,8 @@ public sealed class UiText(UiLocalization localization)
     public string ChooseCollectionArtwork => this[nameof(ChooseCollectionArtwork)];
     public string RemoveCollectionArtwork => this[nameof(RemoveCollectionArtwork)];
     public string AddModsToCollection => this[nameof(AddModsToCollection)];
+    public string DeleteCollection => this[nameof(DeleteCollection)];
+    public string ReadMore => this[nameof(ReadMore)];
     public string RefreshingMetadataArtwork => this[nameof(RefreshingMetadataArtwork)];
     public string RefreshingMetadataArtworkHint => this[nameof(RefreshingMetadataArtworkHint)];
     public string Author => this[nameof(Author)]; public string ReleaseDate => this[nameof(ReleaseDate)];

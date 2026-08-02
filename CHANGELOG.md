@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+## 0.8.10 - 2026-08-03
+
+- Added encoding detection for archive metadata. UTF-8 and Unicode BOMs are
+  respected, while legacy Windows-1252 `/idgames` text files now retain names
+  such as `Jägermörder` instead of producing replacement characters.
+- Reworked mod details with compact side-by-side favorite/finished actions, a
+  concise description preview and a localized **Read more** dialog.
+- Renamed **Manage collections** to **Add to collection** and simplified the
+  assignment dialog to a searchable collection list without unrelated filter
+  or deletion controls.
+- Added complete collection context menus to tile and accordion views, plus a
+  directly accessible **Delete collection** action inside collection details.
+- Added a configurable **Favorites** column after **Finished** in library and
+  collection list layouts.
+- Made shared mod context menus resilient to refreshed collection data so a
+  right-click can no longer open an empty flyout until restart.
+- Explicitly bound metadata-refresh and achievement progress bars to each
+  theme's control accent instead of the Windows default accent.
+- Strengthened Discover downloads: fresh `/idgames` details, exact map data,
+  launch inference and available TITLEPIC artwork are applied before the new
+  library entry is shown.
+- Renamed the file-conflict action from **Not now** to the unambiguous
+  **Skip**, with matching translations.
+
 ## 0.8.9 - 2026-08-02
 
 - Changed **Refresh metadata & artwork** into a blocking, progress-aware
