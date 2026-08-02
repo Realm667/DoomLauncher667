@@ -397,11 +397,23 @@ public interface IFirstSetupService
     Task<SetupScanResult> ScanIwadsAsync(
         CancellationToken cancellationToken = default);
 
+    Task<SetupScanResult> ScanIwadsAsync(
+        CancellationToken cancellationToken,
+        IProgress<double>? progress);
+
     Task<SetupScanResult> ScanSourcePortsAsync(
         CancellationToken cancellationToken = default);
 
+    Task<SetupScanResult> ScanSourcePortsAsync(
+        CancellationToken cancellationToken,
+        IProgress<double>? progress);
+
     Task<SetupScanResult> ScanModsAsync(
         CancellationToken cancellationToken = default);
+
+    Task<SetupScanResult> ScanModsAsync(
+        CancellationToken cancellationToken,
+        IProgress<double>? progress);
 }
 
 public sealed record ManagedLayoutMigrationResult(

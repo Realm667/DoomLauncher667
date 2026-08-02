@@ -397,7 +397,13 @@ public sealed class FirstSetupService(
 
     public async Task<SetupScanResult> ScanIwadsAsync(
         CancellationToken cancellationToken = default)
+        => await ScanIwadsAsync(cancellationToken, null);
+
+    public async Task<SetupScanResult> ScanIwadsAsync(
+        CancellationToken cancellationToken,
+        IProgress<double>? progress)
     {
+        progress?.Report(0);
         await EnsureManagedLayoutAsync(cancellationToken);
         var (databasePath, root) = await GetLayoutAsync(cancellationToken);
         var directory = Path.Combine(root, "GameWads");
@@ -407,8 +413,10 @@ public sealed class FirstSetupService(
         var pending = new List<(string Archive, string Reference, IwadArchiveCandidate Candidate)>();
         var successfullyReadArchives = new HashSet<string>(
             StringComparer.OrdinalIgnoreCase);
-        foreach (var archive in EnumerateFiles(directory, ArchiveExtensions))
+        var archives = EnumerateFiles(directory, ArchiveExtensions).ToArray();
+        for (var archiveIndex = 0; archiveIndex < archives.Length; archiveIndex++)
         {
+            var archive = archives[archiveIndex];
             try
             {
                 var candidates = await IwadVersionDetector.ScanArchiveAsync(
@@ -431,16 +439,23 @@ public sealed class FirstSetupService(
             {
                 warnings.Add($"{Path.GetFileName(archive)}: {exception.Message}");
             }
+            progress?.Report(
+                archives.Length == 0
+                    ? 35
+                    : 5 + ((archiveIndex + 1) * 30d / archives.Length));
         }
 
         var imported = 0;
         var updated = 0;
         var skipped = 0;
-        foreach (var item in pending
-                     .OrderBy(item => item.Candidate.InternalFileName.Equals(
-                         "HEXDD.WAD",
-                         StringComparison.OrdinalIgnoreCase)))
+        var orderedPending = pending
+            .OrderBy(item => item.Candidate.InternalFileName.Equals(
+                "HEXDD.WAD",
+                StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        for (var pendingIndex = 0; pendingIndex < orderedPending.Length; pendingIndex++)
         {
+            var item = orderedPending[pendingIndex];
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
@@ -488,6 +503,9 @@ public sealed class FirstSetupService(
                     && (sameLocation || existingLocationStillPresent))
                 {
                     skipped++;
+                    progress?.Report(
+                        35 + ((pendingIndex + 1) * 45d /
+                            Math.Max(1, orderedPending.Length)));
                     continue;
                 }
 
@@ -515,6 +533,10 @@ public sealed class FirstSetupService(
                     $"{Path.GetFileName(item.Archive)} / " +
                     $"{item.Candidate.InternalFileName}: {exception.Message}");
             }
+            progress?.Report(
+                orderedPending.Length == 0
+                    ? 80
+                    : 35 + ((pendingIndex + 1) * 45d / orderedPending.Length));
         }
 
         var reconciliation = await ReconcileLegacyIwadGameFilesAsync(
@@ -524,10 +546,14 @@ public sealed class FirstSetupService(
             cancellationToken);
         updated += reconciliation.Reconciled;
         removedItems.AddRange(reconciliation.RemovedItems);
+        progress?.Report(86);
 
         definitions = await libraryService.LoadLauncherDefinitionsAsync(cancellationToken);
-        foreach (var definition in definitions.Iwads)
+        for (var definitionIndex = 0;
+             definitionIndex < definitions.Iwads.Count;
+             definitionIndex++)
         {
+            var definition = definitions.Iwads[definitionIndex];
             cancellationToken.ThrowIfCancellationRequested();
             var archivePath = ResolveManagedReference(
                 databasePath,
@@ -562,7 +588,11 @@ public sealed class FirstSetupService(
             {
                 warnings.Add($"{definition.Name}: {exception.Message}");
             }
+            progress?.Report(
+                86 + ((definitionIndex + 1) * 13d /
+                    Math.Max(1, definitions.Iwads.Count)));
         }
+        progress?.Report(100);
         return new SetupScanResult(
             pending.Count,
             imported,
@@ -575,7 +605,13 @@ public sealed class FirstSetupService(
 
     public async Task<SetupScanResult> ScanSourcePortsAsync(
         CancellationToken cancellationToken = default)
+        => await ScanSourcePortsAsync(cancellationToken, null);
+
+    public async Task<SetupScanResult> ScanSourcePortsAsync(
+        CancellationToken cancellationToken,
+        IProgress<double>? progress)
     {
+        progress?.Report(0);
         await EnsureManagedLayoutAsync(cancellationToken);
         var (databasePath, root) = await GetLayoutAsync(cancellationToken);
         var directory = Path.Combine(root, "Sourceports");
@@ -586,11 +622,14 @@ public sealed class FirstSetupService(
         var updated = 0;
         var skipped = 0;
         var discovered = 0;
-        foreach (var portDirectory in Directory.EnumerateDirectories(
-                     directory,
-                     "*",
-                     SearchOption.TopDirectoryOnly))
+        var portDirectories = Directory.EnumerateDirectories(
+                directory,
+                "*",
+                SearchOption.TopDirectoryOnly)
+            .ToArray();
+        for (var portIndex = 0; portIndex < portDirectories.Length; portIndex++)
         {
+            var portDirectory = portDirectories[portIndex];
             cancellationToken.ThrowIfCancellationRequested();
             var executable = FindSourcePortExecutable(portDirectory);
             if (executable is null)
@@ -598,6 +637,9 @@ public sealed class FirstSetupService(
                 skipped++;
                 warnings.Add(
                     $"{Path.GetFileName(portDirectory)}: keine passende EXE gefunden.");
+                progress?.Report(
+                    5 + ((portIndex + 1) * 77d /
+                        Math.Max(1, portDirectories.Length)));
                 continue;
             }
             discovered++;
@@ -647,11 +689,18 @@ public sealed class FirstSetupService(
             {
                 warnings.Add($"{Path.GetFileName(portDirectory)}: {exception.Message}");
             }
+            progress?.Report(
+                portDirectories.Length == 0
+                    ? 82
+                    : 5 + ((portIndex + 1) * 77d / portDirectories.Length));
         }
 
         definitions = await libraryService.LoadLauncherDefinitionsAsync(cancellationToken);
-        foreach (var definition in definitions.SourcePorts)
+        for (var definitionIndex = 0;
+             definitionIndex < definitions.SourcePorts.Count;
+             definitionIndex++)
         {
+            var definition = definitions.SourcePorts[definitionIndex];
             cancellationToken.ThrowIfCancellationRequested();
             var portDirectory = ResolveManagedReference(
                 databasePath,
@@ -677,7 +726,11 @@ public sealed class FirstSetupService(
             {
                 warnings.Add($"{definition.Name}: {exception.Message}");
             }
+            progress?.Report(
+                82 + ((definitionIndex + 1) * 17d /
+                    Math.Max(1, definitions.SourcePorts.Count)));
         }
+        progress?.Report(100);
         return new SetupScanResult(
             discovered,
             imported,
@@ -690,7 +743,13 @@ public sealed class FirstSetupService(
 
     public async Task<SetupScanResult> ScanModsAsync(
         CancellationToken cancellationToken = default)
+        => await ScanModsAsync(cancellationToken, null);
+
+    public async Task<SetupScanResult> ScanModsAsync(
+        CancellationToken cancellationToken,
+        IProgress<double>? progress)
     {
+        progress?.Report(0);
         await EnsureManagedLayoutAsync(cancellationToken);
         var (_, root) = await GetLayoutAsync(cancellationToken);
         var directory = Path.Combine(root, "Mods");
@@ -698,8 +757,9 @@ public sealed class FirstSetupService(
         var imported = 0;
         var skipped = 0;
         var warnings = new List<string>();
-        foreach (var file in files)
+        for (var fileIndex = 0; fileIndex < files.Length; fileIndex++)
         {
+            var file = files[fileIndex];
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
@@ -712,6 +772,8 @@ public sealed class FirstSetupService(
                     warnings.Add(
                         $"{Path.GetFileName(file)}: IWAD erkannt; bitte in das " +
                         "IWAD-Verzeichnis verschieben.");
+                    progress?.Report(
+                        (fileIndex + 1) * 100d / Math.Max(1, files.Length));
                     continue;
                 }
                 var result = await libraryService.ImportAsync(file, cancellationToken);
@@ -740,7 +802,12 @@ public sealed class FirstSetupService(
             {
                 warnings.Add($"{Path.GetFileName(file)}: {exception.Message}");
             }
+            progress?.Report(
+                files.Length == 0
+                    ? 100
+                    : ((fileIndex + 1) * 100d / files.Length));
         }
+        progress?.Report(100);
         return new SetupScanResult(
             files.Length,
             imported,

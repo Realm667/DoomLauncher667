@@ -971,12 +971,27 @@ static async Task ExerciseMigrationAsync(
     var sourceRoot = Path.Combine(scratchRoot, "legacy-source");
     var sourceFiles = Path.Combine(sourceRoot, "GameFiles");
     Directory.CreateDirectory(sourceFiles);
+    var sourceIwads = Path.Combine(sourceRoot, "IWADs");
+    var sourcePorts = Path.Combine(sourceRoot, "Sourceports", "LegacyPort");
+    var sourceTiles = Path.Combine(sourceRoot, "TileImages");
+    var sourceScreenshots = Path.Combine(sourceFiles, "Screenshots");
+    var sourceTitlePics = Path.Combine(sourceFiles, "TitlePics");
+    Directory.CreateDirectory(sourceIwads);
+    Directory.CreateDirectory(sourcePorts);
+    Directory.CreateDirectory(sourceTiles);
+    Directory.CreateDirectory(sourceScreenshots);
+    Directory.CreateDirectory(sourceTitlePics);
     var sourceCopy = Path.Combine(sourceRoot, "DoomLauncher.sqlite");
     SqliteConnection.ClearAllPools();
     File.Copy(sourceDatabase, sourceCopy);
     await File.WriteAllTextAsync(
         Path.Combine(sourceFiles, "migration-marker.wad"),
         "migration");
+    await File.WriteAllTextAsync(Path.Combine(sourceIwads, "legacy-iwad.zip"), "iwad");
+    await File.WriteAllTextAsync(Path.Combine(sourcePorts, "legacy-port.exe"), "port");
+    await File.WriteAllTextAsync(Path.Combine(sourceTiles, "doom.png"), "tile");
+    await File.WriteAllTextAsync(Path.Combine(sourceScreenshots, "legacy-shot.png"), "shot");
+    await File.WriteAllTextAsync(Path.Combine(sourceTitlePics, "legacy-title.png"), "title");
     await using (var connection = new SqliteConnection(
                      new SqliteConnectionStringBuilder
                      {
@@ -987,6 +1002,15 @@ static async Task ExerciseMigrationAsync(
     {
         await connection.OpenAsync();
         await UpsertConfigurationAsync(connection, "GameFileDirectory", "GameFiles");
+        await UpsertConfigurationAsync(connection, "GameWadDirectory", "IWADs");
+        await UpsertConfigurationAsync(
+            connection,
+            "ScreenshotDirectory",
+            @"GameFiles\Screenshots");
+        await using var legacySchema = connection.CreateCommand();
+        legacySchema.CommandText =
+            "ALTER TABLE Files DROP COLUMN DerivedFromFileID;";
+        await legacySchema.ExecuteNonQueryAsync();
     }
 
     var migrationRoot = Path.Combine(scratchRoot, "migration-target");
@@ -996,13 +1020,42 @@ static async Task ExerciseMigrationAsync(
         migrationDatabase);
     var migration = new LegacyInstallationMigrationService(
         new DoomLauncherDatabaseLocator());
-    var result = await migration.MigrateAsync(sourceRoot);
+    var migrationProgress = new RecordedProgress();
+    var result = await migration.MigrateAsync(
+        sourceRoot,
+        migrationProgress);
     if (!File.Exists(result.DatabasePath)
         || !File.Exists(Path.Combine(
             migrationRoot,
             "Data",
             "Mods",
-            "migration-marker.wad")))
+            "migration-marker.wad"))
+        || !File.Exists(Path.Combine(
+            migrationRoot,
+            "Data",
+            "GameWads",
+            "legacy-iwad.zip"))
+        || !File.Exists(Path.Combine(
+            migrationRoot,
+            "Data",
+            "Sourceports",
+            "LegacyPort",
+            "legacy-port.exe"))
+        || !File.Exists(Path.Combine(
+            migrationRoot,
+            "Data",
+            "TileImages",
+            "doom.png"))
+        || !File.Exists(Path.Combine(
+            migrationRoot,
+            "Data",
+            "Screenshots",
+            "legacy-shot.png"))
+        || !File.Exists(Path.Combine(
+            migrationRoot,
+            "Data",
+            "TitlePics",
+            "legacy-title.png")))
     {
         throw new InvalidOperationException(
             "Die Migration hat Datenbank oder referenzierte Dateien nicht übernommen.");
@@ -1010,6 +1063,24 @@ static async Task ExerciseMigrationAsync(
     await using var migrated = await OpenReadOnlyAsync(result.DatabasePath);
     if (await ScalarStringAsync(migrated, "PRAGMA integrity_check;") != "ok")
         throw new InvalidOperationException("Die migrierte Datenbank ist nicht integer.");
+    if (await ScalarIntAsync(
+            migrated,
+            "SELECT COUNT(*) FROM pragma_table_info('Files') " +
+            "WHERE name='DerivedFromFileID';") != 1)
+    {
+        throw new InvalidOperationException(
+            "Die Migration hat die fehlende DerivedFromFileID-Spalte nicht repariert.");
+    }
+    if (migrationProgress.Values.Count == 0
+        || migrationProgress.Values[^1] != 100
+        || migrationProgress.Values.Zip(
+                migrationProgress.Values.Skip(1),
+                (left, right) => right >= left)
+            .Any(monotonic => !monotonic))
+    {
+        throw new InvalidOperationException(
+            "Der Migrationsfortschritt ist unvollständig oder nicht monoton.");
+    }
 }
 
 static async Task UpsertConfigurationAsync(
@@ -1249,12 +1320,20 @@ static async Task VerifyFirstSetupAsync()
             _ = archive.CreateEntry("README.txt");
         }
 
-        var iwads = await setup.ScanIwadsAsync();
-        var sourcePorts = await setup.ScanSourcePortsAsync();
-        var mods = await setup.ScanModsAsync();
+        var iwadProgress = new RecordedProgress();
+        var sourcePortProgress = new RecordedProgress();
+        var modProgress = new RecordedProgress();
+        var iwads = await setup.ScanIwadsAsync(default, iwadProgress);
+        var sourcePorts = await setup.ScanSourcePortsAsync(
+            default,
+            sourcePortProgress);
+        var mods = await setup.ScanModsAsync(default, modProgress);
         if (iwads.Imported != 1
             || sourcePorts.Imported != 1
-            || mods.Imported != 1)
+            || mods.Imported != 1
+            || iwadProgress.Values.LastOrDefault() != 100
+            || sourcePortProgress.Values.LastOrDefault() != 100
+            || modProgress.Values.LastOrDefault() != 100)
         {
             throw new InvalidOperationException(
                 $"First setup scan failed: IWAD={iwads.Imported}, " +
@@ -1464,4 +1543,11 @@ static async Task VerifyFirstSetupAsync()
         if (Directory.Exists(root))
             Directory.Delete(root, recursive: true);
     }
+}
+
+sealed class RecordedProgress : IProgress<double>
+{
+    public List<double> Values { get; } = [];
+
+    public void Report(double value) => Values.Add(value);
 }

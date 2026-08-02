@@ -19,8 +19,8 @@ public sealed class UiLocalization
                 ["FirstSetupModsTitle"]="Step 3: Scan mods",["FirstSetupModsHelp"]="All supported files below Mods are added to the library. Map names and available TITLEPIC artwork are imported automatically.",
                 ["FirstSetupScanReady"]="Fill this folder before starting the scan.",["ScanAndContinue"]="Scan and continue",["SkipStep"]="Skip step",
                 ["FirstSetupScanResult"]="Found: {0} · New: {1} · Updated: {2} · Removed: {3} · Skipped: {4}",["FirstSetupWarnings"]="{0} warnings occurred.",
-                ["FirstSetupComplete"]="First setup completed",["FirstSetupCompleteMessage"]="IWADs, source ports and mods have been processed. You can repeat the definition scans later in Launcher definitions.",
-                ["ScanComplete"]="Scan complete",["ScanFailed"]="Scan failed",["Scanning"]="Scanning",["ScanningDirectories"]="The portable folders are being inspected.",
+                ["FirstSetupComplete"]="First setup completed",["FirstSetupCompleteMessage"]="IWADs, source ports and mods have been processed. You can repeat the scans later in Setup.",
+                ["ScanComplete"]="Scan complete",["ScanFailed"]="Scan failed",["Scanning"]="Scanning",["ScanningDirectories"]="The portable folders are being inspected.",["FirstSetupProgressStatus"]="The current setup folder is being scanned and imported.",["Next"]="Next",["Finish"]="Finish",
                 ["RemovedDefinitions"]="Removed missing definitions: {0}",["DeleteSourcePort"]="Delete source port",["DeleteIwad"]="Delete IWAD",["DeleteDefinitionWarning"]="Delete the definition “{0}”? Dependent mods are reset to automatic selection.",["DeleteSourcePortFiles"]="Also permanently delete the complete source-port folder",["DeleteIwadFiles"]="Also permanently delete the IWAD archive and its managed media",["DeleteMod"]="Delete mod",["DeleteModWarning"]="Delete “{0}” from the library? Metadata and collection assignments are removed.",["DeleteModFiles"]="Also permanently delete the mod archive and its managed artwork, screenshots and demos",["DefinitionDeleted"]="Deleted",["DefinitionDeletedMessage"]="“{0}” was removed.",["ModDeletedMessage"]="“{0}” was removed from the library.",["DeleteFailed"]="Delete failed",
                 ["ScanSourcePortDirectory"]="Scan source-port folder",["ScanIwadDirectory"]="Scan IWAD folder",
                 ["Home"] = "Home", ["Library"] = "Library", ["MyLibrary"] = "My Library",
@@ -336,6 +336,10 @@ public sealed class UiLocalization
                 ["MigrationFirstStartPrompt"] = "Do you already have a classic DoomLauncher installation? Doom Launcher 667 can import its database and managed files now.",
                 ["Skip"] = "Not now",
                 ["MigrationWarning"] = "Select an existing DoomLauncher installation to import its database and referenced library files. The source installation is not modified.",
+                ["MigrationPortableNotice"] = "The database, IWADs, source ports, mods, title artwork, screenshots and other managed media are copied into the portable Doom Launcher 667 Data folders. The original installation remains untouched and is no longer required afterwards.",
+                ["ChooseOriginalDoomLauncherFolder"] = "Choose original Doom Launcher folder",
+                ["MigrationProgressTitle"] = "Migrating DoomLauncher installation",
+                ["MigrationProgressStatus"] = "Copying managed files, updating portable paths and preparing the database.",
                 ["MigrationTitle"] = "Migrate existing installation",
                 ["Migrate"] = "Migrate", ["MigrationComplete"] = "Migration complete",
                 ["FilesCopied"] = "files copied", ["MigrationFailed"] = "Migration failed",
@@ -352,6 +356,11 @@ public sealed class UiLocalization
             },
             ["de-DE"] = new Dictionary<string, string>
             {
+                ["FirstSetupProgressStatus"]="Der aktuelle Einrichtungsordner wird gescannt und importiert.",["Next"]="Weiter",["Finish"]="Fertigstellen",
+                ["MigrationPortableNotice"]="Datenbank, IWADs, Sourceports, Mods, Titelbilder, Screenshots und weitere verwaltete Medien werden in die portablen Data-Ordner von Doom Launcher 667 kopiert. Die Originalinstallation bleibt unverändert und wird danach nicht mehr benötigt.",
+                ["ChooseOriginalDoomLauncherFolder"]="Original-Doom-Launcher-Ordner auswählen",
+                ["MigrationProgressTitle"]="DoomLauncher-Installation wird migriert",
+                ["MigrationProgressStatus"]="Verwaltete Dateien werden kopiert, portable Pfade aktualisiert und die Datenbank vorbereitet.",
                 ["FirstSetupTitle"]="Erste Einrichtung",["FirstSetupIntro"]="Du kannst die portablen Data-Ordner vorab befüllen. Der Assistent scannt sie anschließend in drei klaren Schritten und legt vollständige Launcher-Definitionen und Bibliothekseinträge an.",
                 ["FirstSetupIwadsPlacement"]="Hier IWAD-Archive (ZIP, 7Z oder RAR) oder einzelne WAD-Dateien ablegen. Bekannte Versionen werden mit dem Hash-Katalog abgeglichen.",
                 ["FirstSetupSourcePortsPlacement"]="Für jeden Sourceport einen eigenen Unterordner anlegen und dessen vollständige portable Installation dort ablegen.",
@@ -658,6 +667,11 @@ public sealed class UiLocalization
             },
             ["fr-FR"] = new Dictionary<string, string>
             {
+                ["FirstSetupProgressStatus"]="Le dossier de configuration actuel est analysé et importé.",["Next"]="Suivant",["Finish"]="Terminer",
+                ["MigrationPortableNotice"]="La base de données, les IWAD, les ports source, les mods, les illustrations de titre, les captures et les autres médias gérés sont copiés dans les dossiers Data portables. L’installation d’origine reste intacte et ne sera plus requise.",
+                ["ChooseOriginalDoomLauncherFolder"]="Choisir le dossier Doom Launcher d’origine",
+                ["MigrationProgressTitle"]="Migration de l’installation DoomLauncher",
+                ["MigrationProgressStatus"]="Copie des fichiers gérés, mise à jour des chemins portables et préparation de la base de données.",
                 ["FirstSetupTitle"]="Configuration initiale",["FirstSetupIntro"]="Vous pouvez remplir à l’avance les dossiers portables Data. L’assistant les analyse ensuite en trois étapes et crée les définitions et entrées de bibliothèque.",
                 ["FirstSetupIwadsPlacement"]="Placez ici les archives IWAD (ZIP, 7Z ou RAR) ou les fichiers WAD individuels. Les versions connues sont comparées au catalogue de hachages.",
                 ["FirstSetupSourcePortsPlacement"]="Créez un sous-dossier par port source et copiez-y son installation portable complète.",
@@ -958,6 +972,11 @@ public sealed class UiLocalization
             },
             ["es-ES"] = new Dictionary<string, string>
             {
+                ["FirstSetupProgressStatus"]="Se está escaneando e importando la carpeta de configuración actual.",["Next"]="Siguiente",["Finish"]="Finalizar",
+                ["MigrationPortableNotice"]="La base de datos, los IWAD, los puertos fuente, los mods, las portadas, las capturas y otros medios administrados se copian en las carpetas Data portátiles. La instalación original permanece intacta y ya no será necesaria.",
+                ["ChooseOriginalDoomLauncherFolder"]="Elegir carpeta original de Doom Launcher",
+                ["MigrationProgressTitle"]="Migrando la instalación de DoomLauncher",
+                ["MigrationProgressStatus"]="Copiando archivos administrados, actualizando rutas portátiles y preparando la base de datos.",
                 ["FirstSetupTitle"]="Configuración inicial",["FirstSetupIntro"]="Puedes rellenar previamente las carpetas portátiles Data. El asistente las escanea en tres pasos y crea las definiciones y entradas de biblioteca.",
                 ["FirstSetupIwadsPlacement"]="Coloca aquí archivos IWAD en ZIP, 7Z o RAR, o archivos WAD individuales. Las versiones conocidas se comparan con el catálogo hash.",
                 ["FirstSetupSourcePortsPlacement"]="Crea una subcarpeta por cada puerto fuente y copia allí su instalación portátil completa.",

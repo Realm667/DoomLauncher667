@@ -38,6 +38,7 @@ public sealed class LegacyInstallationMigrationService(
         IProgress<double>? progress = null,
         CancellationToken cancellationToken = default)
     {
+        progress?.Report(0);
         legacyDirectory = Path.GetFullPath(legacyDirectory);
         var sourceDatabase = Path.Combine(
             legacyDirectory,
@@ -54,6 +55,7 @@ public sealed class LegacyInstallationMigrationService(
             destinationDatabase,
             destinationRoot,
             cancellationToken);
+        progress?.Report(3);
 
         var sourceGameDirectory = await ReadConfiguredPathAsync(
             sourceDatabase,
@@ -62,52 +64,49 @@ public sealed class LegacyInstallationMigrationService(
             "GameFiles",
             cancellationToken);
         var destinationGameDirectory = Path.Combine(destinationRoot, "Data");
-        var sourceTileDirectory = Path.Combine(legacyDirectory, "TileImages");
-        var destinationTileDirectory = Path.Combine(
-            destinationRoot,
-            "Data",
-            "TileImages");
-        var files = EnumerateMigrationFiles(sourceGameDirectory, sourceTileDirectory).ToArray();
+        var sources = await BuildMigrationSourcesAsync(
+            sourceDatabase,
+            legacyDirectory,
+            sourceGameDirectory,
+            destinationGameDirectory,
+            cancellationToken);
+        var files = EnumerateMigrationFiles(sources).ToArray();
         var copied = 0;
         foreach (var file in files)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var relative = file.StartsWith(
-                sourceGameDirectory,
-                StringComparison.OrdinalIgnoreCase)
-                ? Path.GetRelativePath(sourceGameDirectory, file)
-                : Path.GetRelativePath(sourceTileDirectory, file);
-            var targetRoot = file.StartsWith(
-                sourceGameDirectory,
-                StringComparison.OrdinalIgnoreCase)
-                ? destinationGameDirectory
-                : destinationTileDirectory;
-            if (targetRoot.Equals(
-                    destinationGameDirectory,
-                    StringComparison.OrdinalIgnoreCase)
-                && !IsManagedSubdirectory(relative))
-            {
-                relative = Path.Combine("Mods", relative);
-            }
-            var target = Path.Combine(targetRoot, relative);
-            if (Path.GetFullPath(file).Equals(
-                    Path.GetFullPath(target),
+            if (Path.GetFullPath(file.Source).Equals(
+                    Path.GetFullPath(file.Target),
                     StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
-            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-            File.Copy(file, target, overwrite: true);
+            Directory.CreateDirectory(Path.GetDirectoryName(file.Target)!);
+            File.Copy(file.Source, file.Target, overwrite: true);
             copied++;
-            progress?.Report(files.Length == 0 ? 70 : copied * 70d / files.Length);
+            progress?.Report(
+                files.Length == 0
+                    ? 70
+                    : 3 + (copied * 67d / files.Length));
         }
+        progress?.Report(70);
 
         var temporaryDatabase = destinationDatabase + $".migrating-{Guid.NewGuid():N}";
         try
         {
             File.Copy(sourceDatabase, temporaryDatabase, overwrite: false);
-            await RewritePathsAsync(temporaryDatabase, cancellationToken);
+            progress?.Report(76);
+            await RewritePathsAsync(
+                temporaryDatabase,
+                legacyDirectory,
+                destinationGameDirectory,
+                sources,
+                cancellationToken);
+            progress?.Report(84);
+            await UpgradeSchemaAsync(temporaryDatabase, cancellationToken);
+            progress?.Report(94);
             await VerifyIntegrityAsync(temporaryDatabase, cancellationToken);
+            progress?.Report(98);
             SqliteConnection.ClearAllPools();
             File.Move(temporaryDatabase, destinationDatabase, overwrite: true);
             Environment.SetEnvironmentVariable(
@@ -122,6 +121,13 @@ public sealed class LegacyInstallationMigrationService(
                 File.Delete(temporaryDatabase);
         }
     }
+
+    private sealed record MigrationSource(
+        string SourceDirectory,
+        string TargetDirectory,
+        bool RouteLooseFilesToMods = false);
+
+    private sealed record MigrationFile(string Source, string Target);
 
     private static bool IsManagedSubdirectory(string relativePath)
     {
@@ -141,28 +147,149 @@ public sealed class LegacyInstallationMigrationService(
             || first?.Equals("Temp", StringComparison.OrdinalIgnoreCase) == true;
     }
 
-    private static IEnumerable<string> EnumerateMigrationFiles(
+    private static async Task<IReadOnlyList<MigrationSource>> BuildMigrationSourcesAsync(
+        string database,
+        string legacyRoot,
         string gameDirectory,
-        string tileDirectory)
+        string destinationData,
+        CancellationToken cancellationToken)
     {
-        if (Directory.Exists(gameDirectory))
+        var sources = new List<MigrationSource>();
+        AddMigrationSource(sources, gameDirectory, destinationData, true);
+
+        var configured = new[]
         {
-            foreach (var file in Directory.EnumerateFiles(
-                         gameDirectory,
-                         "*",
-                         SearchOption.AllDirectories))
-            {
-                yield return file;
-            }
+            ("GameWadDirectory", "IWADs", "GameWads"),
+            ("ScreenshotDirectory", Path.Combine("GameFiles", "Screenshots"), "Screenshots"),
+            ("SaveGameDirectory", Path.Combine("GameFiles", "SaveGames"), "SaveGames"),
+            ("DemoDirectory", Path.Combine("GameFiles", "Demos"), "Demos"),
+            ("TempDirectory", Path.Combine("GameFiles", "Temp"), "Temp"),
+        };
+        foreach (var (name, fallback, target) in configured)
+        {
+            var source = await ReadConfiguredPathAsync(
+                database,
+                legacyRoot,
+                name,
+                fallback,
+                cancellationToken);
+            AddMigrationSource(
+                sources,
+                source,
+                Path.Combine(destinationData, target));
         }
-        if (Directory.Exists(tileDirectory))
+
+        foreach (var (sourceName, targetName) in new[]
+                 {
+                     ("IWADs", "GameWads"),
+                     ("GameWads", "GameWads"),
+                     ("Sourceports", "Sourceports"),
+                     ("SourcePorts", "Sourceports"),
+                     ("TileImages", "TileImages"),
+                     ("TitlePics", "TitlePics"),
+                     ("Screenshots", "Screenshots"),
+                     ("SaveGames", "SaveGames"),
+                     ("Demos", "Demos"),
+                 })
+        {
+            AddMigrationSource(
+                sources,
+                Path.Combine(legacyRoot, sourceName),
+                Path.Combine(destinationData, targetName));
+        }
+
+        foreach (var sourcePortDirectory in await ReadSourcePortDirectoriesAsync(
+                     database,
+                     legacyRoot,
+                     cancellationToken))
+        {
+            AddMigrationSource(
+                sources,
+                sourcePortDirectory,
+                Path.Combine(
+                    destinationData,
+                    "Sourceports",
+                    Path.GetFileName(sourcePortDirectory.TrimEnd(
+                        Path.DirectorySeparatorChar,
+                        Path.AltDirectorySeparatorChar))));
+        }
+        return sources;
+    }
+
+    private static async Task<IReadOnlyList<string>> ReadSourcePortDirectoriesAsync(
+        string database,
+        string legacyRoot,
+        CancellationToken cancellationToken)
+    {
+        var directories = new List<string>();
+        await using var connection = new SqliteConnection(
+            new SqliteConnectionStringBuilder
+            {
+                DataSource = database,
+                Mode = SqliteOpenMode.ReadOnly,
+                Pooling = false,
+            }.ToString());
+        await connection.OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText =
+            "SELECT DISTINCT Directory FROM SourcePorts " +
+            "WHERE Directory IS NOT NULL AND TRIM(Directory) <> '';";
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var value = Environment.ExpandEnvironmentVariables(reader.GetString(0));
+            var full = Path.GetFullPath(
+                Path.IsPathFullyQualified(value)
+                    ? value
+                    : Path.Combine(legacyRoot, value));
+            if (Directory.Exists(full)
+                && IsWithinDirectory(full, legacyRoot))
+                directories.Add(full);
+        }
+        return directories;
+    }
+
+    private static void AddMigrationSource(
+        ICollection<MigrationSource> sources,
+        string source,
+        string target,
+        bool routeLooseFilesToMods = false)
+    {
+        if (!Directory.Exists(source))
+            return;
+        source = Path.GetFullPath(source).TrimEnd(Path.DirectorySeparatorChar);
+        if (sources.Any(existing =>
+                IsWithinDirectory(source, existing.SourceDirectory)))
+        {
+            return;
+        }
+        sources.Add(new MigrationSource(
+            source,
+            Path.GetFullPath(target),
+            routeLooseFilesToMods));
+    }
+
+    private static IEnumerable<MigrationFile> EnumerateMigrationFiles(
+        IReadOnlyList<MigrationSource> sources)
+    {
+        var targets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var source in sources)
         {
             foreach (var file in Directory.EnumerateFiles(
-                         tileDirectory,
+                         source.SourceDirectory,
                          "*",
                          SearchOption.AllDirectories))
             {
-                yield return file;
+                var relative = Path.GetRelativePath(source.SourceDirectory, file);
+                if (source.RouteLooseFilesToMods
+                    && !IsManagedSubdirectory(relative))
+                {
+                    relative = Path.Combine("Mods", relative);
+                }
+                var target = Path.GetFullPath(
+                    Path.Combine(source.TargetDirectory, relative));
+                if (targets.Add(target))
+                    yield return new MigrationFile(file, target);
             }
         }
     }
@@ -206,7 +333,9 @@ public sealed class LegacyInstallationMigrationService(
             "SELECT Value FROM Configuration WHERE Name=$name LIMIT 1;";
         command.Parameters.AddWithValue("$name", name);
         var value = Convert.ToString(
-            await command.ExecuteScalarAsync(cancellationToken)) ?? fallback;
+            await command.ExecuteScalarAsync(cancellationToken));
+        if (string.IsNullOrWhiteSpace(value))
+            value = fallback;
         value = Environment.ExpandEnvironmentVariables(value);
         return Path.GetFullPath(
             Path.IsPathFullyQualified(value) ? value : Path.Combine(root, value));
@@ -214,6 +343,9 @@ public sealed class LegacyInstallationMigrationService(
 
     private static async Task RewritePathsAsync(
         string database,
+        string legacyRoot,
+        string destinationData,
+        IReadOnlyList<MigrationSource> sources,
         CancellationToken cancellationToken)
     {
         await using var connection = new SqliteConnection(
@@ -264,9 +396,123 @@ public sealed class LegacyInstallationMigrationService(
             SET FileName = 'Mods\' || FileName
             WHERE instr(replace(FileName, '/', '\'), '\') = 0
               AND GameFileID NOT IN (SELECT GameFileID FROM IWads);
+
+            UPDATE GameFiles
+            SET FileName = substr(FileName, length('GameFiles\') + 1)
+            WHERE replace(FileName, '/', '\') LIKE 'GameFiles\%';
+
+            UPDATE GameFiles
+            SET FileName = 'GameWads\' || substr(FileName, length('IWADs\') + 1)
+            WHERE replace(FileName, '/', '\') LIKE 'IWADs\%';
             """;
         await command.ExecuteNonQueryAsync(cancellationToken);
+
+        await RewriteSourcePortPathsAsync(
+            connection,
+            transaction,
+            legacyRoot,
+            destinationData,
+            sources,
+            cancellationToken);
         await transaction.CommitAsync(cancellationToken);
+    }
+
+    private static async Task RewriteSourcePortPathsAsync(
+        SqliteConnection connection,
+        SqliteTransaction transaction,
+        string legacyRoot,
+        string destinationData,
+        IReadOnlyList<MigrationSource> sources,
+        CancellationToken cancellationToken)
+    {
+        var rows = new List<(long Id, string Directory)>();
+        await using (var read = connection.CreateCommand())
+        {
+            read.Transaction = transaction;
+            read.CommandText = "SELECT SourcePortID, Directory FROM SourcePorts;";
+            await using var reader = await read.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                rows.Add((
+                    reader.GetInt64(0),
+                    reader.IsDBNull(1) ? string.Empty : reader.GetString(1)));
+            }
+        }
+
+        var destinationSourcePorts = Path.Combine(
+            destinationData,
+            "Sourceports");
+        var sourcePortSources = sources
+            .Where(source => IsWithinDirectory(
+                source.TargetDirectory,
+                destinationSourcePorts))
+            .ToArray();
+        foreach (var row in rows)
+        {
+            if (string.IsNullOrWhiteSpace(row.Directory)
+                || row.Directory.Replace('/', '\\').StartsWith(
+                    "Data\\Sourceports",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var expanded = Environment.ExpandEnvironmentVariables(row.Directory);
+            var full = Path.GetFullPath(
+                Path.IsPathFullyQualified(expanded)
+                    ? expanded
+                    : Path.Combine(legacyRoot, expanded));
+            var matchingSource = sourcePortSources.FirstOrDefault(source =>
+                IsWithinDirectory(full, source.SourceDirectory));
+            if (matchingSource is null)
+                continue;
+            var relative = Path.GetRelativePath(
+                matchingSource.SourceDirectory,
+                full);
+            var migratedDirectory = relative == "."
+                ? matchingSource.TargetDirectory
+                : Path.Combine(matchingSource.TargetDirectory, relative);
+            var portableRelative = Path.GetRelativePath(
+                destinationData,
+                migratedDirectory);
+            var portable = $"Data\\{portableRelative.TrimEnd('\\', '/')}\\";
+            await using var update = connection.CreateCommand();
+            update.Transaction = transaction;
+            update.CommandText =
+                "UPDATE SourcePorts SET Directory=$directory WHERE SourcePortID=$id;";
+            update.Parameters.AddWithValue("$directory", portable);
+            update.Parameters.AddWithValue("$id", row.Id);
+            await update.ExecuteNonQueryAsync(cancellationToken);
+        }
+    }
+
+    private static bool IsWithinDirectory(string path, string directory)
+    {
+        var normalizedPath = Path.GetFullPath(path)
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var normalizedDirectory = Path.GetFullPath(directory)
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        return normalizedPath.Equals(
+                   normalizedDirectory,
+                   StringComparison.OrdinalIgnoreCase)
+               || normalizedPath.StartsWith(
+                   normalizedDirectory + Path.DirectorySeparatorChar,
+                   StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static async Task UpgradeSchemaAsync(
+        string database,
+        CancellationToken cancellationToken)
+    {
+        await using var connection = new SqliteConnection(
+            new SqliteConnectionStringBuilder
+            {
+                DataSource = database,
+                Mode = SqliteOpenMode.ReadWrite,
+                Pooling = false,
+            }.ToString());
+        await connection.OpenAsync(cancellationToken);
+        await WinUiDatabaseSchema.EnsureAsync(connection, cancellationToken);
     }
 
     private static async Task VerifyIntegrityAsync(

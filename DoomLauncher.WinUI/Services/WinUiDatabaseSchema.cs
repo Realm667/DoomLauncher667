@@ -8,6 +8,8 @@ internal static class WinUiDatabaseSchema
         SqliteConnection connection,
         CancellationToken cancellationToken)
     {
+        await EnsureLegacyCompatibilityAsync(connection, cancellationToken);
+
         await using var command = connection.CreateCommand();
         command.CommandText =
             """
@@ -120,5 +122,123 @@ internal static class WinUiDatabaseSchema
             WHERE TRIM(Name) = 'Finished' COLLATE NOCASE;
             """;
         await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    private static async Task EnsureLegacyCompatibilityAsync(
+        SqliteConnection connection,
+        CancellationToken cancellationToken)
+    {
+        var fileColumns = await ReadColumnsAsync(
+            connection,
+            "Files",
+            cancellationToken);
+        if (fileColumns.Count > 0)
+        {
+            await AddColumnAsync(
+                connection,
+                fileColumns,
+                "Files",
+                "DerivedFromFileID",
+                "INTEGER NULL",
+                cancellationToken);
+            await AddColumnAsync(
+                connection,
+                fileColumns,
+                "Files",
+                "FileOrder",
+                "INTEGER NOT NULL DEFAULT 0",
+                cancellationToken);
+            await AddColumnAsync(
+                connection,
+                fileColumns,
+                "Files",
+                "IsMain",
+                "INTEGER NOT NULL DEFAULT 0",
+                cancellationToken);
+            await AddColumnAsync(
+                connection,
+                fileColumns,
+                "Files",
+                "OriginalFileName",
+                "TEXT NULL",
+                cancellationToken);
+            await AddColumnAsync(
+                connection,
+                fileColumns,
+                "Files",
+                "OriginalFilePath",
+                "TEXT NULL",
+                cancellationToken);
+
+            // DoomLauncher 3.7.9 rebuilt Files without DerivedFromFileID but left
+            // thumbnail relationships temporarily stored in SourcePortID.
+            if (fileColumns.Contains("SourcePortID"))
+            {
+                await using var repair = connection.CreateCommand();
+                repair.CommandText =
+                    """
+                    UPDATE Files
+                    SET DerivedFromFileID = SourcePortID,
+                        SourcePortID = NULL
+                    WHERE FileTypeID = 4
+                      AND DerivedFromFileID IS NULL
+                      AND SourcePortID IS NOT NULL;
+                    """;
+                await repair.ExecuteNonQueryAsync(cancellationToken);
+            }
+        }
+
+        var gameColumns = await ReadColumnsAsync(
+            connection,
+            "GameFiles",
+            cancellationToken);
+        if (gameColumns.Count > 0)
+        {
+            await AddColumnAsync(
+                connection,
+                gameColumns,
+                "GameFiles",
+                "MapCount",
+                "INTEGER NOT NULL DEFAULT 0",
+                cancellationToken);
+            await AddColumnAsync(
+                connection,
+                gameColumns,
+                "GameFiles",
+                "IsSyncNeeded",
+                "INTEGER NOT NULL DEFAULT 0",
+                cancellationToken);
+        }
+    }
+
+    private static async Task<HashSet<string>> ReadColumnsAsync(
+        SqliteConnection connection,
+        string table,
+        CancellationToken cancellationToken)
+    {
+        var columns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        await using var command = connection.CreateCommand();
+        command.CommandText = $"PRAGMA table_info([{table}]);";
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+            columns.Add(reader.GetString(1));
+        return columns;
+    }
+
+    private static async Task AddColumnAsync(
+        SqliteConnection connection,
+        ISet<string> columns,
+        string table,
+        string column,
+        string declaration,
+        CancellationToken cancellationToken)
+    {
+        if (columns.Contains(column))
+            return;
+        await using var command = connection.CreateCommand();
+        command.CommandText =
+            $"ALTER TABLE [{table}] ADD COLUMN [{column}] {declaration};";
+        await command.ExecuteNonQueryAsync(cancellationToken);
+        columns.Add(column);
     }
 }

@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 0.8.3 - 2026-08-02
+
+- Added live percentage progress dialogs for migration and all three first-
+  setup scans (IWADs, source ports and mods).
+- Replaced misleading completion actions with **Next**, **Finish** and
+  **Close**, and clarified the original Doom Launcher folder selection.
+- Expanded classic-launcher migration to copy IWADs, source ports, mods,
+  title artwork, screenshots and other managed media into the portable
+  `Data` layout while leaving the source installation untouched.
+- Added atomic compatibility upgrades for older DoomLauncher databases,
+  including recovery of the missing `Files.DerivedFromFileID` column that
+  previously caused the library to fail immediately after migration.
+- Added regression coverage for portable asset transfer, monotonic progress,
+  first-setup progress completion and legacy database schema repair.
+
 ## 0.8.2 - 2026-08-02
 
 - Fixed the portable reset launcher passing a trailing-backslash installation

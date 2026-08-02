@@ -2,7 +2,7 @@
 
 ## Architecture
 
-Version 0.8.1 is a self-contained WinUI 3 client. It uses the established
+Version 0.8.3 is a self-contained WinUI 3 client. It uses the established
 `DoomLauncher.sqlite` schema as its source of truth but does not require or
 start the classic .NET Framework executable.
 

@@ -3535,7 +3535,10 @@ public sealed partial class MainPage : Page
                 Title = Strings["MigrationFirstStart"],
                 Content = new TextBlock
                 {
-                    Text = Strings["MigrationFirstStartPrompt"],
+                    Text = Strings["MigrationFirstStartPrompt"]
+                        + Environment.NewLine
+                        + Environment.NewLine
+                        + Strings["MigrationPortableNotice"],
                     TextWrapping = TextWrapping.Wrap,
                     MaxWidth = 520,
                 },
@@ -3549,6 +3552,7 @@ public sealed partial class MainPage : Page
         }
 
         var picker = new Windows.Storage.Pickers.FolderPicker();
+        picker.CommitButtonText = Strings["ChooseOriginalDoomLauncherFolder"];
         picker.FileTypeFilter.Add("*");
         if (_app.MainWindow is null)
             return;
@@ -3568,7 +3572,10 @@ public sealed partial class MainPage : Page
                 Title = Strings["MigrationTitle"],
                 Content = new TextBlock
                 {
-                    Text = Strings["MigrationWarning"],
+                    Text = Strings["MigrationWarning"]
+                        + Environment.NewLine
+                        + Environment.NewLine
+                        + Strings["MigrationPortableNotice"],
                     TextWrapping = TextWrapping.Wrap,
                     MaxWidth = 520,
                 },
@@ -3583,14 +3590,19 @@ public sealed partial class MainPage : Page
 
         try
         {
-            var result = await _app.MigrationService.MigrateAsync(
-                folder.Path,
-                cancellationToken: _loadCancellation.Token);
-            await ShowErrorAsync(
-                Strings["MigrationComplete"],
-                $"{result.CopiedFiles} {Strings["FilesCopied"]}\n{result.DatabasePath}");
+            var result = await RunProgressDialogAsync(
+                Strings["MigrationProgressTitle"],
+                Strings["MigrationProgressStatus"],
+                progress => _app.MigrationService.MigrateAsync(
+                    folder.Path,
+                    progress,
+                    _loadCancellation.Token));
             await ViewModel.RefreshAsync(_loadCancellation.Token);
             SyncSelection();
+            await ShowActionMessageAsync(
+                Strings["MigrationComplete"],
+                $"{result.CopiedFiles} {Strings["FilesCopied"]}\n{result.DatabasePath}",
+                Strings["Close"]);
         }
         catch (Exception exception)
         {
@@ -3645,7 +3657,10 @@ public sealed partial class MainPage : Page
                 Strings["FirstSetupIwadsTitle"],
                 Strings["FirstSetupIwadsHelp"],
                 "Data\\GameWads",
-                _app.FirstSetupService.ScanIwadsAsync))
+                (cancellationToken, progress) =>
+                    _app.FirstSetupService.ScanIwadsAsync(
+                        cancellationToken,
+                        progress)))
         {
             return;
         }
@@ -3654,7 +3669,10 @@ public sealed partial class MainPage : Page
                 Strings["FirstSetupSourcePortsTitle"],
                 Strings["FirstSetupSourcePortsHelp"],
                 "Data\\Sourceports",
-                _app.FirstSetupService.ScanSourcePortsAsync))
+                (cancellationToken, progress) =>
+                    _app.FirstSetupService.ScanSourcePortsAsync(
+                        cancellationToken,
+                        progress)))
         {
             return;
         }
@@ -3663,15 +3681,19 @@ public sealed partial class MainPage : Page
                 Strings["FirstSetupModsTitle"],
                 Strings["FirstSetupModsHelp"],
                 "Data\\Mods",
-                _app.FirstSetupService.ScanModsAsync))
+                (cancellationToken, progress) =>
+                    _app.FirstSetupService.ScanModsAsync(
+                        cancellationToken,
+                        progress)))
         {
             return;
         }
 
         await _app.FirstSetupService.CompleteWizardAsync(_loadCancellation.Token);
-        await ShowErrorAsync(
+        await ShowActionMessageAsync(
             Strings["FirstSetupComplete"],
-            Strings["FirstSetupCompleteMessage"]);
+            Strings["FirstSetupCompleteMessage"],
+            Strings["Finish"]);
     }
 
     private async Task<bool> ShowFirstSetupStepAsync(
@@ -3679,7 +3701,7 @@ public sealed partial class MainPage : Page
         string title,
         string help,
         string directory,
-        Func<CancellationToken, Task<SetupScanResult>> scan)
+        Func<CancellationToken, IProgress<double>?, Task<SetupScanResult>> scan)
     {
         var content = new StackPanel
         {
@@ -3722,7 +3744,10 @@ public sealed partial class MainPage : Page
 
         try
         {
-            var scanResult = await scan(_loadCancellation.Token);
+            var scanResult = await RunProgressDialogAsync(
+                Strings["Scanning"],
+                Strings["FirstSetupProgressStatus"],
+                progress => scan(_loadCancellation.Token, progress));
             var details = _app.Localization.Format(
                 "FirstSetupScanResult",
                 scanResult.Discovered,
@@ -3750,7 +3775,10 @@ public sealed partial class MainPage : Page
                         Environment.NewLine,
                         scanResult.Warnings.Take(5).Select(warning => $"• {warning}"));
             }
-            await ShowErrorAsync(Strings["ScanComplete"], details);
+            await ShowActionMessageAsync(
+                Strings["ScanComplete"],
+                details,
+                Strings["Next"]);
             return true;
         }
         catch (Exception exception)
@@ -5341,6 +5369,97 @@ public sealed partial class MainPage : Page
         uint message,
         IntPtr wParam,
         IntPtr lParam);
+
+    private async Task<T> RunProgressDialogAsync<T>(
+        string title,
+        string status,
+        Func<IProgress<double>, Task<T>> operation)
+    {
+        var progressBar = new ProgressBar
+        {
+            Minimum = 0,
+            Maximum = 100,
+            Value = 0,
+            MinWidth = 440,
+        };
+        var percentage = new TextBlock
+        {
+            Text = "0%",
+            HorizontalAlignment = HorizontalAlignment.Right,
+        };
+        var content = new StackPanel
+        {
+            Width = 480,
+            Spacing = 12,
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = status,
+                    TextWrapping = TextWrapping.Wrap,
+                },
+                progressBar,
+                percentage,
+            },
+        };
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            RequestedTheme = EffectiveDialogTheme,
+            Title = title,
+            Content = content,
+        };
+        ApplyDialogTheme(dialog);
+        dialog.Resources["ContentDialogMinWidth"] = 540d;
+
+        var completion = new TaskCompletionSource<T>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        dialog.Opened += async (_, _) =>
+        {
+            var progress = new Progress<double>(value =>
+            {
+                var normalized = Math.Clamp(value, 0, 100);
+                progressBar.Value = normalized;
+                percentage.Text = $"{normalized:0}%";
+            });
+            try
+            {
+                completion.TrySetResult(await operation(progress));
+            }
+            catch (Exception exception)
+            {
+                completion.TrySetException(exception);
+            }
+            finally
+            {
+                dialog.Hide();
+            }
+        };
+        await dialog.ShowAsync();
+        return await completion.Task;
+    }
+
+    private async Task ShowActionMessageAsync(
+        string title,
+        string message,
+        string action)
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            RequestedTheme = EffectiveDialogTheme,
+            Title = title,
+            Content = new TextBlock
+            {
+                Text = message,
+                TextWrapping = TextWrapping.Wrap,
+            },
+            PrimaryButtonText = action,
+            DefaultButton = ContentDialogButton.Primary,
+        };
+        ApplyDialogTheme(dialog);
+        await dialog.ShowAsync();
+    }
 
     private async Task ShowErrorAsync(string title, string message)
     {
