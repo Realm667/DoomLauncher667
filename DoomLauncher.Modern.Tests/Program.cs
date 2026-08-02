@@ -158,8 +158,9 @@ void Check(bool condition, string message)
 try
 {
     Check(
-        AppVersion.Current == "0.8.7",
+        AppVersion.Current == "0.8.8",
         "Die sichtbare Version stammt aus der zentralen Buildversion");
+    VerifyTileImageDefaults();
     Check(
         DatabaseTextSanitizer.SingleLine("Alpha\t\t\tBeta") == "Alpha Beta",
         "Mehrere Tabulatoren werden zu einem Leerzeichen normalisiert");
@@ -1673,6 +1674,40 @@ static async Task VerifyFirstSetupAsync()
             DoomLauncherDatabaseLocator.DatabaseEnvironmentVariable,
             null);
         SqliteConnection.ClearAllPools();
+        if (Directory.Exists(root))
+            Directory.Delete(root, recursive: true);
+    }
+}
+
+void VerifyTileImageDefaults()
+{
+    var root = Path.Combine(
+        Path.GetTempPath(),
+        $"DoomLauncher-TileImages-{Guid.NewGuid():N}");
+    try
+    {
+        var source = Path.Combine(root, "source");
+        var destination = Path.Combine(root, "destination");
+        Directory.CreateDirectory(Path.Combine(source, "colored"));
+        Directory.CreateDirectory(Path.Combine(source, "grayscale"));
+        Directory.CreateDirectory(Path.Combine(destination, "colored"));
+        File.WriteAllText(Path.Combine(source, "colored", "doom.png"), "new-default");
+        File.WriteAllText(Path.Combine(source, "grayscale", "doom.png"), "gray-default");
+        File.WriteAllText(Path.Combine(destination, "colored", "doom.png"), "user-customized");
+
+        TileImageDefaults.EnsurePortableCopies(source, destination);
+
+        Check(
+            File.ReadAllText(Path.Combine(destination, "colored", "doom.png"))
+                == "user-customized"
+            && File.ReadAllText(Path.Combine(destination, "grayscale", "doom.png"))
+                == "gray-default"
+            && TileImageDefaults.IsLegacyDefaultHash(
+                "791B625046B79C23418EB1775F90D6F7E5B1CDE7119E61FFC0964718A39AD2E9"),
+            "TileImage-Defaults ergänzen fehlende Dateien und bewahren Nutzeränderungen");
+    }
+    finally
+    {
         if (Directory.Exists(root))
             Directory.Delete(root, recursive: true);
     }

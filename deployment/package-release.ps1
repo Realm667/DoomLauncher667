@@ -169,12 +169,6 @@ Copy-Item -Path (Join-Path $themeSource '*') `
     -Recurse `
     -Force
 
-$tileImageSource = Join-Path $repositoryRoot 'DoomLauncher\TileImages'
-Copy-Item -Path (Join-Path $tileImageSource '*') `
-    -Destination (Join-Path $packageRoot 'Data\TileImages') `
-    -Recurse `
-    -Force
-
 $revision = 'unknown'
 try {
     $revision = (& git -C $repositoryRoot rev-parse --short=12 HEAD).Trim()

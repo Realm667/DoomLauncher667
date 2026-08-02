@@ -109,6 +109,9 @@ be moved or backed up as one folder:
 * `Data/Screenshots`, `Data/TitlePics` and `Data/CollectionArtworks` store
   visual library data;
 * `Data/Themes` contains the editable XML theme definitions;
+* `Data/TileImages/colored` and `Data/TileImages/grayscale` contain editable
+  placeholder artwork. Missing defaults are restored without overwriting
+  user-modified files;
 * `Data/UserState` contains portable UI preferences;
 * `DoomLauncher.sqlite` contains the library database.
 

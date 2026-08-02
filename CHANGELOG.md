@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.8.8 - 2026-08-02
+
+- Restored the improved 1280x800 `colored` and `grayscale` placeholder artwork
+  from the preserved layout backup and removed obsolete PNG files from the
+  `TileImages` root.
+- Moved release delivery of placeholder artwork into the WinUI application.
+  On startup, missing portable images are seeded into `Data/TileImages`, known
+  obsolete 320x200 defaults are upgraded, and user-modified replacements are
+  preserved.
+- Extended the portable update contract to reject packages that contain
+  mutable `Data/TileImages` files and to verify that custom artwork survives
+  an overlay update.
+
 ## 0.8.7 - 2026-08-02
 
 - Fixed the application title version being stuck at 0.8.1. The custom title

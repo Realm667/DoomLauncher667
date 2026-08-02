@@ -40,6 +40,8 @@ try {
     $state = Join-Path $testRoot `
         'Data\UserState\DoomLauncher.WinUI.state.json'
     $customTheme = Join-Path $testRoot 'Data\Themes\MyTheme.xml'
+    $customTile = Join-Path $testRoot `
+        'Data\TileImages\colored\doom.png'
     Write-Marker $database 'existing-database'
     Write-Marker $mod 'existing-mod'
     Write-Marker $iwad 'existing-iwad'
@@ -50,6 +52,7 @@ try {
     Write-Marker $collectionArtwork 'existing-collection-artwork'
     Write-Marker $state '{"Language":"de"}'
     Write-Marker $customTheme '<theme name="MyTheme" />'
+    Write-Marker $customTile 'custom-tile-image'
 
     $before = @{}
     foreach ($path in @(
@@ -62,7 +65,8 @@ try {
             $saveGame,
             $collectionArtwork,
             $state,
-            $customTheme)) {
+            $customTheme,
+            $customTile)) {
         $before[$path] = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
     }
 
@@ -99,6 +103,11 @@ try {
     if (Get-ChildItem -LiteralPath (
             Join-Path $packageRoot 'Data\UserState') -File -ErrorAction SilentlyContinue) {
         throw 'Release package must never contain persisted user state.'
+    }
+    if (Get-ChildItem -LiteralPath (
+            Join-Path $packageRoot 'Data\TileImages') `
+            -File -Recurse -ErrorAction SilentlyContinue) {
+        throw 'Release package must not overwrite portable TileImages.'
     }
 
     Write-Host (

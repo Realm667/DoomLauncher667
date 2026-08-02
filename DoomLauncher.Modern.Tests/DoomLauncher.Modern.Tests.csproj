@@ -21,6 +21,7 @@
     <Compile Include="..\DoomLauncher.WinUI\Services\DatabaseTextSanitizer.cs" Link="Services\DatabaseTextSanitizer.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\UiLocalization.cs" Link="Services\UiLocalization.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\AppVersion.cs" Link="Services\AppVersion.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\TileImageDefaults.cs" Link="Services\TileImageDefaults.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\ArchiveTextMetadataReader.cs" Link="Services\ArchiveTextMetadataReader.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\MapNameExtractor.cs" Link="Services\MapNameExtractor.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\IwadVersionDetector.cs" Link="Services\IwadVersionDetector.cs" />

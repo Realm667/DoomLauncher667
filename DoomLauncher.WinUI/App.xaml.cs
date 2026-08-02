@@ -61,6 +61,7 @@ public partial class App : Application
                 CancellationToken.None);
             await Task.WhenAll(minimumSplashTime, stateLoad);
             InitialUserState = await stateLoad;
+            TileImageDefaults.EnsurePortableCopies();
 
             _window = new MainWindow();
             _window.Activate();
