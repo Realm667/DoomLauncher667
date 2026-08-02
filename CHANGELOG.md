@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## 0.8.4 - 2026-08-02
+
+- Fixed migration of classic Doom Launcher databases whose legacy
+  `Files.SourcePortID` column is constrained as `NOT NULL`; thumbnail
+  relationships are recovered without invalidating the original column.
+- First setup now reads title, author, description and release date from
+  embedded README, WADINFO and GAMEINFO text files instead of using the mod
+  archive filename whenever structured metadata is available.
+- Added an explicit decision for IWADs found in `Data\\Mods`: keep the file as
+  a normal mod, or move it into `Data\\GameWads` and register it automatically
+  under **Setup > IWAD**.
+- Reduced **Manage package** to its icon and added the explanatory tooltip
+  **Manage portable mod packages**.
+- Added regression coverage for legacy `NOT NULL` schemas, archive metadata
+  parsing, first-setup metadata import and misplaced-IWAD reconciliation.
+
 ## 0.8.3 - 2026-08-02
 
 - Added live percentage progress dialogs for migration and all three first-

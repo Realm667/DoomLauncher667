@@ -743,11 +743,67 @@ public sealed class FirstSetupService(
 
     public async Task<SetupScanResult> ScanModsAsync(
         CancellationToken cancellationToken = default)
-        => await ScanModsAsync(cancellationToken, null);
+        => await ScanModsAsync(cancellationToken, null, null);
 
     public async Task<SetupScanResult> ScanModsAsync(
         CancellationToken cancellationToken,
         IProgress<double>? progress)
+        => await ScanModsAsync(cancellationToken, progress, null);
+
+    public async Task<IReadOnlyList<IwadInModsPrompt>> FindIwadsInModsAsync(
+        CancellationToken cancellationToken,
+        IProgress<double>? progress = null)
+    {
+        progress?.Report(0);
+        await EnsureManagedLayoutAsync(cancellationToken);
+        var (_, root) = await GetLayoutAsync(cancellationToken);
+        var directory = Path.Combine(root, "Mods");
+        var files = EnumerateFiles(directory, ModExtensions).ToArray();
+        var prompts = new List<IwadInModsPrompt>();
+        for (var index = 0; index < files.Length; index++)
+        {
+            var file = files[index];
+            cancellationToken.ThrowIfCancellationRequested();
+            if (ArchiveExtensions.Contains(Path.GetExtension(file)))
+            {
+                try
+                {
+                    var candidates = await IwadVersionDetector.ScanArchiveAsync(
+                        file,
+                        cancellationToken);
+                    if (candidates.Count > 0)
+                    {
+                        prompts.Add(new IwadInModsPrompt(
+                            Path.GetFullPath(file),
+                            Path.GetFileName(file),
+                            candidates
+                                .Select(candidate => candidate.SuggestedName)
+                                .Distinct(StringComparer.OrdinalIgnoreCase)
+                                .ToArray()));
+                    }
+                }
+                catch (Exception exception) when (
+                    exception is IOException
+                    or InvalidDataException
+                    or UnauthorizedAccessException
+                    or NotSupportedException)
+                {
+                    // The actual mod scan reports unreadable archives as warnings.
+                }
+            }
+            progress?.Report(
+                files.Length == 0
+                    ? 100
+                    : ((index + 1) * 100d / files.Length));
+        }
+        progress?.Report(100);
+        return prompts;
+    }
+
+    public async Task<SetupScanResult> ScanModsAsync(
+        CancellationToken cancellationToken,
+        IProgress<double>? progress,
+        IReadOnlyDictionary<string, IwadInModsAction>? iwadDecisions)
     {
         progress?.Report(0);
         await EnsureManagedLayoutAsync(cancellationToken);
@@ -755,7 +811,9 @@ public sealed class FirstSetupService(
         var directory = Path.Combine(root, "Mods");
         var files = EnumerateFiles(directory, ModExtensions).ToArray();
         var imported = 0;
+        var updated = 0;
         var skipped = 0;
+        var movedIwads = 0;
         var warnings = new List<string>();
         for (var fileIndex = 0; fileIndex < files.Length; fileIndex++)
         {
@@ -763,17 +821,47 @@ public sealed class FirstSetupService(
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                if (ArchiveExtensions.Contains(Path.GetExtension(file))
-                    && (await IwadVersionDetector.ScanArchiveAsync(
+                var fullPath = Path.GetFullPath(file);
+                var iwadAction = IwadInModsAction.KeepAsMod;
+                var hasDecision = iwadDecisions?.TryGetValue(
+                    fullPath,
+                    out iwadAction) == true;
+                var isIwad = hasDecision;
+                if (iwadDecisions is null
+                    && ArchiveExtensions.Contains(Path.GetExtension(file)))
+                {
+                    isIwad = (await IwadVersionDetector.ScanArchiveAsync(
                         file,
-                        cancellationToken)).Count > 0)
+                        cancellationToken)).Count > 0;
+                }
+                if (isIwad && hasDecision
+                    && iwadAction == IwadInModsAction.MoveAndRegister)
+                {
+                    var target = Path.Combine(
+                        root,
+                        "GameWads",
+                        Path.GetFileName(file));
+                    if (File.Exists(target))
+                    {
+                        throw new IOException(
+                            $"Im IWAD-Verzeichnis existiert bereits " +
+                            $"{Path.GetFileName(file)}.");
+                    }
+                    Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+                    File.Move(file, target);
+                    movedIwads++;
+                    progress?.Report(
+                        (fileIndex + 1) * 90d / Math.Max(1, files.Length));
+                    continue;
+                }
+                if (isIwad && !hasDecision)
                 {
                     skipped++;
                     warnings.Add(
                         $"{Path.GetFileName(file)}: IWAD erkannt; bitte in das " +
                         "IWAD-Verzeichnis verschieben.");
                     progress?.Report(
-                        (fileIndex + 1) * 100d / Math.Max(1, files.Length));
+                        (fileIndex + 1) * 90d / Math.Max(1, files.Length));
                     continue;
                 }
                 var result = await libraryService.ImportAsync(file, cancellationToken);
@@ -804,14 +892,21 @@ public sealed class FirstSetupService(
             }
             progress?.Report(
                 files.Length == 0
-                    ? 100
-                    : ((fileIndex + 1) * 100d / files.Length));
+                    ? 90
+                    : ((fileIndex + 1) * 90d / files.Length));
+        }
+        if (movedIwads > 0)
+        {
+            progress?.Report(92);
+            var iwadResult = await ScanIwadsAsync(cancellationToken);
+            updated += iwadResult.Imported + iwadResult.Updated;
+            warnings.AddRange(iwadResult.Warnings);
         }
         progress?.Report(100);
         return new SetupScanResult(
             files.Length,
             imported,
-            0,
+            updated,
             0,
             skipped,
             [],

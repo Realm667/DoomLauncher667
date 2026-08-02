@@ -178,8 +178,7 @@ internal static class WinUiDatabaseSchema
                 repair.CommandText =
                     """
                     UPDATE Files
-                    SET DerivedFromFileID = SourcePortID,
-                        SourcePortID = NULL
+                    SET DerivedFromFileID = SourcePortID
                     WHERE FileTypeID = 4
                       AND DerivedFromFileID IS NULL
                       AND SourcePortID IS NOT NULL;

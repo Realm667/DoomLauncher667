@@ -97,6 +97,41 @@ if (args.Length == 2
     }
 }
 
+if (args.Length == 2
+    && args[0].Equals(
+        "--verify-legacy-database",
+        StringComparison.OrdinalIgnoreCase))
+{
+    var sourceDatabase = Path.GetFullPath(args[1]);
+    var testDatabase = Path.Combine(
+        Path.GetTempPath(),
+        $"DoomLauncher-LegacyDatabase-{Guid.NewGuid():N}.sqlite");
+    try
+    {
+        File.Copy(sourceDatabase, testDatabase, overwrite: false);
+        await using var connection = new SqliteConnection(
+            new SqliteConnectionStringBuilder
+            {
+                DataSource = testDatabase,
+                Mode = SqliteOpenMode.ReadWrite,
+                Pooling = false,
+            }.ToString());
+        await connection.OpenAsync();
+        await WinUiDatabaseSchema.EnsureAsync(connection, default);
+        var integrity = await ScalarStringAsync(connection, "PRAGMA integrity_check;");
+        if (integrity != "ok")
+            throw new InvalidOperationException($"Upgraded database: {integrity}");
+        Console.WriteLine("LEGACY_DATABASE PASS");
+        return 0;
+    }
+    finally
+    {
+        SqliteConnection.ClearAllPools();
+        if (File.Exists(testDatabase))
+            File.Delete(testDatabase);
+    }
+}
+
 if (args.Length > 2)
 {
     Console.Error.WriteLine(
@@ -129,6 +164,17 @@ try
         DatabaseTextSanitizer.Multiline("Alpha\t\tBeta\r\nGamma")
             == $"Alpha Beta{Environment.NewLine}Gamma",
         "Mehrzeilige Importtexte werden ohne Tabulatoren gespeichert");
+    var parsedArchiveMetadata = ArchiveTextMetadataReader.Parse(
+        "Title : A Better Title\nAuthor : Test Author\n" +
+        "Description : First line\n  second line\n" +
+        "Date Finished : 2024-05-06");
+    Check(
+        parsedArchiveMetadata.Title == "A Better Title"
+        && parsedArchiveMetadata.Author == "Test Author"
+        && parsedArchiveMetadata.Description.Contains("second line")
+        && parsedArchiveMetadata.ReleaseDate == new DateTime(2024, 5, 6),
+        "Archiv-Textmetadaten werden als Bibliotheksdaten erkannt");
+    await VerifyLegacyNotNullSchemaAsync();
     Check(
         MapNameExtractor.ParseStored("MAP01-MAP03, E1M1")
             .SequenceEqual(["E1M1", "MAP01", "MAP02", "MAP03"]),
@@ -1317,7 +1363,13 @@ static async Task VerifyFirstSetupAsync()
                    stream,
                    System.IO.Compression.ZipArchiveMode.Create))
         {
-            _ = archive.CreateEntry("README.txt");
+            var entry = archive.CreateEntry("README.txt");
+            await using var writer = new StreamWriter(entry.Open());
+            await writer.WriteAsync(
+                "Title : The First Setup Title\n" +
+                "Author : Setup Author\n" +
+                "Description : Imported from archive text.\n" +
+                "Date Finished : 2024-05-06");
         }
 
         var iwadProgress = new RecordedProgress();
@@ -1347,6 +1399,18 @@ static async Task VerifyFirstSetupAsync()
                 modConnection,
                 "SELECT GameFileID FROM GameFiles " +
                 "WHERE FileName='Mods\\sample.pk3';");
+            var importedTitle = await ScalarStringAsync(
+                modConnection,
+                "SELECT Title FROM GameFiles WHERE GameFileID=" + sampleModId + ";");
+            var importedAuthor = await ScalarStringAsync(
+                modConnection,
+                "SELECT Author FROM GameFiles WHERE GameFileID=" + sampleModId + ";");
+            if (importedTitle != "The First Setup Title"
+                || importedAuthor != "Setup Author")
+            {
+                throw new InvalidOperationException(
+                    "First setup did not use the archive text metadata for title and author.");
+            }
         }
         var mediaSource = Path.Combine(root, "media-source.png");
         await File.WriteAllBytesAsync(
@@ -1520,11 +1584,36 @@ static async Task VerifyFirstSetupAsync()
             }
         }
 
+        var misplacedIwad = Path.Combine(modsDirectory, "MISPLACED.WAD");
+        await File.WriteAllBytesAsync(misplacedIwad, iwadBytes);
+        var iwadPrompts = await setup.FindIwadsInModsAsync(default);
+        if (iwadPrompts.Count != 1
+            || !iwadPrompts[0].FileName.Equals(
+                "MISPLACED.WAD",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                "An IWAD in the Mods folder was not offered for user resolution.");
+        }
+        var decisions = new Dictionary<string, IwadInModsAction>(
+            StringComparer.OrdinalIgnoreCase)
+        {
+            [Path.GetFullPath(misplacedIwad)] = IwadInModsAction.MoveAndRegister,
+        };
+        mods = await setup.ScanModsAsync(default, null, decisions);
+        if (mods.Updated != 1
+            || File.Exists(misplacedIwad)
+            || !File.Exists(Path.Combine(iwadDirectory, "MISPLACED.WAD")))
+        {
+            throw new InvalidOperationException(
+                "The selected IWAD was not moved and registered from Mods.");
+        }
+
         await setup.CompleteWizardAsync();
         if (await setup.ShouldRunWizardAsync())
             throw new InvalidOperationException("First setup marker was not stored.");
         await using var connection = await OpenReadOnlyAsync(database);
-        if (await ScalarIntAsync(connection, "SELECT COUNT(*) FROM IWads;") != 0
+        if (await ScalarIntAsync(connection, "SELECT COUNT(*) FROM IWads;") != 1
             || await ScalarIntAsync(connection, "SELECT COUNT(*) FROM SourcePorts;") != 0
             || await ScalarIntAsync(
                 connection,
@@ -1542,6 +1631,68 @@ static async Task VerifyFirstSetupAsync()
         SqliteConnection.ClearAllPools();
         if (Directory.Exists(root))
             Directory.Delete(root, recursive: true);
+    }
+}
+
+static async Task VerifyLegacyNotNullSchemaAsync()
+{
+    var database = Path.Combine(
+        Path.GetTempPath(),
+        $"DoomLauncher-LegacySchema-{Guid.NewGuid():N}.sqlite");
+    try
+    {
+        await using var connection = new SqliteConnection(
+            new SqliteConnectionStringBuilder
+            {
+                DataSource = database,
+                Mode = SqliteOpenMode.ReadWriteCreate,
+            }.ToString());
+        await connection.OpenAsync();
+        await using (var create = connection.CreateCommand())
+        {
+            create.CommandText =
+                """
+                CREATE TABLE GameFiles (GameFileID INTEGER PRIMARY KEY);
+                CREATE TABLE SourcePorts (
+                    SourcePortID INTEGER PRIMARY KEY,
+                    Name TEXT NOT NULL);
+                CREATE TABLE IWads (IWadID INTEGER PRIMARY KEY);
+                CREATE TABLE Files (
+                    FileID INTEGER PRIMARY KEY,
+                    GameFileID INTEGER NOT NULL,
+                    FileName TEXT NOT NULL,
+                    FileTypeID INTEGER NOT NULL,
+                    SourcePortID INTEGER NOT NULL);
+                CREATE TABLE Tags (TagID INTEGER PRIMARY KEY, Name TEXT NOT NULL);
+                CREATE TABLE TagMapping (FileID INTEGER NOT NULL, TagID INTEGER NOT NULL);
+                INSERT INTO GameFiles (GameFileID) VALUES (1);
+                INSERT INTO SourcePorts (SourcePortID, Name) VALUES (17, 'Legacy Port');
+                INSERT INTO Files
+                    (FileID, GameFileID, FileName, FileTypeID, SourcePortID)
+                VALUES (3, 1, 'legacy-thumb.png', 4, 17);
+                """;
+            await create.ExecuteNonQueryAsync();
+        }
+        await WinUiDatabaseSchema.EnsureAsync(connection, default);
+        await using var verify = connection.CreateCommand();
+        verify.CommandText =
+            "SELECT SourcePortID, DerivedFromFileID FROM Files WHERE FileID=3;";
+        await using var reader = await verify.ExecuteReaderAsync();
+        if (!await reader.ReadAsync()
+            || reader.GetInt32(0) != 17
+            || reader.GetInt32(1) != 17)
+        {
+            throw new InvalidOperationException(
+                "Legacy thumbnail repair did not preserve NOT NULL SourcePortID.");
+        }
+        Console.WriteLine(
+            "PASS Legacy Files.SourcePortID NOT NULL migration remains compatible");
+    }
+    finally
+    {
+        SqliteConnection.ClearAllPools();
+        if (File.Exists(database))
+            File.Delete(database);
     }
 }
 

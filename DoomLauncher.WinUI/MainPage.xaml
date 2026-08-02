@@ -510,12 +510,9 @@
                         </Button.KeyboardAccelerators>
                     </Button>
                     <DropDownButton
-                        AutomationProperties.Name="{Binding ManagePackageShort}"
+                        AutomationProperties.Name="{Binding ManagePackage}"
                         ToolTipService.ToolTip="{Binding ManagePackage}">
-                        <StackPanel Orientation="Horizontal" Spacing="7">
-                            <FontIcon Glyph="&#xE7B8;" />
-                            <TextBlock Text="{Binding ManagePackageShort}" />
-                        </StackPanel>
+                        <FontIcon Glyph="&#xE7B8;" />
                         <DropDownButton.Flyout>
                             <MenuFlyout>
                                 <MenuFlyoutItem

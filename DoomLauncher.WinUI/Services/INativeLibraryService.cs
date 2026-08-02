@@ -414,7 +414,27 @@ public interface IFirstSetupService
     Task<SetupScanResult> ScanModsAsync(
         CancellationToken cancellationToken,
         IProgress<double>? progress);
+
+    Task<IReadOnlyList<IwadInModsPrompt>> FindIwadsInModsAsync(
+        CancellationToken cancellationToken,
+        IProgress<double>? progress = null);
+
+    Task<SetupScanResult> ScanModsAsync(
+        CancellationToken cancellationToken,
+        IProgress<double>? progress,
+        IReadOnlyDictionary<string, IwadInModsAction>? iwadDecisions);
 }
+
+public enum IwadInModsAction
+{
+    KeepAsMod,
+    MoveAndRegister,
+}
+
+public sealed record IwadInModsPrompt(
+    string FilePath,
+    string FileName,
+    IReadOnlyList<string> DetectedIwads);
 
 public sealed record ManagedLayoutMigrationResult(
     int UpdatedReferences,

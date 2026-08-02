@@ -353,6 +353,9 @@ public sealed class SqliteNativeLibraryService(
             var detectedMaps = await MapNameExtractor.ExtractAsync(
                 destinationPath,
                 cancellationToken);
+            var textMetadata = await ArchiveTextMetadataReader.ReadAsync(
+                destinationPath,
+                cancellationToken);
             if (existingGameFileId.HasValue)
             {
                 await using var refresh = connection.CreateCommand();
@@ -380,18 +383,37 @@ public sealed class SqliteNativeLibraryService(
             command.CommandText =
                 """
                 INSERT INTO GameFiles
-                    (FileName, Title, Author, Downloaded, MinutesPlayed,
-                     Map, MapCount, IsSyncNeeded)
+                    (FileName, Title, Author, Description, ReleaseDate,
+                     Downloaded, MinutesPlayed, Map, MapCount, IsSyncNeeded)
                 VALUES
-                    ($fileName, $title, NULL, $downloaded, 0,
-                     $maps, $mapCount, 1);
+                    ($fileName, $title, $author, $description, $releaseDate,
+                     $downloaded, 0, $maps, $mapCount, 1);
                 SELECT last_insert_rowid();
                 """;
             command.Parameters.AddWithValue("$fileName", destinationFileName);
             command.Parameters.AddWithValue(
                 "$title",
-                DatabaseTextSanitizer.SingleLine(
-                    Path.GetFileNameWithoutExtension(destinationFileName)));
+                string.IsNullOrWhiteSpace(textMetadata.Title)
+                    ? DatabaseTextSanitizer.SingleLine(
+                        Path.GetFileNameWithoutExtension(destinationFileName))
+                    : textMetadata.Title);
+            command.Parameters.AddWithValue(
+                "$author",
+                string.IsNullOrWhiteSpace(textMetadata.Author)
+                    ? DBNull.Value
+                    : textMetadata.Author);
+            command.Parameters.AddWithValue(
+                "$description",
+                string.IsNullOrWhiteSpace(textMetadata.Description)
+                    ? DBNull.Value
+                    : textMetadata.Description);
+            command.Parameters.AddWithValue(
+                "$releaseDate",
+                textMetadata.ReleaseDate.HasValue
+                    ? textMetadata.ReleaseDate.Value.ToString(
+                        "yyyy-MM-dd HH:mm:ss",
+                        CultureInfo.InvariantCulture)
+                    : DBNull.Value);
             command.Parameters.AddWithValue(
                 "$downloaded",
                 DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fffffff", CultureInfo.InvariantCulture));

@@ -21,6 +21,7 @@ public sealed class UiLocalization
                 ["FirstSetupScanResult"]="Found: {0} · New: {1} · Updated: {2} · Removed: {3} · Skipped: {4}",["FirstSetupWarnings"]="{0} warnings occurred.",
                 ["FirstSetupComplete"]="First setup completed",["FirstSetupCompleteMessage"]="IWADs, source ports and mods have been processed. You can repeat the scans later in Setup.",
                 ["ScanComplete"]="Scan complete",["ScanFailed"]="Scan failed",["Scanning"]="Scanning",["ScanningDirectories"]="The portable folders are being inspected.",["FirstSetupProgressStatus"]="The current setup folder is being scanned and imported.",["Next"]="Next",["Finish"]="Finish",
+                ["CheckingModsForIwads"]="Checking mod folder",["CheckingModsForIwadsStatus"]="Looking for IWADs before importing the mods.",["IwadFoundInModsTitle"]="IWAD detected in Mods",["IwadFoundInModsMessage"]="{0} contains the following IWAD: {1}\n\nMove the file to Data\\GameWads and register it under Setup > IWAD, or keep it in Data\\Mods as a normal library entry?",["MoveAndRegisterIwad"]="Move and register",["KeepAsMod"]="Keep as mod",
                 ["RemovedDefinitions"]="Removed missing definitions: {0}",["DeleteSourcePort"]="Delete source port",["DeleteIwad"]="Delete IWAD",["DeleteDefinitionWarning"]="Delete the definition “{0}”? Dependent mods are reset to automatic selection.",["DeleteSourcePortFiles"]="Also permanently delete the complete source-port folder",["DeleteIwadFiles"]="Also permanently delete the IWAD archive and its managed media",["DeleteMod"]="Delete mod",["DeleteModWarning"]="Delete “{0}” from the library? Metadata and collection assignments are removed.",["DeleteModFiles"]="Also permanently delete the mod archive and its managed artwork, screenshots and demos",["DefinitionDeleted"]="Deleted",["DefinitionDeletedMessage"]="“{0}” was removed.",["ModDeletedMessage"]="“{0}” was removed from the library.",["DeleteFailed"]="Delete failed",
                 ["ScanSourcePortDirectory"]="Scan source-port folder",["ScanIwadDirectory"]="Scan IWAD folder",
                 ["Home"] = "Home", ["Library"] = "Library", ["MyLibrary"] = "My Library",
@@ -141,7 +142,7 @@ public sealed class UiLocalization
                 ["ImportPackageShort"] = "Import package",
                 ["ExportPackageShort"] = "Export package",
                 ["ManagePackageShort"] = "Manage package",
-                ["ManagePackage"] = "Import or export portable packages",
+                ["ManagePackage"] = "Manage portable mod packages",
                 ["ExportCollection"] = "Collection preset",
                 ["ManualSelection"] = "Manual selection",
                 ["BundleExportDescription"] = "Select multiple mods or choose a collection. The package contains the mod archives, metadata, artwork, screenshots, finished state and collection assignments.",
@@ -357,6 +358,7 @@ public sealed class UiLocalization
             ["de-DE"] = new Dictionary<string, string>
             {
                 ["FirstSetupProgressStatus"]="Der aktuelle Einrichtungsordner wird gescannt und importiert.",["Next"]="Weiter",["Finish"]="Fertigstellen",
+                ["CheckingModsForIwads"]="Mod-Verzeichnis prüfen",["CheckingModsForIwadsStatus"]="Vor dem Mod-Import wird nach IWADs gesucht.",["IwadFoundInModsTitle"]="IWAD im Mods-Verzeichnis erkannt",["IwadFoundInModsMessage"]="{0} enthält folgende IWAD: {1}\n\nSoll die Datei nach Data\\GameWads verschoben und unter Setup > IWAD registriert werden oder als normaler Bibliothekseintrag in Data\\Mods verbleiben?",["MoveAndRegisterIwad"]="Verschieben und registrieren",["KeepAsMod"]="Als Mod behalten",
                 ["MigrationPortableNotice"]="Datenbank, IWADs, Sourceports, Mods, Titelbilder, Screenshots und weitere verwaltete Medien werden in die portablen Data-Ordner von Doom Launcher 667 kopiert. Die Originalinstallation bleibt unverändert und wird danach nicht mehr benötigt.",
                 ["ChooseOriginalDoomLauncherFolder"]="Original-Doom-Launcher-Ordner auswählen",
                 ["MigrationProgressTitle"]="DoomLauncher-Installation wird migriert",
@@ -380,7 +382,7 @@ public sealed class UiLocalization
                 ["DeleteCollectionWarning"]="Sammlung „{0}“ löschen? Die Zuordnung wird aus allen Mods entfernt. Die Mods und ihre Dateien bleiben in der Bibliothek erhalten.",
                 ["Delete"]="Löschen",["PlayedMods"]="Gespielte Mods",["UnplayedMods"]="Ungespielte Mods",
                 ["ImportPackageShort"]="Paket importieren",["ExportPackageShort"]="Paket exportieren",
-                ["ManagePackageShort"]="Paket verwalten",["ManagePackage"]="Portable Pakete importieren oder exportieren",
+                ["ManagePackageShort"]="Paket verwalten",["ManagePackage"]="Portable Mod-Pakete verwalten",
                 ["Map"]="Map",["Difficulty"]="Schwierigkeitsgrad",["Date"]="Datum",["Automatic"]="Automatisch",
                 ["SkillOne"]="Ich bin noch zu jung zum Sterben",["SkillTwo"]="Bitte nicht zu heftig",
                 ["SkillThree"]="Zeig's mir",["SkillFour"]="Ultra-Violence",["SkillFive"]="Nightmare!",
@@ -668,6 +670,7 @@ public sealed class UiLocalization
             ["fr-FR"] = new Dictionary<string, string>
             {
                 ["FirstSetupProgressStatus"]="Le dossier de configuration actuel est analysé et importé.",["Next"]="Suivant",["Finish"]="Terminer",
+                ["CheckingModsForIwads"]="Vérification du dossier des mods",["CheckingModsForIwadsStatus"]="Recherche d’IWAD avant l’importation des mods.",["IwadFoundInModsTitle"]="IWAD détecté dans Mods",["IwadFoundInModsMessage"]="{0} contient l’IWAD suivant : {1}\n\nDéplacer le fichier vers Data\\GameWads et l’enregistrer sous Configuration > IWAD, ou le conserver comme mod normal dans Data\\Mods ?",["MoveAndRegisterIwad"]="Déplacer et enregistrer",["KeepAsMod"]="Conserver comme mod",
                 ["MigrationPortableNotice"]="La base de données, les IWAD, les ports source, les mods, les illustrations de titre, les captures et les autres médias gérés sont copiés dans les dossiers Data portables. L’installation d’origine reste intacte et ne sera plus requise.",
                 ["ChooseOriginalDoomLauncherFolder"]="Choisir le dossier Doom Launcher d’origine",
                 ["MigrationProgressTitle"]="Migration de l’installation DoomLauncher",
@@ -691,7 +694,7 @@ public sealed class UiLocalization
                 ["DeleteCollectionWarning"]="Supprimer la collection « {0} » ? Son attribution sera retirée de tous les mods. Les mods et leurs fichiers resteront dans la bibliothèque.",
                 ["Delete"]="Supprimer",["PlayedMods"]="Mods joués",["UnplayedMods"]="Mods non joués",
                 ["ImportPackageShort"]="Importer paquet",["ExportPackageShort"]="Exporter paquet",
-                ["ManagePackageShort"]="Gérer le paquet",["ManagePackage"]="Importer ou exporter des paquets portables",
+                ["ManagePackageShort"]="Gérer le paquet",["ManagePackage"]="Gérer les paquets de mods portables",
                 ["Map"]="Carte",["Difficulty"]="Difficulté",["Date"]="Date",["Automatic"]="Automatique",
                 ["SkillOne"]="Je suis trop jeune pour mourir",["SkillTwo"]="Pas trop brutal",["SkillThree"]="Fais-moi mal",
                 ["SkillFour"]="Ultra-Violence",["SkillFive"]="Cauchemar !",
@@ -973,6 +976,7 @@ public sealed class UiLocalization
             ["es-ES"] = new Dictionary<string, string>
             {
                 ["FirstSetupProgressStatus"]="Se está escaneando e importando la carpeta de configuración actual.",["Next"]="Siguiente",["Finish"]="Finalizar",
+                ["CheckingModsForIwads"]="Comprobando la carpeta de mods",["CheckingModsForIwadsStatus"]="Buscando IWAD antes de importar los mods.",["IwadFoundInModsTitle"]="IWAD detectado en Mods",["IwadFoundInModsMessage"]="{0} contiene el siguiente IWAD: {1}\n\n¿Mover el archivo a Data\\GameWads y registrarlo en Configuración > IWAD, o conservarlo como mod normal en Data\\Mods?",["MoveAndRegisterIwad"]="Mover y registrar",["KeepAsMod"]="Conservar como mod",
                 ["MigrationPortableNotice"]="La base de datos, los IWAD, los puertos fuente, los mods, las portadas, las capturas y otros medios administrados se copian en las carpetas Data portátiles. La instalación original permanece intacta y ya no será necesaria.",
                 ["ChooseOriginalDoomLauncherFolder"]="Elegir carpeta original de Doom Launcher",
                 ["MigrationProgressTitle"]="Migrando la instalación de DoomLauncher",
@@ -996,7 +1000,7 @@ public sealed class UiLocalization
                 ["DeleteCollectionWarning"]="¿Eliminar la colección «{0}»? Se quitará la asignación de todos los mods. Los mods y sus archivos permanecerán en la biblioteca.",
                 ["Delete"]="Eliminar",["PlayedMods"]="Mods jugados",["UnplayedMods"]="Mods sin jugar",
                 ["ImportPackageShort"]="Importar paquete",["ExportPackageShort"]="Exportar paquete",
-                ["ManagePackageShort"]="Gestionar paquete",["ManagePackage"]="Importar o exportar paquetes portátiles",
+                ["ManagePackageShort"]="Gestionar paquete",["ManagePackage"]="Gestionar paquetes de mods portátiles",
                 ["Map"]="Mapa",["Difficulty"]="Dificultad",["Date"]="Fecha",["Automatic"]="Automático",
                 ["SkillOne"]="Soy demasiado joven para morir",["SkillTwo"]="No demasiado duro",["SkillThree"]="Hazme daño",
                 ["SkillFour"]="Ultra-Violence",["SkillFive"]="¡Pesadilla!",

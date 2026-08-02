@@ -26,7 +26,7 @@ public sealed class IdGamesService : IIdGamesService, IDisposable
             Timeout = TimeSpan.FromSeconds(30),
         };
         _httpClient.DefaultRequestHeaders.UserAgent.Add(
-            new ProductInfoHeaderValue("DoomLauncher-667", "0.8.3"));
+            new ProductInfoHeaderValue("DoomLauncher-667", "0.8.4"));
         _httpClient.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
     }

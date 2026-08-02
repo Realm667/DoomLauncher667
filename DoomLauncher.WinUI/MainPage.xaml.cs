@@ -3657,7 +3657,7 @@ public sealed partial class MainPage : Page
                 Strings["FirstSetupIwadsTitle"],
                 Strings["FirstSetupIwadsHelp"],
                 "Data\\GameWads",
-                (cancellationToken, progress) =>
+                (cancellationToken, progress, _) =>
                     _app.FirstSetupService.ScanIwadsAsync(
                         cancellationToken,
                         progress)))
@@ -3669,7 +3669,7 @@ public sealed partial class MainPage : Page
                 Strings["FirstSetupSourcePortsTitle"],
                 Strings["FirstSetupSourcePortsHelp"],
                 "Data\\Sourceports",
-                (cancellationToken, progress) =>
+                (cancellationToken, progress, _) =>
                     _app.FirstSetupService.ScanSourcePortsAsync(
                         cancellationToken,
                         progress)))
@@ -3681,10 +3681,12 @@ public sealed partial class MainPage : Page
                 Strings["FirstSetupModsTitle"],
                 Strings["FirstSetupModsHelp"],
                 "Data\\Mods",
-                (cancellationToken, progress) =>
+                (cancellationToken, progress, decisions) =>
                     _app.FirstSetupService.ScanModsAsync(
                         cancellationToken,
-                        progress)))
+                        progress,
+                        decisions),
+                inspectIwadsInMods: true))
         {
             return;
         }
@@ -3701,7 +3703,12 @@ public sealed partial class MainPage : Page
         string title,
         string help,
         string directory,
-        Func<CancellationToken, IProgress<double>?, Task<SetupScanResult>> scan)
+        Func<
+            CancellationToken,
+            IProgress<double>?,
+            IReadOnlyDictionary<string, IwadInModsAction>?,
+            Task<SetupScanResult>> scan,
+        bool inspectIwadsInMods = false)
     {
         var content = new StackPanel
         {
@@ -3744,10 +3751,16 @@ public sealed partial class MainPage : Page
 
         try
         {
+            IReadOnlyDictionary<string, IwadInModsAction>? iwadDecisions = null;
+            if (inspectIwadsInMods)
+                iwadDecisions = await ResolveIwadsInModsAsync();
             var scanResult = await RunProgressDialogAsync(
                 Strings["Scanning"],
                 Strings["FirstSetupProgressStatus"],
-                progress => scan(_loadCancellation.Token, progress));
+                progress => scan(
+                    _loadCancellation.Token,
+                    progress,
+                    iwadDecisions));
             var details = _app.Localization.Format(
                 "FirstSetupScanResult",
                 scanResult.Discovered,
@@ -5437,6 +5450,47 @@ public sealed partial class MainPage : Page
         };
         await dialog.ShowAsync();
         return await completion.Task;
+    }
+
+    private async Task<IReadOnlyDictionary<string, IwadInModsAction>>
+        ResolveIwadsInModsAsync()
+    {
+        var prompts = await RunProgressDialogAsync(
+            Strings["CheckingModsForIwads"],
+            Strings["CheckingModsForIwadsStatus"],
+            progress => _app.FirstSetupService.FindIwadsInModsAsync(
+                _loadCancellation.Token,
+                progress));
+        var decisions = new Dictionary<string, IwadInModsAction>(
+            StringComparer.OrdinalIgnoreCase);
+        foreach (var prompt in prompts)
+        {
+            var dialog = new ContentDialog
+            {
+                XamlRoot = XamlRoot,
+                RequestedTheme = EffectiveDialogTheme,
+                Title = Strings["IwadFoundInModsTitle"],
+                Content = new TextBlock
+                {
+                    MaxWidth = 620,
+                    Text = _app.Localization.Format(
+                        "IwadFoundInModsMessage",
+                        prompt.FileName,
+                        string.Join(", ", prompt.DetectedIwads)),
+                    TextWrapping = TextWrapping.Wrap,
+                },
+                PrimaryButtonText = Strings["MoveAndRegisterIwad"],
+                SecondaryButtonText = Strings["KeepAsMod"],
+                DefaultButton = ContentDialogButton.Primary,
+            };
+            ApplyDialogTheme(dialog);
+            var result = await dialog.ShowAsync();
+            decisions[Path.GetFullPath(prompt.FilePath)] =
+                result == ContentDialogResult.Primary
+                    ? IwadInModsAction.MoveAndRegister
+                    : IwadInModsAction.KeepAsMod;
+        }
+        return decisions;
     }
 
     private async Task ShowActionMessageAsync(
