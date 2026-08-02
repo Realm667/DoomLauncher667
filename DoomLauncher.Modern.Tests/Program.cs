@@ -174,6 +174,12 @@ try
         && parsedArchiveMetadata.Description.Contains("second line")
         && parsedArchiveMetadata.ReleaseDate == new DateTime(2024, 5, 6),
         "Archiv-Textmetadaten werden als Bibliotheksdaten erkannt");
+    var englishLocalization = new UiLocalization();
+    englishLocalization.SetLanguage("en-US");
+    Check(
+        englishLocalization.Format("IwadTargetAlreadyExists", "DOOM.zip")
+            == "DOOM.zip: A file with the same name already exists in the IWAD folder.",
+        "IWAD-Scanwarnungen folgen der aktiven Sprache");
     await VerifyLegacyNotNullSchemaAsync();
     Check(
         MapNameExtractor.ParseStored("MAP01-MAP03, E1M1")
@@ -1237,7 +1243,7 @@ static string ResolvePath(string baseDirectory, string value)
             : Path.Combine(baseDirectory, value));
 }
 
-static void CreateFlatTitlePicWad(string path)
+static void CreateFlatTitlePicWad(string path, bool isIwad = false)
 {
     var palette = new byte[256 * 3];
     for (var index = 0; index < 256; index++)
@@ -1250,7 +1256,7 @@ static void CreateFlatTitlePicWad(string path)
     var directoryOffset = 12 + palette.Length + titlePic.Length;
     using var stream = File.Create(path);
     using var writer = new BinaryWriter(stream, System.Text.Encoding.ASCII);
-    writer.Write(System.Text.Encoding.ASCII.GetBytes("PWAD"));
+    writer.Write(System.Text.Encoding.ASCII.GetBytes(isIwad ? "IWAD" : "PWAD"));
     writer.Write(2);
     writer.Write(directoryOffset);
     writer.Write(palette);
@@ -1336,13 +1342,7 @@ static async Task VerifyFirstSetupAsync()
         var iwadDirectory = Path.Combine(gameFiles, "GameWads");
         Directory.CreateDirectory(iwadDirectory);
         var iwadPath = Path.Combine(iwadDirectory, "TESTIWAD.WAD");
-        using (var stream = File.Create(iwadPath))
-        using (var writer = new BinaryWriter(stream))
-        {
-            writer.Write(System.Text.Encoding.ASCII.GetBytes("IWAD"));
-            writer.Write(0);
-            writer.Write(12);
-        }
+        CreateFlatTitlePicWad(iwadPath, isIwad: true);
 
         var sourcePortDirectory = Path.Combine(
             gameFiles,
@@ -1390,6 +1390,21 @@ static async Task VerifyFirstSetupAsync()
             throw new InvalidOperationException(
                 $"First setup scan failed: IWAD={iwads.Imported}, " +
                 $"SourcePort={sourcePorts.Imported}, Mod={mods.Imported}");
+        }
+
+        int iwadGameFileId;
+        await using (var iwadConnection = await OpenReadOnlyAsync(database))
+        {
+            iwadGameFileId = await ScalarIntAsync(
+                iwadConnection,
+                "SELECT GameFileID FROM IWads LIMIT 1;");
+        }
+        var iwadMedia = await library.LoadGameMediaAsync(iwadGameFileId);
+        if (iwadMedia.TitleArtwork is null
+            || !File.Exists(iwadMedia.TitleArtwork.FullPath))
+        {
+            throw new InvalidOperationException(
+                "First setup did not extract and assign the IWAD TITLEPIC artwork.");
         }
 
         int sampleModId;
@@ -1581,6 +1596,32 @@ static async Task VerifyFirstSetupAsync()
             {
                 throw new InvalidOperationException(
                     "Physical mod deletion left the database entry behind.");
+            }
+        }
+
+        var missingModPath = Path.Combine(modsDirectory, "missing-after-refresh.pk3");
+        using (var stream = File.Create(missingModPath))
+        using (var archive = new System.IO.Compression.ZipArchive(
+                   stream,
+                   System.IO.Compression.ZipArchiveMode.Create))
+        {
+            _ = archive.CreateEntry("MISSING.txt");
+        }
+        mods = await setup.ScanModsAsync();
+        if (mods.Imported != 1)
+            throw new InvalidOperationException("Refresh test mod was not imported.");
+        File.Delete(missingModPath);
+        mods = await setup.ScanModsAsync();
+        await using (var missingConnection = await OpenReadOnlyAsync(database))
+        {
+            var missingRows = await ScalarIntAsync(
+                missingConnection,
+                "SELECT COUNT(*) FROM GameFiles " +
+                "WHERE FileName='Mods\\missing-after-refresh.pk3';");
+            if (mods.Removed != 1 || missingRows != 0)
+            {
+                throw new InvalidOperationException(
+                    "Refresh did not remove the entry for a missing managed mod archive.");
             }
         }
 

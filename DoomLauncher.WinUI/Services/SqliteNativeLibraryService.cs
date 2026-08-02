@@ -836,9 +836,32 @@ public sealed class SqliteNativeLibraryService(
         int gameFileId,
         string archivePath,
         CancellationToken cancellationToken = default)
+        => await TryImportTitlePicCoreAsync(
+            gameFileId,
+            archivePath,
+            internalWadFileName: null,
+            cancellationToken);
+
+    public async Task<bool> TryImportTitlePicAsync(
+        int gameFileId,
+        string archivePath,
+        string internalWadFileName,
+        CancellationToken cancellationToken = default)
+        => await TryImportTitlePicCoreAsync(
+            gameFileId,
+            archivePath,
+            internalWadFileName,
+            cancellationToken);
+
+    private async Task<bool> TryImportTitlePicCoreAsync(
+        int gameFileId,
+        string archivePath,
+        string? internalWadFileName,
+        CancellationToken cancellationToken)
     {
         var titlePic = await TitlePicExtractor.TryExtractPngAsync(
             archivePath,
+            internalWadFileName,
             cancellationToken);
         if (titlePic is null)
             return false;

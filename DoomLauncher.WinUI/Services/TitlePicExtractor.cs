@@ -12,6 +12,15 @@ internal static class TitlePicExtractor
     public static async Task<byte[]?> TryExtractPngAsync(
         string archivePath,
         CancellationToken cancellationToken)
+        => await TryExtractPngAsync(
+            archivePath,
+            internalWadFileName: null,
+            cancellationToken);
+
+    public static async Task<byte[]?> TryExtractPngAsync(
+        string archivePath,
+        string? internalWadFileName,
+        CancellationToken cancellationToken)
     {
         archivePath = Path.GetFullPath(archivePath);
         if (!File.Exists(archivePath))
@@ -34,7 +43,9 @@ internal static class TitlePicExtractor
         var entries = archive.Entries
             .Where(entry => !entry.IsDirectory)
             .ToArray();
-        foreach (var titleName in TitleNames)
+        foreach (var titleName in string.IsNullOrWhiteSpace(internalWadFileName)
+                     ? TitleNames
+                     : Array.Empty<string>())
         {
             var imageEntry = entries.FirstOrDefault(entry =>
                 TitleNamesEqual(entry.Key ?? string.Empty, titleName)
@@ -49,9 +60,19 @@ internal static class TitlePicExtractor
                 return png;
         }
 
-        foreach (var wadEntry in entries.Where(entry =>
-                     Path.GetExtension(entry.Key ?? string.Empty)
-                         .Equals(".wad", StringComparison.OrdinalIgnoreCase)))
+        var wadEntries = entries.Where(entry =>
+                Path.GetExtension(entry.Key ?? string.Empty)
+                    .Equals(".wad", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        if (!string.IsNullOrWhiteSpace(internalWadFileName))
+        {
+            wadEntries = wadEntries
+                .Where(entry => Path.GetFileName(entry.Key ?? string.Empty).Equals(
+                    Path.GetFileName(internalWadFileName),
+                    StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+        }
+        foreach (var wadEntry in wadEntries)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var png = TryExtractFromWad(

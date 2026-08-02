@@ -22,6 +22,8 @@ public sealed class UiLocalization
                 ["FirstSetupComplete"]="First setup completed",["FirstSetupCompleteMessage"]="IWADs, source ports and mods have been processed. You can repeat the scans later in Setup.",
                 ["ScanComplete"]="Scan complete",["ScanFailed"]="Scan failed",["Scanning"]="Scanning",["ScanningDirectories"]="The portable folders are being inspected.",["FirstSetupProgressStatus"]="The current setup folder is being scanned and imported.",["Next"]="Next",["Finish"]="Finish",
                 ["CheckingModsForIwads"]="Checking mod folder",["CheckingModsForIwadsStatus"]="Looking for IWADs before importing the mods.",["IwadFoundInModsTitle"]="IWAD detected in Mods",["IwadFoundInModsMessage"]="{0} contains the following IWAD: {1}\n\nMove the file to Data\\GameWads and register it under Setup > IWAD, or keep it in Data\\Mods as a normal library entry?",["MoveAndRegisterIwad"]="Move and register",["KeepAsMod"]="Keep as mod",
+                ["IwadTargetAlreadyExists"]="{0}: A file with the same name already exists in the IWAD folder.",["IwadMoveRequired"]="{0}: IWAD detected; move it to the IWAD folder or choose how it should be handled.",["IwadArtworkExtractionFailed"]="Could not extract the title artwork from {0}: {1}",["MissingModCleanupFailed"]="{0} could not be removed from the library: {1}",
+                ["RefreshingLibrary"]="Refreshing library",["RefreshModsProgress"]="Scanning Data\\Mods for new and missing archives.",["LibraryRefreshComplete"]="Library refreshed",["LibraryRefreshFailedTitle"]="Library refresh failed",["RemovedLibraryEntries"]="Removed missing library entries: {0}",
                 ["RemovedDefinitions"]="Removed missing definitions: {0}",["DeleteSourcePort"]="Delete source port",["DeleteIwad"]="Delete IWAD",["DeleteDefinitionWarning"]="Delete the definition “{0}”? Dependent mods are reset to automatic selection.",["DeleteSourcePortFiles"]="Also permanently delete the complete source-port folder",["DeleteIwadFiles"]="Also permanently delete the IWAD archive and its managed media",["DeleteMod"]="Delete mod",["DeleteModWarning"]="Delete “{0}” from the library? Metadata and collection assignments are removed.",["DeleteModFiles"]="Also permanently delete the mod archive and its managed artwork, screenshots and demos",["DefinitionDeleted"]="Deleted",["DefinitionDeletedMessage"]="“{0}” was removed.",["ModDeletedMessage"]="“{0}” was removed from the library.",["DeleteFailed"]="Delete failed",
                 ["ScanSourcePortDirectory"]="Scan source-port folder",["ScanIwadDirectory"]="Scan IWAD folder",
                 ["Home"] = "Home", ["Library"] = "Library", ["MyLibrary"] = "My Library",
@@ -31,7 +33,7 @@ public sealed class UiLocalization
                 ["Search"] = "Search library", ["IdGamesSearch"] = "Search /idgames",
                 ["Featured"] = "FEATURED", ["ExploreNow"] = "Discover and play",
                 ["ImportTooltip"] = "Import WAD, PK3 or archive",
-                ["ClassicTooltip"] = "Migrate an existing DoomLauncher installation", ["RefreshTooltip"] = "Refresh library",
+                ["RefreshTooltip"] = "Scan Mods: add new archives and remove missing entries",
                 ["All"] = "All", ["Iwads"] = "IWADs", ["Mods"] = "Mods",
                 ["TotalConversions"] = "Total Conversions", ["Unplayed"] = "Unplayed",
                 ["Title"] = "Title", ["LastPlayed"] = "Last played", ["Playtime"] = "Playtime",
@@ -359,6 +361,8 @@ public sealed class UiLocalization
             {
                 ["FirstSetupProgressStatus"]="Der aktuelle Einrichtungsordner wird gescannt und importiert.",["Next"]="Weiter",["Finish"]="Fertigstellen",
                 ["CheckingModsForIwads"]="Mod-Verzeichnis prüfen",["CheckingModsForIwadsStatus"]="Vor dem Mod-Import wird nach IWADs gesucht.",["IwadFoundInModsTitle"]="IWAD im Mods-Verzeichnis erkannt",["IwadFoundInModsMessage"]="{0} enthält folgende IWAD: {1}\n\nSoll die Datei nach Data\\GameWads verschoben und unter Setup > IWAD registriert werden oder als normaler Bibliothekseintrag in Data\\Mods verbleiben?",["MoveAndRegisterIwad"]="Verschieben und registrieren",["KeepAsMod"]="Als Mod behalten",
+                ["IwadTargetAlreadyExists"]="{0}: Im IWAD-Verzeichnis existiert bereits eine gleichnamige Datei.",["IwadMoveRequired"]="{0}: IWAD erkannt; verschiebe die Datei in das IWAD-Verzeichnis oder wähle die gewünschte Behandlung.",["IwadArtworkExtractionFailed"]="Das Titelbild aus {0} konnte nicht extrahiert werden: {1}",["MissingModCleanupFailed"]="{0} konnte nicht aus der Bibliothek entfernt werden: {1}",
+                ["RefreshingLibrary"]="Bibliothek wird aktualisiert",["RefreshModsProgress"]="Data\\Mods wird auf neue und fehlende Archive geprüft.",["LibraryRefreshComplete"]="Bibliothek aktualisiert",["LibraryRefreshFailedTitle"]="Aktualisierung fehlgeschlagen",["RemovedLibraryEntries"]="Fehlende Bibliothekseinträge entfernt: {0}",
                 ["MigrationPortableNotice"]="Datenbank, IWADs, Sourceports, Mods, Titelbilder, Screenshots und weitere verwaltete Medien werden in die portablen Data-Ordner von Doom Launcher 667 kopiert. Die Originalinstallation bleibt unverändert und wird danach nicht mehr benötigt.",
                 ["ChooseOriginalDoomLauncherFolder"]="Original-Doom-Launcher-Ordner auswählen",
                 ["MigrationProgressTitle"]="DoomLauncher-Installation wird migriert",
@@ -530,7 +534,7 @@ public sealed class UiLocalization
                 ["Search"]="Bibliothek durchsuchen",["IdGamesSearch"]="/idgames durchsuchen",
                 ["Featured"]="IM RAMPENLICHT",["ExploreNow"]="Entdecken und spielen",
                 ["ImportTooltip"]="WAD, PK3 oder Archiv importieren",
-                ["ClassicTooltip"]="Bestehende DoomLauncher-Installation migrieren",["RefreshTooltip"]="Bibliothek aktualisieren",
+                ["RefreshTooltip"]="Mods scannen: neue Archive ergänzen und fehlende Einträge entfernen",
                 ["All"]="Alle",["Unplayed"]="Ungespielt",["Title"]="Titel",["LastPlayed"]="Zuletzt gespielt",
                 ["Playtime"]="Spielzeit",["Year"]="Jahr",["Columns"]="Spalten",["Artwork"]="Cover",
                 ["Author"]="Autor",["ReleaseDate"]="Veröffentlichung",["Maps"]="Maps",["Rating"]="Bewertung",
@@ -671,6 +675,8 @@ public sealed class UiLocalization
             {
                 ["FirstSetupProgressStatus"]="Le dossier de configuration actuel est analysé et importé.",["Next"]="Suivant",["Finish"]="Terminer",
                 ["CheckingModsForIwads"]="Vérification du dossier des mods",["CheckingModsForIwadsStatus"]="Recherche d’IWAD avant l’importation des mods.",["IwadFoundInModsTitle"]="IWAD détecté dans Mods",["IwadFoundInModsMessage"]="{0} contient l’IWAD suivant : {1}\n\nDéplacer le fichier vers Data\\GameWads et l’enregistrer sous Configuration > IWAD, ou le conserver comme mod normal dans Data\\Mods ?",["MoveAndRegisterIwad"]="Déplacer et enregistrer",["KeepAsMod"]="Conserver comme mod",
+                ["IwadTargetAlreadyExists"]="{0} : un fichier du même nom existe déjà dans le dossier IWAD.",["IwadMoveRequired"]="{0} : IWAD détecté ; déplacez-le dans le dossier IWAD ou choisissez son traitement.",["IwadArtworkExtractionFailed"]="Impossible d’extraire l’illustration de {0} : {1}",["MissingModCleanupFailed"]="Impossible de supprimer {0} de la bibliothèque : {1}",
+                ["RefreshingLibrary"]="Actualisation de la bibliothèque",["RefreshModsProgress"]="Recherche de nouvelles archives et d’archives manquantes dans Data\\Mods.",["LibraryRefreshComplete"]="Bibliothèque actualisée",["LibraryRefreshFailedTitle"]="Échec de l’actualisation",["RemovedLibraryEntries"]="Entrées manquantes supprimées : {0}",
                 ["MigrationPortableNotice"]="La base de données, les IWAD, les ports source, les mods, les illustrations de titre, les captures et les autres médias gérés sont copiés dans les dossiers Data portables. L’installation d’origine reste intacte et ne sera plus requise.",
                 ["ChooseOriginalDoomLauncherFolder"]="Choisir le dossier Doom Launcher d’origine",
                 ["MigrationProgressTitle"]="Migration de l’installation DoomLauncher",
@@ -764,8 +770,8 @@ public sealed class UiLocalization
                 ["Collections"]="Collections",["Search"]="Rechercher dans la bibliothèque",
                 ["IdGamesSearch"]="Rechercher dans /idgames",["Featured"]="À LA UNE",
                 ["ExploreNow"]="Découvrir et jouer",
-                ["ImportTooltip"]="Importer un WAD, PK3 ou une archive",["ClassicTooltip"]="Migrer une installation DoomLauncher existante",
-                ["RefreshTooltip"]="Actualiser la bibliothèque",["All"]="Tous",["Unplayed"]="Non joués",
+                ["ImportTooltip"]="Importer un WAD, PK3 ou une archive",
+                ["RefreshTooltip"]="Analyser les mods : ajouter les archives et supprimer les entrées manquantes",["All"]="Tous",["Unplayed"]="Non joués",
                 ["Title"]="Titre",["LastPlayed"]="Dernière partie",["Playtime"]="Temps de jeu",["Year"]="Année",
                 ["Columns"]="Colonnes",["Artwork"]="Illustration",["Author"]="Auteur",
                 ["ReleaseDate"]="Date de sortie",["Maps"]="Cartes",["Rating"]="Note",
@@ -977,6 +983,8 @@ public sealed class UiLocalization
             {
                 ["FirstSetupProgressStatus"]="Se está escaneando e importando la carpeta de configuración actual.",["Next"]="Siguiente",["Finish"]="Finalizar",
                 ["CheckingModsForIwads"]="Comprobando la carpeta de mods",["CheckingModsForIwadsStatus"]="Buscando IWAD antes de importar los mods.",["IwadFoundInModsTitle"]="IWAD detectado en Mods",["IwadFoundInModsMessage"]="{0} contiene el siguiente IWAD: {1}\n\n¿Mover el archivo a Data\\GameWads y registrarlo en Configuración > IWAD, o conservarlo como mod normal en Data\\Mods?",["MoveAndRegisterIwad"]="Mover y registrar",["KeepAsMod"]="Conservar como mod",
+                ["IwadTargetAlreadyExists"]="{0}: ya existe un archivo con el mismo nombre en la carpeta IWAD.",["IwadMoveRequired"]="{0}: se detectó un IWAD; muévelo a la carpeta IWAD o elige cómo tratarlo.",["IwadArtworkExtractionFailed"]="No se pudo extraer la portada de {0}: {1}",["MissingModCleanupFailed"]="No se pudo eliminar {0} de la biblioteca: {1}",
+                ["RefreshingLibrary"]="Actualizando biblioteca",["RefreshModsProgress"]="Buscando archivos nuevos y ausentes en Data\\Mods.",["LibraryRefreshComplete"]="Biblioteca actualizada",["LibraryRefreshFailedTitle"]="Error al actualizar la biblioteca",["RemovedLibraryEntries"]="Entradas ausentes eliminadas: {0}",
                 ["MigrationPortableNotice"]="La base de datos, los IWAD, los puertos fuente, los mods, las portadas, las capturas y otros medios administrados se copian en las carpetas Data portátiles. La instalación original permanece intacta y ya no será necesaria.",
                 ["ChooseOriginalDoomLauncherFolder"]="Elegir carpeta original de Doom Launcher",
                 ["MigrationProgressTitle"]="Migrando la instalación de DoomLauncher",
@@ -1070,8 +1078,8 @@ public sealed class UiLocalization
                 ["Collections"]="Colecciones",["Search"]="Buscar en la biblioteca",
                 ["IdGamesSearch"]="Buscar en /idgames",["Featured"]="DESTACADO",
                 ["ExploreNow"]="Descubrir y jugar",
-                ["ImportTooltip"]="Importar WAD, PK3 o archivo",["ClassicTooltip"]="Migrar una instalación existente de DoomLauncher",
-                ["RefreshTooltip"]="Actualizar biblioteca",["All"]="Todos",["Unplayed"]="Sin jugar",
+                ["ImportTooltip"]="Importar WAD, PK3 o archivo",
+                ["RefreshTooltip"]="Escanear Mods: añadir archivos nuevos y eliminar entradas ausentes",["All"]="Todos",["Unplayed"]="Sin jugar",
                 ["Title"]="Título",["LastPlayed"]="Última partida",["Playtime"]="Tiempo de juego",["Year"]="Año",
                 ["Columns"]="Columnas",["Artwork"]="Portada",["Author"]="Autor",
                 ["ReleaseDate"]="Fecha de lanzamiento",["Maps"]="Mapas",["Rating"]="Valoración",
@@ -1325,7 +1333,7 @@ public sealed class UiText(UiLocalization localization)
     public string DebugReady => this[nameof(DebugReady)];
     public string ModLibrary => this[nameof(ModLibrary)]; public string Search => this[nameof(Search)];
     public string Featured => this[nameof(Featured)]; public string ExploreNow => this[nameof(ExploreNow)];
-    public string ImportTooltip => this[nameof(ImportTooltip)]; public string ClassicTooltip => this[nameof(ClassicTooltip)];
+    public string ImportTooltip => this[nameof(ImportTooltip)];
     public string RefreshTooltip => this[nameof(RefreshTooltip)]; public string All => this[nameof(All)];
     public string Iwads => this[nameof(Iwads)]; public string Mods => this[nameof(Mods)];
     public string PlayedMods => this[nameof(PlayedMods)];

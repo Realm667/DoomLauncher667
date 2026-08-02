@@ -7,8 +7,10 @@ namespace DoomLauncher.WinUI.Services;
 
 public sealed class FirstSetupService(
     IDoomLauncherDatabaseLocator databaseLocator,
-    INativeLibraryService libraryService) : IFirstSetupService
+    INativeLibraryService libraryService,
+    UiLocalization? localization = null) : IFirstSetupService
 {
+    private readonly UiLocalization _localization = localization ?? new UiLocalization();
     private const string WizardMarker = "FirstSetupWizardV2";
     private static readonly HashSet<string> ArchiveExtensions = new(
         [".zip", ".7z", ".rar", ".wad"],
@@ -488,7 +490,7 @@ public sealed class FirstSetupService(
                         && candidate.Candidate.Md5.Equals(
                             existing.Md5,
                             StringComparison.OrdinalIgnoreCase));
-                await EnsureGameFileAsync(
+                var gameFileId = await EnsureGameFileAsync(
                     databasePath,
                     root,
                     item.Archive,
@@ -496,6 +498,31 @@ public sealed class FirstSetupService(
                     item.Candidate.SuggestedName,
                     existing?.IwadId,
                     cancellationToken);
+                var media = await libraryService.LoadGameMediaAsync(
+                    gameFileId,
+                    cancellationToken);
+                if (media.TitleArtwork is null)
+                {
+                    try
+                    {
+                        await libraryService.TryImportTitlePicAsync(
+                            gameFileId,
+                            item.Archive,
+                            item.Candidate.InternalFileName,
+                            cancellationToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception exception)
+                    {
+                        warnings.Add(_localization.Format(
+                            "IwadArtworkExtractionFailed",
+                            item.Candidate.InternalFileName,
+                            exception.Message));
+                    }
+                }
                 if (existing is not null
                     && existing.Md5.Equals(
                         item.Candidate.Md5,
@@ -807,13 +834,14 @@ public sealed class FirstSetupService(
     {
         progress?.Report(0);
         await EnsureManagedLayoutAsync(cancellationToken);
-        var (_, root) = await GetLayoutAsync(cancellationToken);
+        var (databasePath, root) = await GetLayoutAsync(cancellationToken);
         var directory = Path.Combine(root, "Mods");
         var files = EnumerateFiles(directory, ModExtensions).ToArray();
         var imported = 0;
         var updated = 0;
         var skipped = 0;
         var movedIwads = 0;
+        var removedItems = new List<string>();
         var warnings = new List<string>();
         for (var fileIndex = 0; fileIndex < files.Length; fileIndex++)
         {
@@ -844,8 +872,9 @@ public sealed class FirstSetupService(
                     if (File.Exists(target))
                     {
                         throw new IOException(
-                            $"Im IWAD-Verzeichnis existiert bereits " +
-                            $"{Path.GetFileName(file)}.");
+                            _localization.Format(
+                                "IwadTargetAlreadyExists",
+                                Path.GetFileName(file)));
                     }
                     Directory.CreateDirectory(Path.GetDirectoryName(target)!);
                     File.Move(file, target);
@@ -857,9 +886,9 @@ public sealed class FirstSetupService(
                 if (isIwad && !hasDecision)
                 {
                     skipped++;
-                    warnings.Add(
-                        $"{Path.GetFileName(file)}: IWAD erkannt; bitte in das " +
-                        "IWAD-Verzeichnis verschieben.");
+                    warnings.Add(_localization.Format(
+                        "IwadMoveRequired",
+                        Path.GetFileName(file)));
                     progress?.Report(
                         (fileIndex + 1) * 90d / Math.Max(1, files.Length));
                     continue;
@@ -902,15 +931,87 @@ public sealed class FirstSetupService(
             updated += iwadResult.Imported + iwadResult.Updated;
             warnings.AddRange(iwadResult.Warnings);
         }
+        progress?.Report(96);
+        var missingMods = await RemoveMissingModsAsync(
+            databasePath,
+            root,
+            cancellationToken);
+        removedItems.AddRange(missingMods.RemovedItems);
+        warnings.AddRange(missingMods.Warnings);
         progress?.Report(100);
         return new SetupScanResult(
             files.Length,
             imported,
             updated,
-            0,
+            removedItems.Count,
             skipped,
-            [],
+            removedItems,
             warnings);
+    }
+
+    private async Task<(
+        IReadOnlyList<string> RemovedItems,
+        IReadOnlyList<string> Warnings)> RemoveMissingModsAsync(
+        string databasePath,
+        string gameFilesRoot,
+        CancellationToken cancellationToken)
+    {
+        var missing = new List<(int GameFileId, string Reference, string Title)>();
+        await using (var connection = await OpenAsync(
+                         databasePath,
+                         cancellationToken))
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText =
+                """
+                SELECT game.GameFileID,
+                       game.FileName,
+                       COALESCE(NULLIF(TRIM(game.Title), ''), game.FileName)
+                FROM GameFiles game
+                LEFT JOIN IWads iwad ON iwad.GameFileID=game.GameFileID
+                WHERE iwad.IWadID IS NULL
+                  AND lower(replace(game.FileName, '/', '\')) LIKE 'mods\%';
+                """;
+            await using var reader = await command.ExecuteReaderAsync(
+                cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                var reference = reader.GetString(1);
+                var path = Path.GetFullPath(Path.Combine(
+                    gameFilesRoot,
+                    reference));
+                if (!File.Exists(path))
+                {
+                    missing.Add((
+                        reader.GetInt32(0),
+                        reference,
+                        reader.GetString(2)));
+                }
+            }
+        }
+
+        var removed = new List<string>();
+        var warnings = new List<string>();
+        foreach (var entry in missing)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                await libraryService.DeleteGameAsync(
+                    entry.GameFileId,
+                    deletePhysicalFiles: false,
+                    cancellationToken);
+                removed.Add(entry.Title);
+            }
+            catch (Exception exception)
+            {
+                warnings.Add(_localization.Format(
+                    "MissingModCleanupFailed",
+                    entry.Reference,
+                    exception.Message));
+            }
+        }
+        return (removed, warnings);
     }
 
     private async Task<(string DatabasePath, string Root)> GetLayoutAsync(
@@ -925,7 +1026,7 @@ public sealed class FirstSetupService(
         return (databasePath, root);
     }
 
-    private static async Task EnsureGameFileAsync(
+    private static async Task<int> EnsureGameFileAsync(
         string databasePath,
         string gameFilesRoot,
         string fullPath,
@@ -939,8 +1040,13 @@ public sealed class FirstSetupService(
         existing.CommandText =
             "SELECT GameFileID FROM GameFiles WHERE FileName=$file COLLATE NOCASE LIMIT 1;";
         existing.Parameters.AddWithValue("$file", reference);
-        if (await existing.ExecuteScalarAsync(cancellationToken) is not null)
-            return;
+        var existingValue = await existing.ExecuteScalarAsync(cancellationToken);
+        if (existingValue is not null && existingValue != DBNull.Value)
+        {
+            return Convert.ToInt32(
+                existingValue,
+                CultureInfo.InvariantCulture);
+        }
 
         if (existingIwadId.HasValue)
         {
@@ -979,7 +1085,7 @@ public sealed class FirstSetupService(
                         DatabaseTextSanitizer.SingleLine(title));
                     relocate.Parameters.AddWithValue("$gameFileId", gameFileId);
                     await relocate.ExecuteNonQueryAsync(cancellationToken);
-                    return;
+                    return gameFileId;
                 }
             }
         }
@@ -993,6 +1099,7 @@ public sealed class FirstSetupService(
                  Map, MapCount, IsSyncNeeded)
             VALUES
                 ($file, $title, NULL, $downloaded, 0, $maps, $mapCount, 1);
+            SELECT last_insert_rowid();
             """;
         insert.Parameters.AddWithValue("$file", reference);
         insert.Parameters.AddWithValue(
@@ -1007,7 +1114,9 @@ public sealed class FirstSetupService(
             "$maps",
             maps.Count == 0 ? DBNull.Value : string.Join(", ", maps));
         insert.Parameters.AddWithValue("$mapCount", maps.Count);
-        await insert.ExecuteNonQueryAsync(cancellationToken);
+        return Convert.ToInt32(
+            await insert.ExecuteScalarAsync(cancellationToken),
+            CultureInfo.InvariantCulture);
     }
 
     private static async Task<(

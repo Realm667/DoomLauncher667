@@ -5,7 +5,7 @@ engine games and mods on Windows. It combines a modern WinUI 3 interface with
 library management, source-port and IWAD setup, /idgames integration,
 collections, statistics, achievements, screenshots, and package transfer.
 
-The current public version is *0.8.4 Beta*.
+The current public version is *0.8.5 Beta*.
 
 == Downloading the portable beta
 
@@ -99,7 +99,7 @@ dotnet publish DoomLauncher.WinUI/DoomLauncher.WinUI.csproj -c Release -p:Platfo
 Maintainer release packages are built reproducibly with:
 
 ----
-./deployment/package-release.ps1 -Version 0.8.4
+./deployment/package-release.ps1 -Version 0.8.5
 ----
 
 Pushing a version tag such as `v0.9.0` runs the same build and test process and

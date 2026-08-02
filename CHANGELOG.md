@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+## 0.8.5 - 2026-08-02
+
+- Localized IWAD scan conflicts and related first-setup warnings through the
+  active English, German, French or Spanish UI language instead of returning
+  hard-coded German service messages.
+- First setup now extracts and assigns TITLEPIC artwork from direct IWADs and
+  from the exact detected WAD inside an IWAD archive. Existing custom artwork
+  is preserved, while missing IWAD artwork is backfilled on a later scan.
+- Removed the redundant manual classic-migration button from the shared
+  header; migration remains a documented first-start workflow for empty
+  portable instances.
+- Turned **Refresh Library** into a real `Data\\Mods` reconciliation: supported
+  new archives are imported and database entries for missing managed archives
+  are removed. The localized tooltip now describes both operations.
+- Added regression coverage for localized IWAD warnings, first-setup IWAD
+  artwork extraction and add/remove reconciliation of the managed Mods folder.
+
 ## 0.8.4 - 2026-08-02
 
 - Fixed migration of classic Doom Launcher databases whose legacy

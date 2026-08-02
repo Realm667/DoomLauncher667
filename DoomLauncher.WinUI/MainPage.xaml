@@ -535,12 +535,6 @@
                         </DropDownButton.Flyout>
                     </DropDownButton>
                     <Button
-                        AutomationProperties.Name="{Binding ClassicTooltip}"
-                        Click="OpenClassicButton_Click"
-                        ToolTipService.ToolTip="{Binding ClassicTooltip}">
-                        <FontIcon Glyph="&#xE7C8;" />
-                    </Button>
-                    <Button
                         AutomationProperties.Name="{Binding RefreshTooltip}"
                         Click="RefreshButton_Click"
                         ToolTipService.ToolTip="{Binding RefreshTooltip}">

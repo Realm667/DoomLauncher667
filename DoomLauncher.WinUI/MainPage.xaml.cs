@@ -906,11 +906,6 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private async void OpenClassicButton_Click(object sender, RoutedEventArgs args)
-    {
-        await ShowMigrationDialogAsync();
-    }
-
     private async void ImportButton_Click(object sender, RoutedEventArgs args)
     {
         var picker = new Windows.Storage.Pickers.FileOpenPicker();
@@ -946,8 +941,29 @@ public sealed partial class MainPage : Page
 
     private async void RefreshButton_Click(object sender, RoutedEventArgs args)
     {
-        await ViewModel.RefreshAsync(_loadCancellation.Token);
-        SyncSelection();
+        try
+        {
+            var decisions = await ResolveIwadsInModsAsync();
+            var result = await RunProgressDialogAsync(
+                Strings["RefreshingLibrary"],
+                Strings["RefreshModsProgress"],
+                progress => _app.FirstSetupService.ScanModsAsync(
+                    _loadCancellation.Token,
+                    progress,
+                    decisions));
+            await ViewModel.RefreshAsync(_loadCancellation.Token);
+            SyncSelection();
+            await ShowActionMessageAsync(
+                Strings["LibraryRefreshComplete"],
+                FormatSetupScanResult(result),
+                Strings["Close"]);
+        }
+        catch (Exception exception)
+        {
+            await ShowErrorAsync(
+                Strings["LibraryRefreshFailedTitle"],
+                exception.Message);
+        }
     }
 
     private void Page_DragOver(object sender, DragEventArgs args)
@@ -3799,6 +3815,38 @@ public sealed partial class MainPage : Page
             await ShowErrorAsync(Strings["ScanFailed"], exception.Message);
             return false;
         }
+    }
+
+    private string FormatSetupScanResult(SetupScanResult scanResult)
+    {
+        var details = _app.Localization.Format(
+            "FirstSetupScanResult",
+            scanResult.Discovered,
+            scanResult.Imported,
+            scanResult.Updated,
+            scanResult.Removed,
+            scanResult.Skipped);
+        if (scanResult.RemovedItems.Count > 0)
+        {
+            details += Environment.NewLine
+                + Environment.NewLine
+                + _app.Localization.Format(
+                    "RemovedLibraryEntries",
+                    string.Join(", ", scanResult.RemovedItems));
+        }
+        if (scanResult.Warnings.Count > 0)
+        {
+            details += Environment.NewLine
+                + Environment.NewLine
+                + _app.Localization.Format(
+                    "FirstSetupWarnings",
+                    scanResult.Warnings.Count)
+                + Environment.NewLine
+                + string.Join(
+                    Environment.NewLine,
+                    scanResult.Warnings.Take(5).Select(warning => $"• {warning}"));
+        }
+        return details;
     }
 
     private static Border CreateSetupFolderHint(

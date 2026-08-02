@@ -2,7 +2,7 @@
 
 ## Architecture
 
-Version 0.8.4 is a self-contained WinUI 3 client. It uses the established
+Version 0.8.5 is a self-contained WinUI 3 client. It uses the established
 `DoomLauncher.sqlite` schema as its source of truth but does not require or
 start the classic .NET Framework executable.
 
@@ -21,9 +21,16 @@ grouped under the single **Manage package** menu in the shared header.
 | Last played, playtime and screenshot capture/import | Native session service |
 | Existing-installation migration, backup and integrity check | Migration service |
 
-The migration assistant is offered when no database exists and remains
-available from the header. It copies the existing database and managed content;
-the source installation is never modified.
+The migration assistant is offered once when no database exists. It copies the
+existing database and managed content; the source installation is never
+modified. After the first-start choice, migration is intentionally no longer
+shown in the shared header. To repeat a clean migration test, reset an empty
+portable instance and start it again.
+
+The header refresh command reconciles `Data\\Mods` with the library. New
+supported archives are imported, while library entries whose managed mod
+archive no longer exists are removed. Its tooltip states this behavior rather
+than implying a display-only refresh.
 
 ## Source-port capabilities
 

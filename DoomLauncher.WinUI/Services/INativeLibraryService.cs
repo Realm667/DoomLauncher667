@@ -80,6 +80,12 @@ public interface INativeLibraryService
         string archivePath,
         CancellationToken cancellationToken = default);
 
+    Task<bool> TryImportTitlePicAsync(
+        int gameFileId,
+        string archivePath,
+        string internalWadFileName,
+        CancellationToken cancellationToken = default);
+
     Task<int> CleanupDerivedThumbnailsAsync(
         CancellationToken cancellationToken = default);
 

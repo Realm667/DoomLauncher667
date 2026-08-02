@@ -29,7 +29,8 @@ public partial class App : Application
         MigrationService = new LegacyInstallationMigrationService(databaseLocator);
         FirstSetupService = new FirstSetupService(
             databaseLocator,
-            NativeLibraryService);
+            NativeLibraryService,
+            Localization);
         IdGamesService = new IdGamesService(databaseLocator);
         UserLibraryStateStore = new JsonUserLibraryStateStore();
     }
