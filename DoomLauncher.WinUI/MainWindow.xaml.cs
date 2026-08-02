@@ -22,6 +22,9 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
         _app = (App)Application.Current;
 
+        AppTitleBar.Subtitle = AppVersion.Current;
+        Title = $"Doom Launcher 667 {AppVersion.Current}";
+
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
         ApplyTitleBarTheme();

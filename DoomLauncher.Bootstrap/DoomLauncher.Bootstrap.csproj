@@ -5,9 +5,12 @@
     <AssemblyName>DoomLauncher667</AssemblyName>
     <RootNamespace>DoomLauncher.Bootstrap</RootNamespace>
     <ApplicationIcon>..\DoomLauncher.WinUI\Assets\AppIcon.ico</ApplicationIcon>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <LangVersion>7.3</LangVersion>
     <PlatformTarget>x64</PlatformTarget>
+    <AssemblyTitle>Doom Launcher 667</AssemblyTitle>
+    <Description>Portable Doom Launcher 667 bootstrapper</Description>
+    <Company>Realm667</Company>
+    <Product>Doom Launcher 667</Product>
   </PropertyGroup>
 
   <ItemGroup>

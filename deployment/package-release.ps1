@@ -80,6 +80,14 @@ if ($launcherVersion -ne "$Version.0") {
     throw "WinUI version $launcherVersion does not match package version $Version.0."
 }
 
+$manifestPath = Join-Path $repositoryRoot `
+    'DoomLauncher.WinUI\Package.appxmanifest'
+[xml]$manifest = Get-Content -LiteralPath $manifestPath -Raw
+$manifestVersion = [string]$manifest.Package.Identity.Version
+if ($manifestVersion -ne "$Version.0") {
+    throw "App manifest version $manifestVersion does not match package version $Version.0."
+}
+
 if ([string]::IsNullOrWhiteSpace($BootstrapPublishDirectory)) {
     $BootstrapPublishDirectory = Join-Path $outputRoot "launcher-$Version-win-x64"
     $resolvedBootstrapPublish = [IO.Path]::GetFullPath(

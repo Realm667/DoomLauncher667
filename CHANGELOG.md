@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.8.7 - 2026-08-02
+
+- Fixed the application title version being stuck at 0.8.1. The custom title
+  bar, native window title, executable metadata, `/idgames` user agent and
+  release package now derive from one central build version.
+- Added release validation that rejects a package when its WinUI executable,
+  bootstrap executable or app manifest does not match the requested version.
+- Replaced the inherited README with project documentation dedicated to Doom
+  Launcher 667 0.8.0 and later, including download instructions, current
+  screenshots, separately identified reimplemented and new features, portable
+  layout details and the modern WinUI 3 architecture.
+
 ## 0.8.6 - 2026-08-02
 
 - Added `DoomLauncher667.exe` as the primary portable, console-free entry

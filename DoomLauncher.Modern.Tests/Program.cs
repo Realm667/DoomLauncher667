@@ -158,6 +158,9 @@ void Check(bool condition, string message)
 try
 {
     Check(
+        AppVersion.Current == "0.8.7",
+        "Die sichtbare Version stammt aus der zentralen Buildversion");
+    Check(
         DatabaseTextSanitizer.SingleLine("Alpha\t\t\tBeta") == "Alpha Beta",
         "Mehrere Tabulatoren werden zu einem Leerzeichen normalisiert");
     Check(

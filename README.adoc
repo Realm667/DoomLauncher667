@@ -1,129 +1,134 @@
 = Doom Launcher 667
 
-Doom Launcher 667 is an open-source, portable game-library launcher for Doom
-engine games and mods on Windows. It combines a modern WinUI 3 interface with
-library management, source-port and IWAD setup, /idgames integration,
-collections, statistics, achievements, screenshots, and package transfer.
+image::gfx/logo_alpha_cropped.png[Doom Launcher 667,width=480]
 
-The current public version is *0.8.6 Beta*.
+Doom Launcher 667 is a modern, open-source and portable library launcher for
+Doom-engine games and mods on Windows. It combines a responsive WinUI 3
+interface with native game launching, IWAD and source-port setup, `/idgames`
+integration, collections, achievements, screenshots and portable package
+transfer.
 
-== Downloading the portable beta
+The application available here is the new Doom Launcher 667, introduced with
+version 0.8.0. It is a complete modern redevelopment and runs independently of
+the classic Doom Launcher executable. The original
+https://github.com/nstlaurent/DoomLauncher[Doom Launcher by hobomaster22]
+remains its inspiration and the source of the migration compatibility work.
 
-Download the Windows x64 ZIP from the
-https://github.com/Realm667/DoomLauncher667/releases[GitHub Releases page],
-extract the complete archive into a writable folder, then run
-`DoomLauncher667.exe`. The package is self-contained and does not
-require a separate .NET installation.
+== Download
 
-To update, close the launcher and copy a newer package over the existing
-portable installation. Release packages do not contain a user database or
-personal state. Existing game files, screenshots, settings, artwork and custom
-themes are preserved, while compatible schema migrations run automatically on
-the next start. This overlay-update contract is verified by the release CI.
+Download the latest Windows x64 beta ZIP from the
+https://github.com/Realm667/DoomLauncher667/releases/latest[GitHub Releases
+page]. Extract the complete archive into a writable folder and launch
+`DoomLauncher667.exe`.
 
-The first start opens the setup and migration assistant. Keep IWAD files and
-commercial game data in your own portable installation; they are not included
-in the release package.
+The download is self-contained; a separate .NET installation is not required.
+On first start, a guided setup can scan portable IWAD, source-port and mod
+folders or migrate an existing classic Doom Launcher installation.
 
-== Modern WinUI 3 client
+To update, close Doom Launcher 667 and extract the newer package over the
+existing installation. Release packages do not contain a personal database.
+Your database, mods, screenshots, artwork, settings and custom themes are
+preserved, and compatible schema migrations run automatically.
 
-`DoomLauncher.WinUI` is the modern, responsive launcher client. The repository
-also preserves the original Doom Launcher code for attribution, migration
-reference, and compatibility work. The public repository history begins with
-the Doom Launcher 667 0.8.0 release.
+NOTE: Commercial IWADs and other copyrighted game data are not distributed
+with Doom Launcher 667. Supply your legally obtained files during setup.
 
-The current vertical slice includes:
+== Screenshots
 
-* a native SQLite-backed game library;
-* search, category filters, recent items, downloads, tag collections, and
-  persistent WinUI favorites;
-* game details, artwork, playtime, IWAD, and source-port context;
-* launch-time source-port and IWAD overrides;
-* monitored game sessions with automatic playtime refresh;
-* native managed-file import by file picker or drag and drop;
-* native metadata editing, setup, and portable application settings;
-* incremental loading, lazy artwork caching, sorting, and grid/list views;
-* XML-defined themes, localization, keyboard shortcuts, and automation labels;
-* a shared modern launch contract plus an executable real-database regression
-  suite.
+=== Collections
 
-See `docs/winui-rebuild.md` for setup, deployment, and migration details.
+image::docs/screenshots/collections.png[Collection overview in Doom Launcher 667,link=docs/screenshots/collections.png]
 
-image::https://i.imgur.com/TIg4kNK.png[IWads Tile View Showcase]
-Large tile view for IWads tab. IWADs such as _Freedoom_ and _Heretic_ can be played with Doom Launcher.
+=== Library
 
-image::https://i.imgur.com/mYqC1QO.png[Custom Files Tile View Showcase]
-Large tile view for a custom tag named "Playing". Doom Launcher can play custom mapsets such as Eviternity, Back to Saturn X, Plutonia 2, and more!
+image::docs/screenshots/library.png[Modern library list in Doom Launcher 667,link=docs/screenshots/library.png]
+
+=== Achievements and statistics
+
+image::docs/screenshots/achievements.png[Achievements dashboard in Doom Launcher 667,link=docs/screenshots/achievements.png]
+
+=== Portable setup
+
+image::docs/screenshots/setup.png[Source-port and IWAD setup in Doom Launcher 667,link=docs/screenshots/setup.png]
 
 == Features
 
-* Direct download and metadata update from /idgames (through API).
-* Add ZIP archives containing WAD/PK3/DEH/TXT files.
-* Automatic scraping of title, author, release date and description
-from included text files.
-* Automatically load files when selecting an IWAD or source port.
-* Add comments and ratings for files.
-* Import screenshots directly from a source port into the database.
-* Maintain demos and saved games (DSG/ZDS supported).
-* Set launch parameters and warp into any map in a file.
-* Select specific files within a ZIP archive.
-* Tag files with custom colored tags.
-* Screen filters to simulate CRT monitors.
-* Record play-statistics for each map completed in a play session.
-Supported source ports includes ZDoom, PrBoom+, CNDoom, Chocolate Doom,
-and Crispy Doom.
-* Automatic daily database backups (SQLite database files).
-* Create shortcuts to quickly launch files.
+=== Reimplemented from the classic Doom Launcher
 
-Many more features are documented in the Help file. Please read it if
-you have any concerns regarding certain features.
+These familiar workflows were rebuilt natively for Doom Launcher 667:
 
-Doom Launcher was originally created by Hobomaster22. Doom Launcher 667 builds
-on that GPL-licensed work and retains its source history and attribution.
-See `LICENSE` and `THIRD-PARTY-NOTICES.md` for licensing details.
+* portable SQLite library management and migration from a classic Doom
+  Launcher installation;
+* IWAD and source-port definitions with per-mod selection and launch options;
+* `/idgames` discovery, download and metadata enrichment;
+* favorites, recently played mods, playtime and user-defined collections;
+* automatic metadata and map detection from supported mod archives;
+* TITLEPIC extraction, artwork management and screenshot import;
+* configurable map and skill selection for explicit advanced launches;
+* preservation of compatible library metadata during migration.
 
-== Building Doom Launcher
+=== New in Doom Launcher 667
 
-Clone the repository on Windows. Visual Studio 2022 with the Windows
-application development workload is recommended. The modern client requires
-the .NET 10 SDK and Windows App SDK tooling.
+* a responsive WinUI 3 experience with Home, Library, Collections, Discover,
+  Latest and Achievements views;
+* grid and table layouts, sortable/selectable columns, adjustable tile sizes
+  and normal, compact or ultra-compact row and accordion densities;
+* a showcase-style Home view with featured, unplayed, recent, favorite and
+  IWAD-specific recommendations;
+* collection artwork, collection browsing and optional collection filters in
+  the main library;
+* completion state, richer statistics and achievement notifications;
+* capability-aware source-port definitions for screenshot and statistics
+  adapters, plus executable version detection;
+* IWAD recognition by hash and portable folder reconciliation;
+* XML-based user themes, automatic text-contrast protection and English,
+  German, French and Spanish localization;
+* configurable grayscale or color placeholder artwork loaded from the
+  portable data folders;
+* selective import and export of individual mods, groups or complete
+  collections, including archives, artwork, screenshots and metadata;
+* guided first setup, database-health tools and an opt-in diagnostic mode;
+* additive database migrations and a tested overlay-update contract for
+  backwards-compatible portable upgrades.
 
-In order to build the Setup module for Visual Studio 2022, you may need to separately install 
-support for Installer projects: 
-https://marketplace.visualstudio.com/items?itemName=VisualStudioClient.MicrosoftVisualStudio2022InstallerProjects 
+== Modern WinUI 3 client
 
-=== Building the WinUI client
+Doom Launcher 667 is centered on a native Windows App SDK / WinUI 3 client.
+The portable `DoomLauncher667.exe` entry point starts the self-contained client
+without a console window; the classic launcher executable is not required.
 
-Install the .NET 10 SDK and the Windows application development workload, then:
+The runtime keeps mutable data beside the application so an installation can
+be moved or backed up as one folder:
 
-----
-dotnet restore DoomLauncher.WinUI/DoomLauncher.WinUI.csproj
-dotnet build DoomLauncher.WinUI/DoomLauncher.WinUI.csproj -c Release -p:Platform=x64
-dotnet publish DoomLauncher.WinUI/DoomLauncher.WinUI.csproj -c Release -p:Platform=x64 -p:PublishProfile=win-x64-unpackaged
-----
+* `Data/Mods` stores managed mod archives;
+* `Data/GameWads` stores portable IWAD archives and files;
+* `Data/Sourceports` stores portable source-port installations;
+* `Data/Screenshots`, `Data/TitlePics` and `Data/CollectionArtworks` store
+  visual library data;
+* `Data/Themes` contains the editable XML theme definitions;
+* `Data/UserState` contains portable UI preferences;
+* `DoomLauncher.sqlite` contains the library database.
 
-Maintainer release packages are built reproducibly with:
+Release builds validate that the visible client version, executable file
+versions and package version all match before an archive can be published.
 
-----
-./deployment/package-release.ps1 -Version 0.8.6
-----
+== Project status and feedback
 
-Pushing a version tag such as `v0.9.0` runs the same build and test process and
-publishes the resulting ZIP and SHA-256 checksum as a GitHub pre-release.
+Doom Launcher 667 is currently in public beta. Please report reproducible
+problems and feature requests through
+https://github.com/Realm667/DoomLauncher667/issues[GitHub Issues]. Include the
+launcher version, source port and relevant diagnostic details where possible.
 
+Technical architecture and migration notes are available in
+link:docs/winui-rebuild.md[the WinUI 3 implementation guide].
 
-== Development Tools
+== Origins and licensing
 
-SQLite Browser. Great tool for viewing and editing the DoomLauncher.sqlite database: 
-https://sqlitebrowser.org/
+Doom Launcher 667 is inspired by the original Doom Launcher created by
+hobomaster22. Compatibility and migration work retain the appropriate
+attribution, while the application delivered from version 0.8.0 onward is the
+new WinUI 3-based Doom Launcher 667 implementation.
 
-SonarLint. A great code analysis extension for Visual Studio. Highly recommended and used for most of Doom Launcher's development:
-https://www.sonarlint.org/visualstudio/
-
-== Doom Launcher Links
-
-GitHub Repository: https://github.com/Realm667/DoomLauncher667
-
-Doomworld Thread: https://www.doomworld.com/vb/doom-general/69346-doom-launcher-doom-frontend-database/
-
-Realm667: https://realm667.com/index.php/en/kunena/doom-launcher 
+See link:LICENSE[LICENSE] and
+link:THIRD-PARTY-NOTICES.md[THIRD-PARTY-NOTICES.md] for licensing and
+third-party attribution.
