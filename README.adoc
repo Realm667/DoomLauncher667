@@ -5,13 +5,26 @@ engine games and mods on Windows. It combines a modern WinUI 3 interface with
 library management, source-port and IWAD setup, /idgames integration,
 collections, statistics, achievements, screenshots, and package transfer.
 
-The current public version is *0.8*.
+The current public version is *0.8.1 Beta*.
+
+== Downloading the portable beta
+
+Download the Windows x64 ZIP from the
+https://github.com/Realm667/DoomLauncher667/releases[GitHub Releases page],
+extract the complete archive into a writable folder, then run
+`Start-DoomLauncher-WinUI.cmd`. The package is self-contained and does not
+require a separate .NET installation.
+
+The first start opens the setup and migration assistant. Keep IWAD files and
+commercial game data in your own portable installation; they are not included
+in the release package.
 
 == Modern WinUI 3 client
 
 `DoomLauncher.WinUI` is the modern, responsive launcher client. The repository
-also preserves the original Doom Launcher code and history for attribution,
-migration reference, and compatibility work.
+also preserves the original Doom Launcher code for attribution, migration
+reference, and compatibility work. The public repository history begins with
+the Doom Launcher 667 0.8.0 release.
 
 The current vertical slice includes:
 
@@ -82,6 +95,15 @@ dotnet restore DoomLauncher.WinUI/DoomLauncher.WinUI.csproj
 dotnet build DoomLauncher.WinUI/DoomLauncher.WinUI.csproj -c Release -p:Platform=x64
 dotnet publish DoomLauncher.WinUI/DoomLauncher.WinUI.csproj -c Release -p:Platform=x64 -p:PublishProfile=win-x64-unpackaged
 ----
+
+Maintainer release packages are built reproducibly with:
+
+----
+./deployment/package-release.ps1 -Version 0.8.1
+----
+
+Pushing a version tag such as `v0.9.0` runs the same build and test process and
+publishes the resulting ZIP and SHA-256 checksum as a GitHub pre-release.
 
 
 == Development Tools

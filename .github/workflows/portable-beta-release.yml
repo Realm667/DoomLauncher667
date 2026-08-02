@@ -1,0 +1,86 @@
+name: Portable beta release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: portable-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-test-release:
+    if: github.repository == 'Realm667/DoomLauncher667'
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Validate version tag
+        id: version
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF_NAME -notmatch '^v(\d+\.\d+\.\d+)$') {
+            throw "Unsupported release tag: $env:GITHUB_REF_NAME"
+          }
+          "number=$($Matches[1])" | Out-File `
+            -FilePath $env:GITHUB_OUTPUT `
+            -Encoding utf8 `
+            -Append
+
+      - name: Restore
+        run: |
+          dotnet restore DoomLauncher.WinUI/DoomLauncher.WinUI.csproj
+          dotnet restore DoomLauncher.Modern.Tests/DoomLauncher.Modern.Tests.csproj
+
+      - name: Test
+        run: dotnet run --project DoomLauncher.Modern.Tests/DoomLauncher.Modern.Tests.csproj -c Release --no-restore
+
+      - name: Build portable package
+        id: package
+        shell: pwsh
+        run: ./deployment/package-release.ps1 -Version "${{ steps.version.outputs.number }}" -OutputDirectory "$env:RUNNER_TEMP\release"
+
+      - name: Publish GitHub beta release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARCHIVE: ${{ steps.package.outputs.archive }}
+          CHECKSUM: ${{ steps.package.outputs.checksum }}
+          VERSION: ${{ steps.version.outputs.number }}
+        run: |
+          $notes = @"
+          Portable Windows x64 beta package for testing.
+
+          1. Download and extract the ZIP into a writable folder.
+          2. Run `Start-DoomLauncher-WinUI.cmd`.
+          3. Follow the first-setup assistant to configure IWADs, source ports and mods.
+
+          The package is self-contained and does not require a separate .NET installation.
+          Verify the ZIP with the attached SHA-256 file before extracting it.
+          "@
+          if (gh release view $env:GITHUB_REF_NAME --repo $env:GITHUB_REPOSITORY 2>$null) {
+            gh release upload $env:GITHUB_REF_NAME `
+              $env:ARCHIVE `
+              $env:CHECKSUM `
+              --clobber `
+              --repo $env:GITHUB_REPOSITORY
+          }
+          else {
+            gh release create $env:GITHUB_REF_NAME `
+              $env:ARCHIVE `
+              $env:CHECKSUM `
+              --verify-tag `
+              --prerelease `
+              --title "Doom Launcher 667 $env:VERSION Beta" `
+              --notes $notes `
+              --repo $env:GITHUB_REPOSITORY
+          }

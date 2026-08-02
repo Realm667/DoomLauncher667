@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Added a reproducible portable Windows x64 beta-packaging script.
+- Added a GitHub Actions release workflow that builds, tests and publishes a
+  ZIP plus SHA-256 checksum whenever a semantic `vX.Y.Z` tag is pushed.
+- Added bilingual first-start instructions to the clean portable package and
+  documented the public beta download workflow.
+
 ## 0.8.1 - 2026-08-02
 
 - The main-window size is now stored in the portable user-state file and
