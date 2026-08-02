@@ -21,11 +21,14 @@ https://github.com/Realm667/DoomLauncher667/releases/latest[GitHub Releases
 page]. Extract the complete archive into a writable folder and launch
 `DoomLauncher667.exe`.
 
-The download is self-contained; a separate .NET installation is not required.
+The **download** is self-contained; a separate .NET installation is not required.
 On first start, a guided setup can scan portable IWAD, source-port and mod
 folders or migrate an existing classic Doom Launcher installation.
 
-To update, close Doom Launcher 667 and extract the newer package over the
+To **migrate**, extract Doom Launcher 667 and use the integrated function
+at the first launch of the software, it will guide you through the process.
+
+To **update**, close Doom Launcher 667 and extract the newer package over the
 existing installation. Release packages do not contain a personal database.
 Your database, mods, screenshots, artwork, settings and custom themes are
 preserved, and compatible schema migrations run automatically.
@@ -57,15 +60,13 @@ image::docs/screenshots/setup.png[Source-port and IWAD setup in Doom Launcher 66
 
 These familiar workflows were rebuilt natively for Doom Launcher 667:
 
-* portable SQLite library management and migration from a classic Doom
-  Launcher installation;
+* portable SQLite library management;
 * IWAD and source-port definitions with per-mod selection and launch options;
 * `/idgames` discovery, download and metadata enrichment;
 * favorites, recently played mods, playtime and user-defined collections;
 * automatic metadata and map detection from supported mod archives;
 * TITLEPIC extraction, artwork management and screenshot import;
-* configurable map and skill selection for explicit advanced launches;
-* preservation of compatible library metadata during migration.
+* configurable map and skill selection for explicit advanced launches.
 
 === New in Doom Launcher 667
 
@@ -81,21 +82,23 @@ These familiar workflows were rebuilt natively for Doom Launcher 667:
 * capability-aware source-port definitions for screenshot and statistics
   adapters, plus executable version detection;
 * IWAD recognition by hash and portable folder reconciliation;
-* XML-based user themes, automatic text-contrast protection and English,
-  German, French and Spanish localization;
+* XML-based user themes including various choosable custom themes, automatic 
+  text-contrast protection and English, German, French and Spanish localization;
 * configurable grayscale or color placeholder artwork loaded from the
   portable data folders;
 * selective import and export of individual mods, groups or complete
   collections, including archives, artwork, screenshots and metadata;
 * guided first setup, database-health tools and an opt-in diagnostic mode;
-* additive database migrations and a tested overlay-update contract for
-  backwards-compatible portable upgrades.
+* tested overlay-update contract for backwards-compatible portable upgrades.
+* migration from hobomaster22's original Doom Launcher at startup, alternatively
+  scanning for mods, iwads and sourceports in their responsive directories with
+  automatic integration
 
 == Modern WinUI 3 client
 
 Doom Launcher 667 is centered on a native Windows App SDK / WinUI 3 client.
 The portable `DoomLauncher667.exe` entry point starts the self-contained client
-without a console window; the classic launcher executable is not required.
+without a console window; the classic DoomLauncher is not required.
 
 The runtime keeps mutable data beside the application so an installation can
 be moved or backed up as one folder:
