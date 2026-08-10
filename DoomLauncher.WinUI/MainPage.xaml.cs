@@ -726,6 +726,10 @@ public sealed partial class MainPage : Page
             ObsidianProgressText.Text = _app.Localization.Format(
                 "GenerationCompleted",
                 result.FileName);
+            var generatedGame = ViewModel.CatalogItems.FirstOrDefault(game =>
+                game.GameFileId == result.GameFileId);
+            if (generatedGame is not null)
+                OpenOverviewGame(generatedGame);
         }
         catch (OperationCanceledException)
         {

@@ -58,6 +58,26 @@ if (args.Length == 2
         var setup = new FirstSetupService(locator, library);
         await setup.EnsureDatabaseAsync();
         await setup.EnsureManagedLayoutAsync();
+        var testIwadPath = Path.Combine(
+            Path.GetDirectoryName(targetDatabase)!,
+            $"obsidian-test-doom-{Guid.NewGuid():N}.wad");
+        CreateFlatTitlePicWad(testIwadPath, isIwad: true);
+        var testIwadImport = await library.ImportAsync(testIwadPath);
+        await library.SaveIwadAsync(new NativeIwadDefinition(
+            null,
+            "The Ultimate Doom",
+            testIwadImport.FileName,
+            "DOOM.WAD",
+            "1.9"));
+        await library.SaveSourcePortAsync(new NativeSourcePortDefinition(
+            null,
+            "UZDoom",
+            "Data\\Sourceports\\UZDoom",
+            "uzdoom.exe",
+            ".wad,.pk3,.pk7",
+            "-file",
+            string.Empty,
+            "4.14.3"));
         var obsidian = new ObsidianService(locator, library);
         var detected = await obsidian.DetectAsync();
         if (!detected.IsAvailable)
@@ -108,9 +128,14 @@ if (args.Length == 2
             await using var command = connection.CreateCommand();
             command.CommandText =
                 """
-                SELECT Map, MapCount, ReleaseDate, Description, Author
-                FROM GameFiles
-                WHERE GameFileID=$id;
+                SELECT game.Map, game.MapCount, game.ReleaseDate,
+                       game.Description, game.Author,
+                       COALESCE(source.Name, ''), COALESCE(iwad.Name, '')
+                FROM GameFiles game
+                LEFT JOIN SourcePorts source
+                    ON source.SourcePortID=game.SourcePortID
+                LEFT JOIN IWads iwad ON iwad.IWadID=game.IWadID
+                WHERE game.GameFileID=$id;
                 """;
             command.Parameters.AddWithValue("$id", result.GameFileId);
             await using var reader = await command.ExecuteReaderAsync();
@@ -121,15 +146,17 @@ if (args.Length == 2
                     DateTime.Now.ToString("yyyy-MM-dd"),
                     StringComparison.Ordinal)
                 || !reader.GetString(3).Contains(
-                    $"Seed: {result.Seed}",
+                    result.Seed,
                     StringComparison.Ordinal)
                 || !reader.GetString(3).Contains(
-                    "Game: doom1",
+                    "Game: Doom",
                     StringComparison.Ordinal)
                 || !reader.GetString(3).Contains(
-                    "Length: single",
+                    "Length: Single level",
                     StringComparison.Ordinal)
-                || reader.GetString(4) != "Obsidian Level Maker")
+                || reader.GetString(4) != "Obsidian Level Maker"
+                || reader.GetString(5) != "UZDoom"
+                || reader.GetString(6) != "The Ultimate Doom")
             {
                 throw new InvalidOperationException(
                     "Generated map metadata was not persisted correctly.");
@@ -332,7 +359,7 @@ void Check(bool condition, string message)
 try
 {
     Check(
-        AppVersion.Current == "0.9.1",
+        AppVersion.Current == "0.9.2",
         "Die sichtbare Version stammt aus der zentralen Buildversion");
     VerifyTileImageDefaults();
     Check(
@@ -424,12 +451,53 @@ try
         "21.20251226",
         "actual seed",
         new DateTime(2026, 8, 10));
+    var normalizedGeneratedDescription = generatedDescription.Replace(
+        "\r\n",
+        "\n",
+        StringComparison.Ordinal);
     Check(
-        generatedDescription.Contains("Seed: actual seed", StringComparison.Ordinal)
-        && generatedDescription.Contains("Game: doom1", StringComparison.Ordinal)
-        && generatedDescription.Contains("Length: single", StringComparison.Ordinal)
-        && generatedDescription.Contains("21.20251226", StringComparison.Ordinal),
+        normalizedGeneratedDescription.Contains(
+            "Effective seed: actual seed",
+            StringComparison.Ordinal)
+        && normalizedGeneratedDescription.Contains("Game: Doom", StringComparison.Ordinal)
+        && normalizedGeneratedDescription.Contains(
+            "Length: Single level",
+            StringComparison.Ordinal)
+        && normalizedGeneratedDescription.Contains("21.20251226", StringComparison.Ordinal)
+        && normalizedGeneratedDescription.Contains(
+            "Architecture\nMap size: 22",
+            StringComparison.Ordinal)
+        && normalizedGeneratedDescription.Contains(
+            "Combat\nMonsters: 0.5",
+            StringComparison.Ordinal),
         "Generierte Beschreibungen dokumentieren Seed, Version und Einstellungen");
+    var obsidianDefinitions = ObsidianService.InferLaunchDefinitions(
+        obsidianOptions,
+        new LauncherDefinitionsData(
+            [
+                new NativeSourcePortDefinition(
+                    11, "GZDoom", "", "gzdoom.exe", "", "-file", "", "4.12.1"),
+                new NativeSourcePortDefinition(
+                    12, "UZDoom", "", "uzdoom.exe", "", "-file", "", "4.14.3"),
+            ],
+            [
+                new NativeIwadDefinition(
+                    21,
+                    "The Ultimate Doom",
+                    "DOOM.zip",
+                    "DOOM.WAD",
+                    "1.9"),
+                new NativeIwadDefinition(
+                    22,
+                    "Doom II - Hell on Earth",
+                    "DOOM2.zip",
+                    "DOOM2.WAD",
+                    "1.9"),
+            ]));
+    Check(
+        obsidianDefinitions.SourcePortId == 12
+        && obsidianDefinitions.IwadId == 21,
+        "Obsidian setzt die passende IWAD und neueste kompatible Source-Port-Definition");
     await VerifyLegacyNotNullSchemaAsync();
     Check(
         MapNameExtractor.ParseStored("MAP01-MAP03, E1M1")

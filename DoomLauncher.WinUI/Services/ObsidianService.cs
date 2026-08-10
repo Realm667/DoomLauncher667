@@ -328,48 +328,47 @@ public sealed class ObsidianService(
     {
         var definitions = await libraryService.LoadLauncherDefinitionsAsync(
             cancellationToken);
-        var iwadNames = options.Game switch
-        {
-            "doom1" or "ultdoom" => new[] { "DOOM.WAD", "The Ultimate Doom", "Doom" },
-            "tnt" => new[] { "TNT.WAD", "TNT" },
-            "plutonia" => new[] { "PLUTONIA.WAD", "Plutonia" },
-            "heretic" => new[] { "HERETIC.WAD", "Heretic" },
-            _ => new[] { "DOOM2.WAD", "Doom 2", "Doom II" },
-        };
-        var iwad = definitions.Iwads.FirstOrDefault(candidate =>
-            iwadNames.Any(name =>
-                candidate.InternalFileName.Equals(name, StringComparison.OrdinalIgnoreCase)
-                || candidate.Name.Contains(name, StringComparison.OrdinalIgnoreCase)));
-        NativeSourcePortDefinition? sourcePort = options.Port switch
-        {
-            "zdoom" => definitions.SourcePorts
-                .Where(candidate =>
-                    candidate.Name.Contains("ZDoom", StringComparison.OrdinalIgnoreCase))
-                .OrderByDescending(candidate => candidate.Version)
-                .FirstOrDefault(),
-            "edge" => definitions.SourcePorts
-                .Where(candidate =>
-                    candidate.Name.Contains("EDGE", StringComparison.OrdinalIgnoreCase))
-                .OrderByDescending(candidate => candidate.Version)
-                .FirstOrDefault(),
-            _ => definitions.SourcePorts
-                .Where(candidate =>
-                    candidate.Name.Contains("Boom", StringComparison.OrdinalIgnoreCase)
-                    || candidate.Name.Contains("Eternity", StringComparison.OrdinalIgnoreCase)
-                    || candidate.Name.Contains("PrBoom", StringComparison.OrdinalIgnoreCase))
-                .OrderByDescending(candidate => candidate.Version)
-                .FirstOrDefault(),
-        };
-        if (iwad is null && sourcePort is null)
+        var inferred = InferLaunchDefinitions(options, definitions);
+        if (!inferred.IwadId.HasValue && !inferred.SourcePortId.HasValue)
             return;
         var game = await libraryService.LoadGameAsync(gameFileId, cancellationToken);
         await libraryService.UpdateGameAsync(
             game with
             {
-                IwadId = iwad?.IwadId ?? game.IwadId,
-                SourcePortId = sourcePort?.SourcePortId ?? game.SourcePortId,
+                IwadId = inferred.IwadId ?? game.IwadId,
+                SourcePortId = inferred.SourcePortId ?? game.SourcePortId,
             },
             cancellationToken);
+    }
+
+    internal static InferredLaunchDefinitions InferLaunchDefinitions(
+        ObsidianGenerationOptions options,
+        LauncherDefinitionsData definitions)
+    {
+        var game = options.Game switch
+        {
+            "doom1" => "Doom",
+            "ultdoom" => "The Ultimate Doom",
+            "tnt" => "TNT: Evilution",
+            "plutonia" => "Final Doom: Plutonia",
+            "heretic" => "Heretic",
+            _ => "Doom II",
+        };
+        var sourcePort = options.Port switch
+        {
+            "zdoom" => "ZDoom GZDoom UZDoom QZDoom",
+            "edge" => "EDGE 3DGE",
+            _ => "Boom MBF PrBoom DSDA-Doom Eternity",
+        };
+        return LaunchDefinitionMatcher.Infer(
+            new ArchiveTextMetadata(
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                null,
+                game,
+                sourcePort),
+            definitions);
     }
 
     private async Task AddToGeneratedCollectionAsync(
@@ -442,27 +441,76 @@ public sealed class ObsidianService(
             ? "unknown version"
             : version;
         var requestedSeed = options.Seed.ToString(CultureInfo.InvariantCulture);
-        var seedDescription = seed.Equals(
+        var seedLines = seed.Equals(
             requestedSeed,
             StringComparison.OrdinalIgnoreCase)
-            ? $"Seed: {seed}"
-            : $"Seed: {seed}{Environment.NewLine}" +
-              $"Requested seed: {requestedSeed} " +
-              "(replaced by this Obsidian build during batch initialization)";
+            ? new[] { $"Seed: {seed}" }
+            : new[]
+            {
+                $"Effective seed: {seed}",
+                $"Requested seed: {requestedSeed}",
+                "Note: This Obsidian build replaced the requested seed during batch initialization.",
+            };
         return $$"""
             Generated with Obsidian Level Maker {{displayVersion}} on {{generatedAt:yyyy-MM-dd}}.
 
-            {{seedDescription}}
-            Game: {{options.Game}}
-            Port: {{options.Port}}
-            Length: {{options.Length}}
-            Theme: {{options.Theme}}
+            Generation
+            {{string.Join(Environment.NewLine, seedLines)}}
+            Game: {{FormatSettingValue(options.Game)}}
+            Compatibility: {{FormatSettingValue(options.Port)}}
+            Length: {{FormatSettingValue(options.Length)}}
+            Theme: {{FormatSettingValue(options.Theme)}}
 
-            Architecture: map size={{options.MapSize}}; outdoors={{options.Outdoors}}; caves={{options.Caves}}; liquids={{options.Liquids}}; hallways={{options.Hallways}}; steepness={{options.Steepness}}
-            Combat: monsters={{options.Monsters}}; strength={{options.MonsterStrength}}; bosses={{options.Bosses}}; traps={{options.Traps}}; cages={{options.Cages}}
-            Pickups: health={{options.Health}}; ammo={{options.Ammo}}; weapons={{options.Weapons}}
-            Modules: sky={{(options.GenerateSky ? "enabled" : "disabled")}}; music={{(options.GenerateMusic ? "enabled" : "disabled")}}
+            Architecture
+            Map size: {{FormatSettingValue(options.MapSize)}}
+            Outdoors: {{FormatSettingValue(options.Outdoors)}}
+            Caves: {{FormatSettingValue(options.Caves)}}
+            Liquids: {{FormatSettingValue(options.Liquids)}}
+            Hallways: {{FormatSettingValue(options.Hallways)}}
+            Steepness: {{FormatSettingValue(options.Steepness)}}
+
+            Combat
+            Monsters: {{FormatSettingValue(options.Monsters)}}
+            Monster strength: {{FormatSettingValue(options.MonsterStrength)}}
+            Bosses: {{FormatSettingValue(options.Bosses)}}
+            Traps: {{FormatSettingValue(options.Traps)}}
+            Cages: {{FormatSettingValue(options.Cages)}}
+
+            Pickups
+            Health: {{FormatSettingValue(options.Health)}}
+            Ammo: {{FormatSettingValue(options.Ammo)}}
+            Weapons: {{FormatSettingValue(options.Weapons)}}
+
+            Modules
+            Sky generator: {{(options.GenerateSky ? "enabled" : "disabled")}}
+            Music swapper: {{(options.GenerateMusic ? "enabled" : "disabled")}}
             """;
+    }
+
+    private static string FormatSettingValue(string value)
+    {
+        var normalized = value.Trim().ToLowerInvariant();
+        var display = normalized switch
+        {
+            "doom1" => "Doom",
+            "doom2" => "Doom II",
+            "ultdoom" => "The Ultimate Doom",
+            "tnt" => "TNT: Evilution",
+            "plutonia" => "Final Doom: Plutonia",
+            "zdoom" => "ZDoom / GZDoom / UZDoom / QZDoom",
+            "boom" => "Boom compatible",
+            "edge" => "EDGE / 3DGE",
+            "single" => "Single level",
+            "game" => "Full game",
+            "epi" => "Episode",
+            "mostly" => "Mostly random",
+            "jumble" => "Completely random",
+            "bit_more" => "A bit more",
+            _ => normalized.Replace('_', ' '),
+        };
+        return display.Length == 0 || !char.IsLetter(display[0])
+            ? display
+            : char.ToUpperInvariant(display[0]) + display[1..];
     }
 
     private static string SanitizeFileName(string value)

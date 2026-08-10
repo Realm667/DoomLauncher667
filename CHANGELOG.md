@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.9.2 - 2026-08-10
+
+- Successful Obsidian generation now opens the generated entry directly in
+  the Library and keeps it selected in both list and tile views.
+- Generated entries now reuse the central launch-definition matcher to select
+  the corresponding IWAD and newest compatible source port when they have
+  been configured in Setup.
+- Generated descriptions now use clearly separated Generation, Architecture,
+  Combat, Pickups and Modules sections with one setting per line.
+
 ## 0.9.1 - 2026-08-10
 
 - Fixed Obsidian batch generation ignoring the selected game, level count and
