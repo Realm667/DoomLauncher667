@@ -64,7 +64,7 @@ if (args.Length == 2
             throw new FileNotFoundException("Obsidian smoke-test installation missing.");
         var result = await obsidian.GenerateAsync(new ObsidianGenerationOptions(
             "Obsidian integration smoke test",
-            "doom2",
+            "doom1",
             "zdoom",
             "single",
             "original",
@@ -96,8 +96,56 @@ if (args.Length == 2
             collection.Name.Equals("Generated", StringComparison.OrdinalIgnoreCase));
         if (generated is null || !collections.SelectedTagIds.Contains(generated.TagId))
             throw new InvalidOperationException("Generated collection was not assigned.");
+        await using (var connection = new SqliteConnection(
+                         new SqliteConnectionStringBuilder
+                         {
+                             DataSource = targetDatabase,
+                             Mode = SqliteOpenMode.ReadOnly,
+                             Pooling = false,
+                         }.ToString()))
+        {
+            await connection.OpenAsync();
+            await using var command = connection.CreateCommand();
+            command.CommandText =
+                """
+                SELECT Map, MapCount, ReleaseDate, Description, Author
+                FROM GameFiles
+                WHERE GameFileID=$id;
+                """;
+            command.Parameters.AddWithValue("$id", result.GameFileId);
+            await using var reader = await command.ExecuteReaderAsync();
+            if (!await reader.ReadAsync()
+                || reader.GetString(0) != "E1M1"
+                || reader.GetInt32(1) != 1
+                || !reader.GetString(2).StartsWith(
+                    DateTime.Now.ToString("yyyy-MM-dd"),
+                    StringComparison.Ordinal)
+                || !reader.GetString(3).Contains(
+                    $"Seed: {result.Seed}",
+                    StringComparison.Ordinal)
+                || !reader.GetString(3).Contains(
+                    "Game: doom1",
+                    StringComparison.Ordinal)
+                || !reader.GetString(3).Contains(
+                    "Length: single",
+                    StringComparison.Ordinal)
+                || reader.GetString(4) != "Obsidian Level Maker")
+            {
+                throw new InvalidOperationException(
+                    "Generated map metadata was not persisted correctly.");
+            }
+            if (!result.Seed.Equals("667", StringComparison.OrdinalIgnoreCase)
+                && !reader.GetString(3).Contains(
+                    "Requested seed: 667",
+                    StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "The generated description does not document the requested seed.");
+            }
+        }
         Console.WriteLine(
-            $"OBSIDIAN_BATCH PASS file={game.FileName} version={result.ObsidianVersion}");
+            $"OBSIDIAN_BATCH PASS file={game.FileName} maps={result.MapCount} " +
+            $"seed={result.Seed} version={result.ObsidianVersion}");
         return 0;
     }
     finally
@@ -284,7 +332,7 @@ void Check(bool condition, string message)
 try
 {
     Check(
-        AppVersion.Current == "0.9.0",
+        AppVersion.Current == "0.9.1",
         "Die sichtbare Version stammt aus der zentralen Buildversion");
     VerifyTileImageDefaults();
     Check(
@@ -340,6 +388,48 @@ try
         englishLocalization.Format("IwadTargetAlreadyExists", "DOOM.zip")
             == "DOOM.zip: A file with the same name already exists in the IWAD folder.",
         "IWAD-Scanwarnungen folgen der aktiven Sprache");
+    var obsidianOptions = new ObsidianGenerationOptions(
+        "Test map",
+        "doom1",
+        "zdoom",
+        "single",
+        "original",
+        667,
+        "22",
+        "few",
+        "few",
+        "some",
+        "mixed",
+        "some",
+        "0.5",
+        "0.75",
+        "easier",
+        "few",
+        "few",
+        "bit_more",
+        "bit_more",
+        "normal",
+        true,
+        false);
+    var obsidianBatchSettings = ObsidianService.BuildBatchSettings(
+        obsidianOptions);
+    Check(
+        obsidianBatchSettings.Contains("game=doom1")
+        && obsidianBatchSettings.Contains("length=single")
+        && obsidianBatchSettings.Contains("seed=667")
+        && obsidianBatchSettings.Contains("@compress_output=0"),
+        "Obsidian erhÃ¤lt Spiel, LÃ¤nge, Seed und Ausgabeformat als Batch-Argumente");
+    var generatedDescription = ObsidianService.BuildGeneratedDescription(
+        obsidianOptions,
+        "21.20251226",
+        "actual seed",
+        new DateTime(2026, 8, 10));
+    Check(
+        generatedDescription.Contains("Seed: actual seed", StringComparison.Ordinal)
+        && generatedDescription.Contains("Game: doom1", StringComparison.Ordinal)
+        && generatedDescription.Contains("Length: single", StringComparison.Ordinal)
+        && generatedDescription.Contains("21.20251226", StringComparison.Ordinal),
+        "Generierte Beschreibungen dokumentieren Seed, Version und Einstellungen");
     await VerifyLegacyNotNullSchemaAsync();
     Check(
         MapNameExtractor.ParseStored("MAP01-MAP03, E1M1")

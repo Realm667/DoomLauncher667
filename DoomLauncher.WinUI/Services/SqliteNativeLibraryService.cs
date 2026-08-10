@@ -440,6 +440,62 @@ public sealed class SqliteNativeLibraryService(
         }
     }
 
+    public async Task<int> UpdateGeneratedMetadataAsync(
+        int gameFileId,
+        string archivePath,
+        string author,
+        string description,
+        DateTime releaseDate,
+        CancellationToken cancellationToken = default)
+    {
+        archivePath = Path.GetFullPath(archivePath);
+        if (!File.Exists(archivePath))
+            throw new FileNotFoundException(
+                "The generated archive could not be found.",
+                archivePath);
+
+        var detectedMaps = await MapNameExtractor.ExtractAsync(
+            archivePath,
+            cancellationToken);
+        await using var connection = await OpenConnectionAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            UPDATE GameFiles
+            SET Author=$author,
+                Description=$description,
+                ReleaseDate=$releaseDate,
+                Map=$maps,
+                MapCount=$mapCount,
+                IsSyncNeeded=1
+            WHERE GameFileID=$id;
+            """;
+        command.Parameters.AddWithValue(
+            "$author",
+            DbValue(DatabaseTextSanitizer.SingleLine(author)));
+        command.Parameters.AddWithValue(
+            "$description",
+            DbValue(DatabaseTextSanitizer.Multiline(description)));
+        command.Parameters.AddWithValue(
+            "$releaseDate",
+            releaseDate.Date.ToString(
+                "yyyy-MM-dd HH:mm:ss",
+                CultureInfo.InvariantCulture));
+        command.Parameters.AddWithValue(
+            "$maps",
+            detectedMaps.Count == 0
+                ? DBNull.Value
+                : string.Join(", ", detectedMaps));
+        command.Parameters.AddWithValue("$mapCount", detectedMaps.Count);
+        command.Parameters.AddWithValue("$id", gameFileId);
+        if (await command.ExecuteNonQueryAsync(cancellationToken) == 0)
+        {
+            throw new InvalidOperationException(
+                $"Generated library entry {gameFileId} was not found.");
+        }
+        return detectedMaps.Count;
+    }
+
     public async Task<NativeImportConflict?> FindImportConflictAsync(
         string originalFileName,
         CancellationToken cancellationToken = default)

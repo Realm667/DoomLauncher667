@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.9.1 - 2026-08-10
+
+- Fixed Obsidian batch generation ignoring the selected game, level count and
+  other generator controls. Options are now passed through Obsidian's supported
+  `key=value` batch interface instead of being mistaken for its GUI config.
+- Generated Doom maps now use the expected `ExMx` names, while Doom II and
+  compatible games continue to use `MAPxx`; single-level generation is
+  verified against a real Obsidian v21 build.
+- Generated entries now receive an explicit post-import metadata pass that
+  recounts maps and stores the creation date as the release date.
+- Generated descriptions now document the effective seed, Obsidian version and
+  all selected game, architecture, combat, pickup and module settings.
+
 ## 0.9.0 - 2026-08-10
 
 - Added a native **Generate** view for the optional Obsidian Level Maker. It

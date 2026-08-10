@@ -28,6 +28,14 @@ public interface INativeLibraryService
         ImportFileConflictResolution conflictResolution,
         CancellationToken cancellationToken = default);
 
+    Task<int> UpdateGeneratedMetadataAsync(
+        int gameFileId,
+        string archivePath,
+        string author,
+        string description,
+        DateTime releaseDate,
+        CancellationToken cancellationToken = default);
+
     Task<NativeImportConflict?> FindImportConflictAsync(
         string originalFileName,
         CancellationToken cancellationToken = default);

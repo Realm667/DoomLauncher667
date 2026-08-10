@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Globalization;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace DoomLauncher.WinUI.Services;
@@ -25,6 +24,11 @@ public sealed class ObsidianService(
     private static readonly Regex ProgressPattern = new(
         @"(?<!\d)(?<value>\d{1,3})(?:\.\d+)?\s*%",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex SeedPattern = new(
+        @"^\s*seed\s*=\s*(?<value>.+?)\s*$",
+        RegexOptions.Compiled
+        | RegexOptions.CultureInvariant
+        | RegexOptions.IgnoreCase);
 
     public string InstallDirectory => Path.Combine(
         Path.GetDirectoryName(databaseLocator.FindDatabase())!,
@@ -81,6 +85,13 @@ public sealed class ObsidianService(
         IProgress<ObsidianGenerationProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
+        if (options.Seed <= 0)
+        {
+            options = options with
+            {
+                Seed = Random.Shared.Next(1, int.MaxValue),
+            };
+        }
         var installation = await DetectAsync(cancellationToken);
         if (!installation.IsAvailable)
         {
@@ -91,7 +102,7 @@ public sealed class ObsidianService(
 
         progress?.Report(new ObsidianGenerationProgress(
             0.03,
-            "Preparing Obsidian configuration"));
+            "Preparing Obsidian batch"));
         var databaseDirectory = Path.GetDirectoryName(databaseLocator.FindDatabase())!;
         var dataDirectory = Path.Combine(databaseDirectory, "Data");
         var workingDirectory = Path.Combine(dataDirectory, "Temp", "Obsidian");
@@ -116,18 +127,13 @@ public sealed class ObsidianService(
         var temporaryOutput = Path.Combine(
             workingDirectory,
             temporaryOutputStem + ".wad");
-        var configurationPath = Path.Combine(
+        var logPath = Path.Combine(
             workingDirectory,
-            $"obsidian-{Guid.NewGuid():N}.txt");
-        var logPath = Path.ChangeExtension(configurationPath, ".log");
-        await File.WriteAllTextAsync(
-            configurationPath,
-            BuildConfiguration(options),
-            new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
-            cancellationToken);
+            $"obsidian-{Guid.NewGuid():N}.log");
 
         var outputLines = new Queue<string>();
         string? fatalOutput = null;
+        string? actualSeed = null;
         var lastProgressReport = DateTimeOffset.MinValue;
         using var process = new Process
         {
@@ -149,13 +155,14 @@ public sealed class ObsidianService(
         process.StartInfo.ArgumentList.Add("--install");
         process.StartInfo.ArgumentList.Add(Path.GetDirectoryName(
             installation.ExecutablePath)!);
-        process.StartInfo.ArgumentList.Add("--config");
-        process.StartInfo.ArgumentList.Add(configurationPath);
         process.StartInfo.ArgumentList.Add("--log");
         process.StartInfo.ArgumentList.Add(logPath);
+        process.StartInfo.ArgumentList.Add("--keep");
         process.StartInfo.ArgumentList.Add("--batch");
         process.StartInfo.ArgumentList.Add(temporaryOutput);
         process.StartInfo.ArgumentList.Add("--verbose");
+        foreach (var setting in BuildBatchSettings(options))
+            process.StartInfo.ArgumentList.Add(setting);
 
         void CaptureLine(string? line)
         {
@@ -198,6 +205,9 @@ public sealed class ObsidianService(
                 {
                 }
             }
+            var seedMatch = SeedPattern.Match(line);
+            if (seedMatch.Success)
+                actualSeed = seedMatch.Groups["value"].Value.Trim();
         }
 
         process.OutputDataReceived += (_, args) => CaptureLine(args.Data);
@@ -268,6 +278,21 @@ public sealed class ObsidianService(
                 import.GameFileId,
                 import.DestinationPath,
                 cancellationToken);
+            var generatedAt = DateTime.Now;
+            var effectiveSeed = string.IsNullOrWhiteSpace(actualSeed)
+                ? options.Seed.ToString(CultureInfo.InvariantCulture)
+                : actualSeed;
+            var mapCount = await libraryService.UpdateGeneratedMetadataAsync(
+                import.GameFileId,
+                import.DestinationPath,
+                "Obsidian Level Maker",
+                BuildGeneratedDescription(
+                    options,
+                    installation.Version,
+                    effectiveSeed,
+                    generatedAt),
+                generatedAt,
+                cancellationToken);
             await ApplyLaunchDefinitionsAsync(
                 import.GameFileId,
                 options,
@@ -282,11 +307,13 @@ public sealed class ObsidianService(
                 import.GameFileId,
                 import.FileName,
                 import.DestinationPath,
-                installation.Version);
+                installation.Version,
+                effectiveSeed,
+                mapCount,
+                generatedAt);
         }
         finally
         {
-            TryDelete(configurationPath);
             TryDelete(logPath);
             TryDelete(temporaryOutput);
             foreach (var extension in new[] { ".zip", ".pk3", ".pk7" })
@@ -372,44 +399,69 @@ public sealed class ObsidianService(
             cancellationToken);
     }
 
-    private static string BuildConfiguration(ObsidianGenerationOptions options)
+    internal static IReadOnlyList<string> BuildBatchSettings(
+        ObsidianGenerationOptions options)
     {
         var seed = options.Seed > 0
             ? options.Seed
             : Random.Shared.Next(1, int.MaxValue);
+        return
+        [
+            $"seed={seed}",
+            $"game={options.Game}",
+            $"port={options.Port}",
+            $"length={options.Length}",
+            $"theme={options.Theme}",
+            $"float_size={options.MapSize}",
+            $"outdoors={options.Outdoors}",
+            $"caves={options.Caves}",
+            $"liquids={options.Liquids}",
+            $"hallways={options.Hallways}",
+            $"steepness={options.Steepness}",
+            $"float_mons={options.Monsters}",
+            $"float_strength={options.MonsterStrength}",
+            $"bosses={options.Bosses}",
+            $"traps={options.Traps}",
+            $"cages={options.Cages}",
+            $"health={options.Health}",
+            $"ammo={options.Ammo}",
+            $"weapons={options.Weapons}",
+            "@compress_output=0",
+            $"@sky_generator={(options.GenerateSky ? 1 : 0)}",
+            $"@music_swapper={(options.GenerateMusic ? 1 : 0)}",
+        ];
+    }
+
+    internal static string BuildGeneratedDescription(
+        ObsidianGenerationOptions options,
+        string version,
+        string seed,
+        DateTime generatedAt)
+    {
+        var displayVersion = string.IsNullOrWhiteSpace(version)
+            ? "unknown version"
+            : version;
+        var requestedSeed = options.Seed.ToString(CultureInfo.InvariantCulture);
+        var seedDescription = seed.Equals(
+            requestedSeed,
+            StringComparison.OrdinalIgnoreCase)
+            ? $"Seed: {seed}"
+            : $"Seed: {seed}{Environment.NewLine}" +
+              $"Requested seed: {requestedSeed} " +
+              "(replaced by this Obsidian build during batch initialization)";
         return $$"""
-            seed = {{seed}}
+            Generated with Obsidian Level Maker {{displayVersion}} on {{generatedAt:yyyy-MM-dd}}.
 
-            ---- Game Settings ----
-            game = {{options.Game}}
-            port = {{options.Port}}
-            length = {{options.Length}}
-            theme = {{options.Theme}}
+            {{seedDescription}}
+            Game: {{options.Game}}
+            Port: {{options.Port}}
+            Length: {{options.Length}}
+            Theme: {{options.Theme}}
 
-            ---- Architecture ----
-            float_size = {{options.MapSize}}
-            outdoors = {{options.Outdoors}}
-            caves = {{options.Caves}}
-            liquids = {{options.Liquids}}
-            hallways = {{options.Hallways}}
-            steepness = {{options.Steepness}}
-
-            ---- Combat ----
-            float_mons = {{options.Monsters}}
-            float_strength = {{options.MonsterStrength}}
-            bosses = {{options.Bosses}}
-            traps = {{options.Traps}}
-            cages = {{options.Cages}}
-
-            ---- Pickups ----
-            health = {{options.Health}}
-            ammo = {{options.Ammo}}
-            weapons = {{options.Weapons}}
-
-            ---- Modules ----
-            @compress_output = 0
-            @sky_generator = {{(options.GenerateSky ? 1 : 0)}}
-            @music_swapper = {{(options.GenerateMusic ? 1 : 0)}}
+            Architecture: map size={{options.MapSize}}; outdoors={{options.Outdoors}}; caves={{options.Caves}}; liquids={{options.Liquids}}; hallways={{options.Hallways}}; steepness={{options.Steepness}}
+            Combat: monsters={{options.Monsters}}; strength={{options.MonsterStrength}}; bosses={{options.Bosses}}; traps={{options.Traps}}; cages={{options.Cages}}
+            Pickups: health={{options.Health}}; ammo={{options.Ammo}}; weapons={{options.Weapons}}
+            Modules: sky={{(options.GenerateSky ? "enabled" : "disabled")}}; music={{(options.GenerateMusic ? "enabled" : "disabled")}}
             """;
     }
 
@@ -487,4 +539,7 @@ public sealed record ObsidianGenerationResult(
     int GameFileId,
     string FileName,
     string DestinationPath,
-    string ObsidianVersion);
+    string ObsidianVersion,
+    string Seed,
+    int MapCount,
+    DateTime GeneratedAt);
