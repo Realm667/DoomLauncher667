@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## 0.9.0 - 2026-08-10
+
+- Added a native **Generate** view for the optional Obsidian Level Maker. It
+  exposes game, compatibility, length, theme, architecture, combat, pickup,
+  module and seed controls while running Obsidian's batch mode in the
+  background with visible progress and cancellation.
+- Added portable Obsidian-Content detection in `Data/Tools/Obsidian` without
+  bundling or downloading the third-party tool. First Setup now includes an
+  optional fourth scan step and clearly explains the expected folder layout.
+- Generated WADs are stored in `Data/Mods/Generated`, imported through the
+  existing library pipeline, scanned for maps and TITLEPIC artwork, assigned
+  compatible configured IWAD/source-port definitions where possible and added
+  to the persistent **Generated** collection/filter.
+- Added localized Generate navigation and setup guidance in English, German,
+  French and Spanish, plus explicit Obsidian license/interoperability notes.
+- Extended portable package, reset and update contracts with the optional
+  user-managed Obsidian tools directory.
+
 ## 0.8.10 - 2026-08-03
 
 - Added encoding detection for archive metadata. UTF-8 and Unicode BOMs are

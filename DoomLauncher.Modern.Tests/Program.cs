@@ -43,6 +43,72 @@ if (args.Length == 1
 }
 
 if (args.Length == 2
+    && args[0].Equals(
+        "--verify-obsidian-batch",
+        StringComparison.OrdinalIgnoreCase))
+{
+    var targetDatabase = Path.GetFullPath(args[1]);
+    Environment.SetEnvironmentVariable(
+        DoomLauncherDatabaseLocator.DatabaseEnvironmentVariable,
+        targetDatabase);
+    try
+    {
+        var locator = new DoomLauncherDatabaseLocator();
+        var library = new SqliteNativeLibraryService(locator);
+        var setup = new FirstSetupService(locator, library);
+        await setup.EnsureDatabaseAsync();
+        await setup.EnsureManagedLayoutAsync();
+        var obsidian = new ObsidianService(locator, library);
+        var detected = await obsidian.DetectAsync();
+        if (!detected.IsAvailable)
+            throw new FileNotFoundException("Obsidian smoke-test installation missing.");
+        var result = await obsidian.GenerateAsync(new ObsidianGenerationOptions(
+            "Obsidian integration smoke test",
+            "doom2",
+            "zdoom",
+            "single",
+            "original",
+            667,
+            "22",
+            "few",
+            "few",
+            "some",
+            "mixed",
+            "some",
+            "0.5",
+            "0.75",
+            "easier",
+            "few",
+            "few",
+            "bit_more",
+            "bit_more",
+            "normal",
+            true,
+            false),
+            new Progress<ObsidianGenerationProgress>(progress =>
+                Console.WriteLine(
+                    $"OBSIDIAN_BATCH {progress.Value:P0} {progress.Status}")));
+        if (!File.Exists(result.DestinationPath))
+            throw new FileNotFoundException("Generated WAD was not imported.");
+        var game = await library.LoadGameAsync(result.GameFileId);
+        var collections = await library.LoadGameCollectionsAsync(result.GameFileId);
+        var generated = collections.Collections.FirstOrDefault(collection =>
+            collection.Name.Equals("Generated", StringComparison.OrdinalIgnoreCase));
+        if (generated is null || !collections.SelectedTagIds.Contains(generated.TagId))
+            throw new InvalidOperationException("Generated collection was not assigned.");
+        Console.WriteLine(
+            $"OBSIDIAN_BATCH PASS file={game.FileName} version={result.ObsidianVersion}");
+        return 0;
+    }
+    finally
+    {
+        Environment.SetEnvironmentVariable(
+            DoomLauncherDatabaseLocator.DatabaseEnvironmentVariable,
+            null);
+    }
+}
+
+if (args.Length == 2
     && args[0].Equals("--migrate-layout", StringComparison.OrdinalIgnoreCase))
 {
     var targetDatabase = Path.GetFullPath(args[1]);
@@ -218,7 +284,7 @@ void Check(bool condition, string message)
 try
 {
     Check(
-        AppVersion.Current == "0.8.10",
+        AppVersion.Current == "0.9.0",
         "Die sichtbare Version stammt aus der zentralen Buildversion");
     VerifyTileImageDefaults();
     Check(
@@ -1415,7 +1481,11 @@ static async Task VerifyFirstSetupAsync()
     {
         var locator = new DoomLauncherDatabaseLocator();
         var library = new SqliteNativeLibraryService(locator);
-        var setup = new FirstSetupService(locator, library);
+        var obsidian = new ObsidianService(locator, library);
+        var setup = new FirstSetupService(
+            locator,
+            library,
+            obsidianService: obsidian);
         await setup.EnsureDatabaseAsync();
         var legacyGameFiles = Path.Combine(root, "Data", "GameFiles");
         var legacyMods = Path.Combine(legacyGameFiles, "Mods");
@@ -1438,6 +1508,27 @@ static async Task VerifyFirstSetupAsync()
         }
         await setup.EnsureManagedLayoutAsync();
         var gameFiles = Path.Combine(root, "Data");
+        var obsidianDirectory = Path.Combine(gameFiles, "Tools", "Obsidian");
+        if (!Directory.Exists(obsidianDirectory))
+        {
+            throw new InvalidOperationException(
+                "Das portable Obsidian-Verzeichnis wurde nicht angelegt.");
+        }
+        var missingObsidian = await setup.ScanObsidianAsync();
+        if (missingObsidian.Discovered != 0 || missingObsidian.Warnings.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "Eine fehlende Obsidian-Installation wurde nicht korrekt gemeldet.");
+        }
+        await File.WriteAllBytesAsync(
+            Path.Combine(obsidianDirectory, "obsidian.exe"),
+            [0x4D, 0x5A]);
+        var detectedObsidian = await setup.ScanObsidianAsync();
+        if (detectedObsidian.Discovered != 1 || detectedObsidian.Imported != 1)
+        {
+            throw new InvalidOperationException(
+                "Die portable Obsidian-Installation wurde nicht erkannt.");
+        }
         if (!File.Exists(Path.Combine(
                 gameFiles,
                 "Mods",

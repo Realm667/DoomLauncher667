@@ -150,6 +150,8 @@ foreach ($directory in @(
         'Data\TileImages',
         'Data\CollectionArtworks',
         'Data\UserState',
+        'Data\Tools',
+        'Data\Tools\Obsidian',
         'WinUI')) {
     [void](New-Item -ItemType Directory -Path (
         Join-Path $packageRoot $directory) -Force)

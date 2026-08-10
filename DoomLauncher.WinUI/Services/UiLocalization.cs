@@ -9,17 +9,20 @@ public sealed class UiLocalization
         {
             ["en-US"] = new Dictionary<string, string>
             {
-                ["FirstSetupTitle"]="First setup",["FirstSetupIntro"]="You can pre-fill the portable Data folders. The assistant scans them in three clear steps and creates complete launcher definitions and library entries.",
+                ["FirstSetupTitle"]="First setup",["FirstSetupIntro"]="You can pre-fill the portable Data folders. The assistant scans them in four clear steps and creates complete launcher definitions and library entries.",
                 ["FirstSetupIwadsPlacement"]="Put IWAD archives (ZIP, 7Z or RAR) or individual WAD files here. Known versions are matched against the hash catalog.",
                 ["FirstSetupSourcePortsPlacement"]="Create one subfolder per source port and copy its complete portable installation into that folder.",
                 ["FirstSetupModsPlacement"]="Put mod archives and WAD/PK3/PK7 files here. Subfolders are supported and retained.",
+                ["FirstSetupObsidianPlacement"]="Optional: unpack Obsidian-Content here. Doom Launcher 667 detects obsidian.exe but never bundles or downloads Obsidian itself.",
                 ["StartSetup"]="Start setup",["Later"]="Later",["FirstSetupStep"]="Step {0} of {1}",
                 ["FirstSetupIwadsTitle"]="Step 1: Scan IWADs",["FirstSetupIwadsHelp"]="The scanner finds IWADs in the portable IWAD folder, detects their versions and creates the corresponding definitions.",
                 ["FirstSetupSourcePortsTitle"]="Step 2: Scan source ports",["FirstSetupSourcePortsHelp"]="Each subfolder is inspected for the most likely source-port EXE. Name, portable path, executable version and supported capabilities are registered automatically.",
                 ["FirstSetupModsTitle"]="Step 3: Scan mods",["FirstSetupModsHelp"]="All supported files below Mods are added to the library. Map names and available TITLEPIC artwork are imported automatically.",
+                ["FirstSetupObsidianTitle"]="Step 4: Detect Obsidian",["FirstSetupObsidianHelp"]="The portable tools folder is checked for an Obsidian-Content installation. This step is optional and can be skipped.",
+                ["ObsidianNotFoundSetup"]="Obsidian was not found. Unpack Obsidian-Content into {0} to enable Generate.",["ObsidianServiceUnavailable"]="The Obsidian integration is not available.",
                 ["FirstSetupScanReady"]="Fill this folder before starting the scan.",["ScanAndContinue"]="Scan and continue",["SkipStep"]="Skip step",
                 ["FirstSetupScanResult"]="Found: {0} · New: {1} · Updated: {2} · Removed: {3} · Skipped: {4}",["FirstSetupWarnings"]="{0} warnings occurred.",
-                ["FirstSetupComplete"]="First setup completed",["FirstSetupCompleteMessage"]="IWADs, source ports and mods have been processed. You can repeat the scans later in Setup.",
+                ["FirstSetupComplete"]="First setup completed",["FirstSetupCompleteMessage"]="IWADs, source ports, mods and the optional Obsidian installation have been processed. You can repeat the definition scans later in Setup.",
                 ["ScanComplete"]="Scan complete",["ScanFailed"]="Scan failed",["Scanning"]="Scanning",["ScanningDirectories"]="The portable folders are being inspected.",["FirstSetupProgressStatus"]="The current setup folder is being scanned and imported.",["Next"]="Next",["Finish"]="Finish",
                 ["CheckingModsForIwads"]="Checking mod folder",["CheckingModsForIwadsStatus"]="Looking for IWADs before importing the mods.",["IwadFoundInModsTitle"]="IWAD detected in Mods",["IwadFoundInModsMessage"]="{0} contains the following IWAD: {1}\n\nMove the file to Data\\GameWads and register it under Setup > IWAD, or keep it in Data\\Mods as a normal library entry?",["MoveAndRegisterIwad"]="Move and register",["KeepAsMod"]="Keep as mod",
                 ["IwadTargetAlreadyExists"]="{0}: A file with the same name already exists in the IWAD folder.",["IwadMoveRequired"]="{0}: IWAD detected; move it to the IWAD folder or choose how it should be handled.",["IwadArtworkExtractionFailed"]="Could not extract the title artwork from {0}: {1}",["MissingModCleanupFailed"]="{0} could not be removed from the library: {1}",
@@ -27,7 +30,16 @@ public sealed class UiLocalization
                 ["RemovedDefinitions"]="Removed missing definitions: {0}",["DeleteSourcePort"]="Delete source port",["DeleteIwad"]="Delete IWAD",["DeleteDefinitionWarning"]="Delete the definition “{0}”? Dependent mods are reset to automatic selection.",["DeleteSourcePortFiles"]="Also permanently delete the complete source-port folder",["DeleteIwadFiles"]="Also permanently delete the IWAD archive and its managed media",["DeleteMod"]="Delete mod",["DeleteModWarning"]="Delete “{0}” from the library? Metadata and collection assignments are removed.",["DeleteModFiles"]="Also permanently delete the mod archive and its managed artwork, screenshots and demos",["DefinitionDeleted"]="Deleted",["DefinitionDeletedMessage"]="“{0}” was removed.",["ModDeletedMessage"]="“{0}” was removed from the library.",["DeleteFailed"]="Delete failed",
                 ["ScanSourcePortDirectory"]="Scan source-port folder",["ScanIwadDirectory"]="Scan IWAD folder",
                 ["Home"] = "Home", ["Library"] = "Library", ["MyLibrary"] = "My Library",
-                ["Discover"] = "Discover", ["Favorites"] = "Favorites", ["Recent"] = "Recently played",
+                ["Discover"] = "Discover", ["Generate"] = "Generate", ["Favorites"] = "Favorites", ["Recent"] = "Recently played",
+                ["GenerateSummaryReady"]="Obsidian {0} ready · output is imported as Generated",["GenerateSummaryMissing"]="Obsidian-Content is not installed",
+                ["ObsidianMissingTitle"]="Obsidian-Content not found",["ObsidianMissingMessage"]="Download Obsidian-Content separately and unpack it into:\n{0}\n\nDoom Launcher 667 does not bundle or download Obsidian.",
+                ["ObsidianOpenFolder"]="Open Obsidian folder",["ObsidianRefresh"]="Detect again",["ObsidianInstallPath"]="Portable installation",["ObsidianDetected"]="Detected",["ObsidianNotDetected"]="Not detected",
+                ["GeneratorBasics"]="Level setup",["GeneratorArchitecture"]="Architecture",["GeneratorCombat"]="Combat and pickups",["GeneratorModules"]="Modules",
+                ["OutputName"]="Output name",["Game"]="Game",["Compatibility"]="Compatibility",["Length"]="Length",["Theme"]="Theme",["Seed"]="Seed (0 = random)",
+                ["MapSize"]="Map size",["Outdoors"]="Outdoors",["Caves"]="Caves",["Liquids"]="Liquids",["Hallways"]="Hallways",["Steepness"]="Steepness",
+                ["Monsters"]="Monsters",["MonsterStrength"]="Monster strength",["Bosses"]="Bosses",["Traps"]="Traps",["Cages"]="Cages",["Health"]="Health",["Ammo"]="Ammo",["Weapons"]="Weapons",
+                ["GenerateSky"]="Generate sky",["GenerateMusic"]="Select music",["RandomizeGenerator"]="Randomize",["GenerateLevel"]="Generate level",["CancelGeneration"]="Cancel generation",
+                ["GenerationReady"]="Configure a level and let Obsidian create it in the background.",["GenerationCompleted"]="{0} was generated, imported and tagged as Generated.",["GenerationFailed"]="Generation failed",["GeneratedFilter"]="Generated",
                 ["Downloads"] = "Latest", ["Collections"] = "Collections",
                 ["Achievements"] = "Achievements", ["ModLibrary"] = "MOD LIBRARY",
                 ["Search"] = "Search library", ["IdGamesSearch"] = "Search /idgames",
@@ -379,17 +391,20 @@ public sealed class UiLocalization
                 ["ChooseOriginalDoomLauncherFolder"]="Original-Doom-Launcher-Ordner auswählen",
                 ["MigrationProgressTitle"]="DoomLauncher-Installation wird migriert",
                 ["MigrationProgressStatus"]="Verwaltete Dateien werden kopiert, portable Pfade aktualisiert und die Datenbank vorbereitet.",
-                ["FirstSetupTitle"]="Erste Einrichtung",["FirstSetupIntro"]="Du kannst die portablen Data-Ordner vorab befüllen. Der Assistent scannt sie anschließend in drei klaren Schritten und legt vollständige Launcher-Definitionen und Bibliothekseinträge an.",
+                ["FirstSetupTitle"]="Erste Einrichtung",["FirstSetupIntro"]="Du kannst die portablen Data-Ordner vorab befüllen. Der Assistent scannt sie anschließend in vier klaren Schritten und legt vollständige Launcher-Definitionen und Bibliothekseinträge an.",
                 ["FirstSetupIwadsPlacement"]="Hier IWAD-Archive (ZIP, 7Z oder RAR) oder einzelne WAD-Dateien ablegen. Bekannte Versionen werden mit dem Hash-Katalog abgeglichen.",
                 ["FirstSetupSourcePortsPlacement"]="Für jeden Sourceport einen eigenen Unterordner anlegen und dessen vollständige portable Installation dort ablegen.",
                 ["FirstSetupModsPlacement"]="Hier Modarchive sowie WAD-, PK3- und PK7-Dateien ablegen. Unterordner werden unterstützt und beibehalten.",
+                ["FirstSetupObsidianPlacement"]="Optional: Obsidian-Content hier entpacken. Doom Launcher 667 erkennt obsidian.exe, liefert Obsidian aber nicht mit und lädt es nicht selbst herunter.",
                 ["StartSetup"]="Einrichtung starten",["Later"]="Später",["FirstSetupStep"]="Schritt {0} von {1}",
                 ["FirstSetupIwadsTitle"]="Schritt 1: IWADs scannen",["FirstSetupIwadsHelp"]="Der Scanner findet IWADs im portablen IWAD-Verzeichnis, erkennt ihre Versionen und erstellt die entsprechenden Definitionen.",
                 ["FirstSetupSourcePortsTitle"]="Schritt 2: Sourceports scannen",["FirstSetupSourcePortsHelp"]="Jeder Unterordner wird nach der wahrscheinlichsten Sourceport-EXE durchsucht. Name, portabler Pfad, EXE-Version und unterstützte Fähigkeiten werden automatisch registriert.",
                 ["FirstSetupModsTitle"]="Schritt 3: Mods scannen",["FirstSetupModsHelp"]="Alle unterstützten Dateien unter Mods werden in die Bibliothek aufgenommen. Mapnamen und vorhandene TITLEPIC-Artworks werden automatisch importiert.",
+                ["FirstSetupObsidianTitle"]="Schritt 4: Obsidian erkennen",["FirstSetupObsidianHelp"]="Der portable Tools-Ordner wird nach einer Obsidian-Content-Installation durchsucht. Dieser Schritt ist optional und kann übersprungen werden.",
+                ["ObsidianNotFoundSetup"]="Obsidian wurde nicht gefunden. Entpacke Obsidian-Content nach {0}, um Generieren zu aktivieren.",["ObsidianServiceUnavailable"]="Die Obsidian-Integration ist nicht verfügbar.",
                 ["FirstSetupScanReady"]="Diesen Ordner vor dem Scan befüllen.",["ScanAndContinue"]="Scannen und weiter",["SkipStep"]="Schritt überspringen",
                 ["FirstSetupScanResult"]="Gefunden: {0} · Neu: {1} · Aktualisiert: {2} · Entfernt: {3} · Übersprungen: {4}",["FirstSetupWarnings"]="Es gab {0} Warnungen.",
-                ["FirstSetupComplete"]="Erste Einrichtung abgeschlossen",["FirstSetupCompleteMessage"]="IWADs, Sourceports und Mods wurden verarbeitet. Die Definitions-Scans können später in den Launcher-Definitionen erneut ausgeführt werden.",
+                ["FirstSetupComplete"]="Erste Einrichtung abgeschlossen",["FirstSetupCompleteMessage"]="IWADs, Sourceports, Mods und die optionale Obsidian-Installation wurden verarbeitet. Die Definitions-Scans können später unter Setup erneut ausgeführt werden.",
                 ["ScanComplete"]="Scan abgeschlossen",["ScanFailed"]="Scan fehlgeschlagen",["Scanning"]="Scan läuft",["ScanningDirectories"]="Die portablen Verzeichnisse werden untersucht.",
                 ["RemovedDefinitions"]="Fehlende Definitionen entfernt: {0}",["DeleteSourcePort"]="Source-Port löschen",["DeleteIwad"]="IWAD löschen",["DeleteDefinitionWarning"]="Definition „{0}“ löschen? Abhängige Mods werden auf die automatische Auswahl zurückgesetzt.",["DeleteSourcePortFiles"]="Zusätzlich das vollständige Source-Port-Verzeichnis dauerhaft löschen",["DeleteIwadFiles"]="Zusätzlich das IWAD-Archiv und seine verwalteten Medien dauerhaft löschen",["DeleteMod"]="Mod löschen",["DeleteModWarning"]="„{0}“ aus der Bibliothek löschen? Metadaten und Sammlungszuordnungen werden entfernt.",["DeleteModFiles"]="Zusätzlich das Mod-Archiv sowie verwaltete Artworks, Screenshots und Demos dauerhaft löschen",["DefinitionDeleted"]="Gelöscht",["DefinitionDeletedMessage"]="„{0}“ wurde entfernt.",["ModDeletedMessage"]="„{0}“ wurde aus der Bibliothek entfernt.",["DeleteFailed"]="Löschen fehlgeschlagen",
                 ["ScanSourcePortDirectory"]="Source-Port-Verzeichnis scannen",["ScanIwadDirectory"]="IWAD-Verzeichnis scannen",
@@ -551,7 +566,16 @@ public sealed class UiLocalization
                 ["FilterCollections"]="Sammlungen nach Titel filtern",["NoMatchingCollections"]="Keine passenden Sammlungen gefunden.",["ReadMore"]="Weiterlesen",
                 ["NewCollectionPlaceholder"]="Name der Sammlung",["CollectionsSaveFailed"]="Sammlungen konnten nicht gespeichert werden",
                 ["FinishedSaveFailed"]="Abgeschlossen-Status konnte nicht gespeichert werden",
-                ["Home"]="Start",["Library"]="Bibliothek",["MyLibrary"]="Meine Bibliothek",["Discover"]="Entdecken",
+                ["Home"]="Start",["Library"]="Bibliothek",["MyLibrary"]="Meine Bibliothek",["Discover"]="Entdecken",["Generate"]="Generieren",
+                ["GenerateSummaryReady"]="Obsidian {0} bereit · Ausgabe wird als Generated importiert",["GenerateSummaryMissing"]="Obsidian-Content ist nicht installiert",
+                ["ObsidianMissingTitle"]="Obsidian-Content nicht gefunden",["ObsidianMissingMessage"]="Lade Obsidian-Content separat herunter und entpacke es nach:\n{0}\n\nDoom Launcher 667 liefert Obsidian nicht mit und lädt es nicht selbst herunter.",
+                ["ObsidianOpenFolder"]="Obsidian-Ordner öffnen",["ObsidianRefresh"]="Erneut erkennen",["ObsidianInstallPath"]="Portable Installation",["ObsidianDetected"]="Erkannt",["ObsidianNotDetected"]="Nicht erkannt",
+                ["GeneratorBasics"]="Level-Einstellungen",["GeneratorArchitecture"]="Architektur",["GeneratorCombat"]="Kampf und Pickups",["GeneratorModules"]="Module",
+                ["OutputName"]="Ausgabename",["Game"]="Spiel",["Compatibility"]="Kompatibilität",["Length"]="Länge",["Theme"]="Thema",["Seed"]="Seed (0 = zufällig)",
+                ["MapSize"]="Mapgröße",["Outdoors"]="Außenbereiche",["Caves"]="Höhlen",["Liquids"]="Flüssigkeiten",["Hallways"]="Korridore",["Steepness"]="Höhenunterschiede",
+                ["Monsters"]="Monster",["MonsterStrength"]="Monsterstärke",["Bosses"]="Bosse",["Traps"]="Fallen",["Cages"]="Käfige",["Health"]="Gesundheit",["Ammo"]="Munition",["Weapons"]="Waffen",
+                ["GenerateSky"]="Himmel generieren",["GenerateMusic"]="Musik auswählen",["RandomizeGenerator"]="Zufällig",["GenerateLevel"]="Level generieren",["CancelGeneration"]="Generierung abbrechen",
+                ["GenerationReady"]="Konfiguriere ein Level und lasse es von Obsidian im Hintergrund erzeugen.",["GenerationCompleted"]="{0} wurde generiert, importiert und als Generated markiert.",["GenerationFailed"]="Generierung fehlgeschlagen",["GeneratedFilter"]="Generated",
                 ["Favorites"]="Favoriten",["Recent"]="Zuletzt gespielt",["Collections"]="Sammlungen",
                 ["Search"]="Bibliothek durchsuchen",["IdGamesSearch"]="/idgames durchsuchen",
                 ["Featured"]="IM RAMPENLICHT",["ExploreNow"]="Entdecken und spielen",
@@ -703,17 +727,20 @@ public sealed class UiLocalization
                 ["ChooseOriginalDoomLauncherFolder"]="Choisir le dossier Doom Launcher d’origine",
                 ["MigrationProgressTitle"]="Migration de l’installation DoomLauncher",
                 ["MigrationProgressStatus"]="Copie des fichiers gérés, mise à jour des chemins portables et préparation de la base de données.",
-                ["FirstSetupTitle"]="Configuration initiale",["FirstSetupIntro"]="Vous pouvez remplir à l’avance les dossiers portables Data. L’assistant les analyse ensuite en trois étapes et crée les définitions et entrées de bibliothèque.",
+                ["FirstSetupTitle"]="Configuration initiale",["FirstSetupIntro"]="Vous pouvez remplir à l’avance les dossiers portables Data. L’assistant les analyse ensuite en quatre étapes et crée les définitions et entrées de bibliothèque.",
                 ["FirstSetupIwadsPlacement"]="Placez ici les archives IWAD (ZIP, 7Z ou RAR) ou les fichiers WAD individuels. Les versions connues sont comparées au catalogue de hachages.",
                 ["FirstSetupSourcePortsPlacement"]="Créez un sous-dossier par port source et copiez-y son installation portable complète.",
                 ["FirstSetupModsPlacement"]="Placez ici les archives de mods et les fichiers WAD/PK3/PK7. Les sous-dossiers sont conservés.",
+                ["FirstSetupObsidianPlacement"]="Facultatif : décompressez Obsidian-Content ici. Doom Launcher 667 détecte obsidian.exe mais ne distribue ni ne télécharge Obsidian.",
                 ["StartSetup"]="Démarrer",["Later"]="Plus tard",["FirstSetupStep"]="Étape {0} sur {1}",
                 ["FirstSetupIwadsTitle"]="Étape 1 : analyser les IWAD",["FirstSetupIwadsHelp"]="Le scanner trouve les IWAD dans le dossier IWAD portable, détecte leur version et crée les définitions correspondantes.",
                 ["FirstSetupSourcePortsTitle"]="Étape 2 : analyser les ports source",["FirstSetupSourcePortsHelp"]="Chaque sous-dossier est analysé pour trouver l’exécutable principal. Le nom, le chemin portable, la version et les capacités sont enregistrés.",
                 ["FirstSetupModsTitle"]="Étape 3 : analyser les mods",["FirstSetupModsHelp"]="Tous les fichiers pris en charge sous Mods sont ajoutés à la bibliothèque. Les cartes et illustrations TITLEPIC sont importées.",
+                ["FirstSetupObsidianTitle"]="Étape 4 : détecter Obsidian",["FirstSetupObsidianHelp"]="Le dossier Tools portable est recherché pour une installation Obsidian-Content. Cette étape est facultative.",
+                ["ObsidianNotFoundSetup"]="Obsidian est introuvable. Décompressez Obsidian-Content dans {0} pour activer la génération.",["ObsidianServiceUnavailable"]="L’intégration Obsidian n’est pas disponible.",
                 ["FirstSetupScanReady"]="Remplissez ce dossier avant l’analyse.",["ScanAndContinue"]="Analyser et continuer",["SkipStep"]="Ignorer l’étape",
                 ["FirstSetupScanResult"]="Trouvés : {0} · Nouveaux : {1} · Mis à jour : {2} · Supprimés : {3} · Ignorés : {4}",["FirstSetupWarnings"]="{0} avertissements sont survenus.",
-                ["FirstSetupComplete"]="Configuration initiale terminée",["FirstSetupCompleteMessage"]="Les IWAD, ports source et mods ont été traités. Les analyses peuvent être relancées dans les définitions du lanceur.",
+                ["FirstSetupComplete"]="Configuration initiale terminée",["FirstSetupCompleteMessage"]="Les IWAD, ports source, mods et l’installation Obsidian facultative ont été traités. Les analyses de définitions peuvent être relancées dans Configuration.",
                 ["ScanComplete"]="Analyse terminée",["ScanFailed"]="Échec de l’analyse",["Scanning"]="Analyse en cours",["ScanningDirectories"]="Les dossiers portables sont en cours d’analyse.",
                 ["RemovedDefinitions"]="Définitions manquantes supprimées : {0}",["DeleteSourcePort"]="Supprimer le port source",["DeleteIwad"]="Supprimer l’IWAD",["DeleteDefinitionWarning"]="Supprimer la définition « {0} » ? Les mods dépendants repasseront en sélection automatique.",["DeleteSourcePortFiles"]="Supprimer aussi définitivement le dossier complet du port source",["DeleteIwadFiles"]="Supprimer aussi définitivement l’archive IWAD et ses médias gérés",["DeleteMod"]="Supprimer le mod",["DeleteModWarning"]="Supprimer « {0} » de la bibliothèque ? Les métadonnées et affectations aux collections seront retirées.",["DeleteModFiles"]="Supprimer aussi définitivement l’archive du mod, ses illustrations, captures et démos gérées",["DefinitionDeleted"]="Supprimé",["DefinitionDeletedMessage"]="« {0} » a été supprimé.",["ModDeletedMessage"]="« {0} » a été supprimé de la bibliothèque.",["DeleteFailed"]="Échec de la suppression",
                 ["ScanSourcePortDirectory"]="Analyser le dossier des ports source",["ScanIwadDirectory"]="Analyser le dossier IWAD",
@@ -797,7 +824,7 @@ public sealed class UiLocalization
                 ["FilterCollections"]="Filtrer les collections par titre",["NoMatchingCollections"]="Aucune collection correspondante.",["ReadMore"]="Lire la suite",
                 ["NewCollectionPlaceholder"]="Nom de la collection",["CollectionsSaveFailed"]="Impossible d’enregistrer les collections",
                 ["FinishedSaveFailed"]="Impossible d’enregistrer l’état terminé",
-                ["Home"]="Accueil",["Library"]="Bibliothèque",["MyLibrary"]="Ma bibliothèque",["Discover"]="Découvrir",
+                ["Home"]="Accueil",["Library"]="Bibliothèque",["MyLibrary"]="Ma bibliothèque",["Discover"]="Découvrir",["Generate"]="Générer",
                 ["Favorites"]="Favoris",["Recent"]="Joués récemment",
                 ["Collections"]="Collections",["Search"]="Rechercher dans la bibliothèque",
                 ["IdGamesSearch"]="Rechercher dans /idgames",["Featured"]="À LA UNE",
@@ -1021,17 +1048,20 @@ public sealed class UiLocalization
                 ["ChooseOriginalDoomLauncherFolder"]="Elegir carpeta original de Doom Launcher",
                 ["MigrationProgressTitle"]="Migrando la instalación de DoomLauncher",
                 ["MigrationProgressStatus"]="Copiando archivos administrados, actualizando rutas portátiles y preparando la base de datos.",
-                ["FirstSetupTitle"]="Configuración inicial",["FirstSetupIntro"]="Puedes rellenar previamente las carpetas portátiles Data. El asistente las escanea en tres pasos y crea las definiciones y entradas de biblioteca.",
+                ["FirstSetupTitle"]="Configuración inicial",["FirstSetupIntro"]="Puedes rellenar previamente las carpetas portátiles Data. El asistente las escanea en cuatro pasos y crea las definiciones y entradas de biblioteca.",
                 ["FirstSetupIwadsPlacement"]="Coloca aquí archivos IWAD en ZIP, 7Z o RAR, o archivos WAD individuales. Las versiones conocidas se comparan con el catálogo hash.",
                 ["FirstSetupSourcePortsPlacement"]="Crea una subcarpeta por cada puerto fuente y copia allí su instalación portátil completa.",
                 ["FirstSetupModsPlacement"]="Coloca aquí archivos de mods WAD, PK3, PK7 o comprimidos. Las subcarpetas se conservan.",
+                ["FirstSetupObsidianPlacement"]="Opcional: descomprime Obsidian-Content aquí. Doom Launcher 667 detecta obsidian.exe, pero no incluye ni descarga Obsidian.",
                 ["StartSetup"]="Iniciar configuración",["Later"]="Más tarde",["FirstSetupStep"]="Paso {0} de {1}",
                 ["FirstSetupIwadsTitle"]="Paso 1: escanear IWAD",["FirstSetupIwadsHelp"]="El escáner encuentra los IWAD en la carpeta portátil de IWAD, detecta sus versiones y crea las definiciones correspondientes.",
                 ["FirstSetupSourcePortsTitle"]="Paso 2: escanear puertos fuente",["FirstSetupSourcePortsHelp"]="Cada subcarpeta se analiza para encontrar el ejecutable principal. Se registran el nombre, la ruta portátil, la versión y las capacidades.",
                 ["FirstSetupModsTitle"]="Paso 3: escanear mods",["FirstSetupModsHelp"]="Todos los archivos compatibles de Mods se añaden a la biblioteca. Se importan los mapas y las imágenes TITLEPIC disponibles.",
+                ["FirstSetupObsidianTitle"]="Paso 4: detectar Obsidian",["FirstSetupObsidianHelp"]="Se busca una instalación de Obsidian-Content en la carpeta Tools portátil. Este paso es opcional.",
+                ["ObsidianNotFoundSetup"]="No se encontró Obsidian. Descomprime Obsidian-Content en {0} para activar Generar.",["ObsidianServiceUnavailable"]="La integración de Obsidian no está disponible.",
                 ["FirstSetupScanReady"]="Rellena esta carpeta antes de iniciar el escaneo.",["ScanAndContinue"]="Escanear y continuar",["SkipStep"]="Omitir paso",
                 ["FirstSetupScanResult"]="Encontrados: {0} · Nuevos: {1} · Actualizados: {2} · Eliminados: {3} · Omitidos: {4}",["FirstSetupWarnings"]="Se produjeron {0} advertencias.",
-                ["FirstSetupComplete"]="Configuración inicial completada",["FirstSetupCompleteMessage"]="Se procesaron los IWAD, puertos fuente y mods. Los escaneos pueden repetirse desde las definiciones del lanzador.",
+                ["FirstSetupComplete"]="Configuración inicial completada",["FirstSetupCompleteMessage"]="Se procesaron los IWAD, puertos fuente, mods y la instalación opcional de Obsidian. Los escaneos de definiciones pueden repetirse desde Configuración.",
                 ["ScanComplete"]="Escaneo completado",["ScanFailed"]="Error de escaneo",["Scanning"]="Escaneando",["ScanningDirectories"]="Se están revisando las carpetas portátiles.",
                 ["RemovedDefinitions"]="Definiciones ausentes eliminadas: {0}",["DeleteSourcePort"]="Eliminar puerto fuente",["DeleteIwad"]="Eliminar IWAD",["DeleteDefinitionWarning"]="¿Eliminar la definición «{0}»? Los mods dependientes volverán a la selección automática.",["DeleteSourcePortFiles"]="Eliminar también de forma permanente la carpeta completa del puerto fuente",["DeleteIwadFiles"]="Eliminar también de forma permanente el archivo IWAD y sus medios gestionados",["DeleteMod"]="Eliminar mod",["DeleteModWarning"]="¿Eliminar «{0}» de la biblioteca? Se quitarán los metadatos y las asignaciones de colecciones.",["DeleteModFiles"]="Eliminar también de forma permanente el archivo del mod, las ilustraciones, capturas y demos gestionadas",["DefinitionDeleted"]="Eliminado",["DefinitionDeletedMessage"]="Se eliminó «{0}».",["ModDeletedMessage"]="Se eliminó «{0}» de la biblioteca.",["DeleteFailed"]="Error al eliminar",
                 ["ScanSourcePortDirectory"]="Escanear carpeta de puertos fuente",["ScanIwadDirectory"]="Escanear carpeta IWAD",
@@ -1115,7 +1145,7 @@ public sealed class UiLocalization
                 ["FilterCollections"]="Filtrar colecciones por título",["NoMatchingCollections"]="No se encontraron colecciones coincidentes.",["ReadMore"]="Leer más",
                 ["NewCollectionPlaceholder"]="Nombre de la colección",["CollectionsSaveFailed"]="No se pudieron guardar las colecciones",
                 ["FinishedSaveFailed"]="No se pudo guardar el estado completado",
-                ["Home"]="Inicio",["Library"]="Biblioteca",["MyLibrary"]="Mi biblioteca",["Discover"]="Descubrir",
+                ["Home"]="Inicio",["Library"]="Biblioteca",["MyLibrary"]="Mi biblioteca",["Discover"]="Descubrir",["Generate"]="Generar",
                 ["Favorites"]="Favoritos",["Recent"]="Jugados recientemente",
                 ["Collections"]="Colecciones",["Search"]="Buscar en la biblioteca",
                 ["IdGamesSearch"]="Buscar en /idgames",["Featured"]="DESTACADO",
@@ -1364,6 +1394,7 @@ public sealed class UiText(UiLocalization localization)
 
     public string Home => this[nameof(Home)]; public string Library => this[nameof(Library)];
     public string MyLibrary => this[nameof(MyLibrary)]; public string Discover => this[nameof(Discover)];
+    public string Generate => this[nameof(Generate)];
     public string Favorites => this[nameof(Favorites)]; public string Recent => this[nameof(Recent)];
     public string Downloads => this[nameof(Downloads)]; public string Collections => this[nameof(Collections)];
     public string Achievements => this[nameof(Achievements)]; public string Debug => this[nameof(Debug)];
@@ -1436,4 +1467,35 @@ public sealed class UiText(UiLocalization localization)
     public string LoadMore => this[nameof(LoadMore)];
     public string ListActivation => this[nameof(ListActivation)];
     public string GridActivation => this[nameof(GridActivation)];
+    public string ObsidianOpenFolder => this[nameof(ObsidianOpenFolder)];
+    public string ObsidianRefresh => this[nameof(ObsidianRefresh)];
+    public string ObsidianInstallPath => this[nameof(ObsidianInstallPath)];
+    public string GeneratorBasics => this[nameof(GeneratorBasics)];
+    public string GeneratorArchitecture => this[nameof(GeneratorArchitecture)];
+    public string GeneratorCombat => this[nameof(GeneratorCombat)];
+    public string GeneratorModules => this[nameof(GeneratorModules)];
+    public string OutputName => this[nameof(OutputName)];
+    public string Game => this[nameof(Game)];
+    public string Compatibility => this[nameof(Compatibility)];
+    public string Length => this[nameof(Length)];
+    public string Seed => this[nameof(Seed)];
+    public string MapSize => this[nameof(MapSize)];
+    public string Outdoors => this[nameof(Outdoors)];
+    public string Caves => this[nameof(Caves)];
+    public string Liquids => this[nameof(Liquids)];
+    public string Hallways => this[nameof(Hallways)];
+    public string Steepness => this[nameof(Steepness)];
+    public string Monsters => this[nameof(Monsters)];
+    public string MonsterStrength => this[nameof(MonsterStrength)];
+    public string Bosses => this[nameof(Bosses)];
+    public string Traps => this[nameof(Traps)];
+    public string Cages => this[nameof(Cages)];
+    public string Health => this[nameof(Health)];
+    public string Ammo => this[nameof(Ammo)];
+    public string Weapons => this[nameof(Weapons)];
+    public string GenerateSky => this[nameof(GenerateSky)];
+    public string GenerateMusic => this[nameof(GenerateMusic)];
+    public string RandomizeGenerator => this[nameof(RandomizeGenerator)];
+    public string GenerateLevel => this[nameof(GenerateLevel)];
+    public string CancelGeneration => this[nameof(CancelGeneration)];
 }

@@ -71,7 +71,11 @@ These familiar workflows were rebuilt natively for Doom Launcher 667:
 === New in Doom Launcher 667
 
 * a responsive WinUI 3 experience with Home, Library, Collections, Discover,
-  Latest and Achievements views;
+  Generate, Latest and Achievements views;
+* native Obsidian Level Maker integration: point the portable tools folder at
+  a separately downloaded Obsidian-Content build, configure a level in WinUI,
+  run its batch mode in the background and import the generated WAD with map
+  data, TITLEPIC artwork, launch options and a visible `Generated` filter;
 * grid and table layouts, sortable/selectable columns, adjustable tile sizes
   and normal, compact or ultra-compact row and accordion densities;
 * a showcase-style Home view with featured, unplayed, recent, favorite and
@@ -113,6 +117,9 @@ be moved or backed up as one folder:
   placeholder artwork. Missing defaults are restored without overwriting
   user-modified files;
 * `Data/UserState` contains portable UI preferences;
+* `Data/Tools/Obsidian` is the optional user-managed location for
+  https://github.com/GTD-Carthage/Obsidian-Content[Obsidian-Content]. Obsidian
+  is not included in Doom Launcher 667 releases;
 * `DoomLauncher.sqlite` contains the library database.
 
 Release builds validate that the visible client version, executable file

@@ -36,6 +36,8 @@ public sealed partial class MainPage : Page
     private readonly DispatcherTimer _tileImageRefreshTimer = new();
     private readonly List<FileSystemWatcher> _tileImageWatchers = [];
     private readonly SemaphoreSlim _collectionStateGate = new(1, 1);
+    private CancellationTokenSource? _obsidianGenerationCancellation;
+    private ObsidianInstallation? _obsidianInstallation;
 
     public MainPage()
     {
@@ -67,6 +69,7 @@ public sealed partial class MainPage : Page
             _loadCancellation.Cancel();
             _statusDismissTimer.Stop();
             _tileImageRefreshTimer.Stop();
+            _obsidianGenerationCancellation?.Cancel();
             DisposeTileImageWatchers();
         };
     }
@@ -590,7 +593,206 @@ public sealed partial class MainPage : Page
             SyncSelection();
             if (section == LibrarySection.Discover)
                 await ViewModel.EnsureDiscoverLoadedAsync(_loadCancellation.Token);
+            else if (section == LibrarySection.Generate)
+                await RefreshObsidianDetectionAsync();
         });
+    }
+
+    private async Task RefreshObsidianDetectionAsync()
+    {
+        try
+        {
+            _obsidianInstallation = await _app.ObsidianService.DetectAsync(
+                _loadCancellation.Token);
+            ObsidianPathText.Text = _obsidianInstallation.InstallDirectory;
+            ObsidianVersionText.Text = _obsidianInstallation.IsAvailable
+                ? string.IsNullOrWhiteSpace(_obsidianInstallation.DisplayVersion)
+                    ? Strings["ObsidianDetected"]
+                    : _obsidianInstallation.DisplayVersion
+                : Strings["ObsidianNotDetected"];
+            ObsidianStatusIcon.Foreground = (Brush)Application.Current.Resources[
+                _obsidianInstallation.IsAvailable
+                    ? "DoomSuccessBrush"
+                    : "DoomAccentBrush"];
+            GenerateObsidianButton.IsEnabled = _obsidianInstallation.IsAvailable
+                && _obsidianGenerationCancellation is null;
+            ViewModel.SetGenerateSummary(_obsidianInstallation.IsAvailable
+                ? _app.Localization.Format(
+                    "GenerateSummaryReady",
+                    _obsidianInstallation.DisplayVersion)
+                : Strings["GenerateSummaryMissing"]);
+        }
+        catch (OperationCanceledException) when (_loadCancellation.IsCancellationRequested)
+        {
+        }
+        catch (Exception exception)
+        {
+            ObsidianVersionText.Text = Strings["ObsidianNotDetected"];
+            GenerateObsidianButton.IsEnabled = false;
+            ViewModel.SetGenerateSummary(exception.Message);
+        }
+    }
+
+    private async void RefreshObsidianButton_Click(
+        object sender,
+        RoutedEventArgs args) => await RefreshObsidianDetectionAsync();
+
+    private void OpenObsidianFolderButton_Click(
+        object sender,
+        RoutedEventArgs args)
+    {
+        var directory = _app.ObsidianService.InstallDirectory;
+        Directory.CreateDirectory(directory);
+        var start = new ProcessStartInfo
+        {
+            FileName = "explorer.exe",
+            UseShellExecute = true,
+        };
+        start.ArgumentList.Add(directory);
+        Process.Start(start);
+    }
+
+    private void RandomizeObsidianButton_Click(
+        object sender,
+        RoutedEventArgs args)
+    {
+        foreach (var box in new[]
+                 {
+                     ObsidianGameBox,
+                     ObsidianPortBox,
+                     ObsidianLengthBox,
+                     ObsidianThemeBox,
+                     ObsidianMapSizeBox,
+                     ObsidianOutdoorsBox,
+                     ObsidianCavesBox,
+                     ObsidianLiquidsBox,
+                     ObsidianHallwaysBox,
+                     ObsidianSteepnessBox,
+                     ObsidianMonstersBox,
+                     ObsidianStrengthBox,
+                     ObsidianBossesBox,
+                     ObsidianTrapsBox,
+                     ObsidianCagesBox,
+                     ObsidianHealthBox,
+                     ObsidianAmmoBox,
+                     ObsidianWeaponsBox,
+                 })
+        {
+            if (box.Items.Count > 0)
+                box.SelectedIndex = Random.Shared.Next(box.Items.Count);
+        }
+        ObsidianSeedBox.Value = Random.Shared.Next(1, int.MaxValue);
+        ObsidianSkySwitch.IsOn = Random.Shared.Next(2) == 1;
+        ObsidianMusicSwitch.IsOn = Random.Shared.Next(2) == 1;
+    }
+
+    private async void GenerateObsidianButton_Click(
+        object sender,
+        RoutedEventArgs args)
+    {
+        if (_obsidianGenerationCancellation is not null)
+            return;
+        await RefreshObsidianDetectionAsync();
+        if (_obsidianInstallation?.IsAvailable != true)
+        {
+            await ShowErrorAsync(
+                Strings["ObsidianMissingTitle"],
+                _app.Localization.Format(
+                    "ObsidianMissingMessage",
+                    _app.ObsidianService.InstallDirectory));
+            return;
+        }
+
+        _obsidianGenerationCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+            _loadCancellation.Token);
+        GenerateObsidianButton.IsEnabled = false;
+        ObsidianProgressPanel.Visibility = Visibility.Visible;
+        ObsidianProgressBar.Value = 0;
+        ObsidianProgressText.Text = Strings["GenerationReady"];
+        var progress = new Progress<ObsidianGenerationProgress>(update =>
+        {
+            ObsidianProgressBar.Value = Math.Clamp(update.Value, 0, 1) * 100;
+            ObsidianProgressText.Text = update.Status;
+        });
+        try
+        {
+            var result = await _app.ObsidianService.GenerateAsync(
+                BuildObsidianOptions(),
+                progress,
+                _obsidianGenerationCancellation.Token);
+            await EnsureGeneratedLibraryFilterAsync();
+            await ViewModel.RefreshAsync(_loadCancellation.Token);
+            ObsidianProgressBar.Value = 100;
+            ObsidianProgressText.Text = _app.Localization.Format(
+                "GenerationCompleted",
+                result.FileName);
+        }
+        catch (OperationCanceledException)
+        {
+            ObsidianProgressText.Text = Strings["CancelGeneration"];
+        }
+        catch (Exception exception)
+        {
+            ObsidianProgressText.Text = exception.Message;
+            await ShowErrorAsync(Strings["GenerationFailed"], exception.Message);
+        }
+        finally
+        {
+            _obsidianGenerationCancellation.Dispose();
+            _obsidianGenerationCancellation = null;
+            GenerateObsidianButton.IsEnabled = _obsidianInstallation?.IsAvailable == true;
+        }
+    }
+
+    private void CancelObsidianGenerationButton_Click(
+        object sender,
+        RoutedEventArgs args) => _obsidianGenerationCancellation?.Cancel();
+
+    private ObsidianGenerationOptions BuildObsidianOptions() => new(
+        ObsidianOutputNameBox.Text,
+        SelectedTag(ObsidianGameBox),
+        SelectedTag(ObsidianPortBox),
+        SelectedTag(ObsidianLengthBox),
+        SelectedTag(ObsidianThemeBox),
+        double.IsNaN(ObsidianSeedBox.Value)
+            ? 0
+            : (int)Math.Clamp(ObsidianSeedBox.Value, 0, int.MaxValue),
+        SelectedTag(ObsidianMapSizeBox),
+        SelectedTag(ObsidianOutdoorsBox),
+        SelectedTag(ObsidianCavesBox),
+        SelectedTag(ObsidianLiquidsBox),
+        SelectedTag(ObsidianHallwaysBox),
+        SelectedTag(ObsidianSteepnessBox),
+        SelectedTag(ObsidianMonstersBox),
+        SelectedTag(ObsidianStrengthBox),
+        SelectedTag(ObsidianBossesBox),
+        SelectedTag(ObsidianTrapsBox),
+        SelectedTag(ObsidianCagesBox),
+        SelectedTag(ObsidianHealthBox),
+        SelectedTag(ObsidianAmmoBox),
+        SelectedTag(ObsidianWeaponsBox),
+        ObsidianSkySwitch.IsOn,
+        ObsidianMusicSwitch.IsOn);
+
+    private static string SelectedTag(ComboBox box) =>
+        (box.SelectedItem as ComboBoxItem)?.Tag as string ?? string.Empty;
+
+    private async Task EnsureGeneratedLibraryFilterAsync()
+    {
+        var tags = _userState.LibraryFilterTags.ToHashSet(
+            StringComparer.OrdinalIgnoreCase);
+        if (!tags.Add("Generated"))
+            return;
+        _userState = _userState with
+        {
+            LibraryFilterTags = tags
+                .OrderBy(tag => tag, StringComparer.CurrentCultureIgnoreCase)
+                .ToArray(),
+        };
+        await _app.UserLibraryStateStore.SaveAsync(
+            _userState,
+            _loadCancellation.Token);
+        RebuildCollectionFilterButtons();
     }
 
     private void CategoryFilter_Click(object sender, RoutedEventArgs args)
@@ -3886,6 +4088,10 @@ public sealed partial class MainPage : Page
                         "3",
                         $"{root}\\Mods",
                         Strings["FirstSetupModsPlacement"]),
+                    CreateSetupFolderHint(
+                        "4",
+                        $"{root}\\Tools\\Obsidian",
+                        Strings["FirstSetupObsidianPlacement"]),
                 },
             },
             PrimaryButtonText = Strings["StartSetup"],
@@ -3935,6 +4141,18 @@ public sealed partial class MainPage : Page
         {
             return;
         }
+        if (!await ShowFirstSetupStepAsync(
+                4,
+                Strings["FirstSetupObsidianTitle"],
+                Strings["FirstSetupObsidianHelp"],
+                "Data\\Tools\\Obsidian",
+                (cancellationToken, progress, _) =>
+                    _app.FirstSetupService.ScanObsidianAsync(
+                        cancellationToken,
+                        progress)))
+        {
+            return;
+        }
 
         await _app.FirstSetupService.CompleteWizardAsync(_loadCancellation.Token);
         await ShowActionMessageAsync(
@@ -3962,7 +4180,7 @@ public sealed partial class MainPage : Page
         };
         content.Children.Add(new TextBlock
         {
-            Text = _app.Localization.Format("FirstSetupStep", step, 3),
+            Text = _app.Localization.Format("FirstSetupStep", step, 4),
             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
             Foreground = (Brush)Application.Current.Resources["DoomAccentBrush"],
         });

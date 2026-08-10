@@ -26,6 +26,7 @@
     <Compile Include="..\DoomLauncher.WinUI\Services\MapNameExtractor.cs" Link="Services\MapNameExtractor.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\IwadVersionDetector.cs" Link="Services\IwadVersionDetector.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\FirstSetupService.cs" Link="Services\FirstSetupService.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\ObsidianService.cs" Link="Services\ObsidianService.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\INativeLibraryService.cs" Link="Services\INativeLibraryService.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\ILaunchService.cs" Link="Services\ILaunchService.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\IUserLibraryStateStore.cs" Link="Services\IUserLibraryStateStore.cs" />

@@ -31,6 +31,10 @@ function Assert-ResetState {
         throw 'The empty portable data layout was not recreated.'
     }
     if (-not (Test-Path -LiteralPath (
+            Join-Path $Root 'Data\Tools\Obsidian') -PathType Container)) {
+        throw 'The optional portable Obsidian tools folder was not recreated.'
+    }
+    if (-not (Test-Path -LiteralPath (
             Join-Path $Root 'Tools\reset-instance.marker') -PathType Leaf)) {
         throw 'The guarded reset marker was not preserved.'
     }

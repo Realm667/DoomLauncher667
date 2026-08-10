@@ -83,6 +83,8 @@ foreach ($directory in @(
         'Data\TileImages',
         'Data\CollectionArtworks',
         'Data\UserState',
+        'Data\Tools',
+        'Data\Tools\Obsidian',
         'Backups')) {
     [void](New-Item -ItemType Directory -Path (
         Join-Path $resolvedRoot $directory) -Force)

@@ -8,7 +8,8 @@ namespace DoomLauncher.WinUI.Services;
 public sealed class FirstSetupService(
     IDoomLauncherDatabaseLocator databaseLocator,
     INativeLibraryService libraryService,
-    UiLocalization? localization = null) : IFirstSetupService
+    UiLocalization? localization = null,
+    IObsidianService? obsidianService = null) : IFirstSetupService
 {
     private readonly UiLocalization _localization = localization ?? new UiLocalization();
     private const string WizardMarker = "FirstSetupWizardV2";
@@ -135,6 +136,8 @@ public sealed class FirstSetupService(
         var demos = Path.Combine(root, "Demos");
         var titlePics = Path.Combine(root, "TitlePics");
         var themes = Path.Combine(root, "Themes");
+        var tools = Path.Combine(root, "Tools");
+        var obsidian = Path.Combine(tools, "Obsidian");
         Directory.CreateDirectory(mods);
         Directory.CreateDirectory(gameWads);
         Directory.CreateDirectory(sourcePorts);
@@ -144,6 +147,7 @@ public sealed class FirstSetupService(
         Directory.CreateDirectory(demos);
         Directory.CreateDirectory(titlePics);
         Directory.CreateDirectory(themes);
+        Directory.CreateDirectory(obsidian);
         Directory.CreateDirectory(tileImages);
         Directory.CreateDirectory(collectionArtworks);
 
@@ -947,6 +951,41 @@ public sealed class FirstSetupService(
             skipped,
             removedItems,
             warnings);
+    }
+
+    public async Task<SetupScanResult> ScanObsidianAsync(
+        CancellationToken cancellationToken = default,
+        IProgress<double>? progress = null)
+    {
+        progress?.Report(0);
+        await EnsureManagedLayoutAsync(cancellationToken);
+        progress?.Report(30);
+        if (obsidianService is null)
+        {
+            return new SetupScanResult(
+                0,
+                0,
+                0,
+                0,
+                1,
+                [],
+                [_localization.Get("ObsidianServiceUnavailable")]);
+        }
+
+        var installation = await obsidianService.DetectAsync(cancellationToken);
+        progress?.Report(100);
+        return installation.IsAvailable
+            ? new SetupScanResult(1, 1, 0, 0, 0, [], [])
+            : new SetupScanResult(
+                0,
+                0,
+                0,
+                0,
+                1,
+                [],
+                [_localization.Format(
+                    "ObsidianNotFoundSetup",
+                    installation.InstallDirectory)]);
     }
 
     private async Task<(

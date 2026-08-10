@@ -1,4 +1,12 @@
 ﻿# Third-Party Notices
+## Optional Obsidian-Content interoperability
+
+Doom Launcher 667 can invoke a user-supplied installation of
+[Obsidian-Content](https://github.com/GTD-Carthage/Obsidian-Content) through
+its documented batch command-line interface. Obsidian-Content is not bundled,
+downloaded, modified or redistributed by Doom Launcher 667. Users who install
+it separately remain subject to its own GNU GPL v2-or-later license and notices.
+
 Doom Launcher makes use of third-party assets - these may include libraries, images, icons, fonts, and more. The licenses for these assets are reproduced below, alongside any other information deemed to be relevant to the asset. If we have failed to include a license for a third-party asset, please make us aware so that we can add it to this document.
 
 ## Gameloop.Vdf

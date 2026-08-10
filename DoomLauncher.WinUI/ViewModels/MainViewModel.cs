@@ -393,6 +393,10 @@ public sealed class MainViewModel(
         _activeSection == LibrarySection.Home ? Visibility.Visible : Visibility.Collapsed;
     public Visibility DiscoverVisibility =>
         _activeSection == LibrarySection.Discover ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility GenerateVisibility =>
+        _activeSection == LibrarySection.Generate ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility StandardToolbarVisibility =>
+        _activeSection == LibrarySection.Generate ? Visibility.Collapsed : Visibility.Visible;
     public Visibility CollectionsVisibility =>
         _activeSection == LibrarySection.Collections ? Visibility.Visible : Visibility.Collapsed;
     public Visibility AchievementsVisibility =>
@@ -402,6 +406,7 @@ public sealed class MainViewModel(
     public Visibility LibraryVisibility =>
         _activeSection is LibrarySection.Home
             or LibrarySection.Discover
+            or LibrarySection.Generate
             or LibrarySection.Collections
             or LibrarySection.Achievements
             or LibrarySection.Debug
@@ -419,6 +424,7 @@ public sealed class MainViewModel(
         LibrarySection.Recent => localization.Get("Recent"),
         LibrarySection.Downloads => localization.Get("Downloads"),
         LibrarySection.Discover => localization.Get("Discover"),
+        LibrarySection.Generate => localization.Get("Generate"),
         LibrarySection.Collections => localization.Get("Collections"),
         LibrarySection.Achievements => localization.Get("Achievements"),
         LibrarySection.Debug => localization.Get("Debug"),
@@ -489,6 +495,8 @@ public sealed class MainViewModel(
         OnPropertyChanged(nameof(ActiveSection));
         OnPropertyChanged(nameof(HomeVisibility));
         OnPropertyChanged(nameof(DiscoverVisibility));
+        OnPropertyChanged(nameof(GenerateVisibility));
+        OnPropertyChanged(nameof(StandardToolbarVisibility));
         OnPropertyChanged(nameof(CollectionsVisibility));
         OnPropertyChanged(nameof(AchievementsVisibility));
         OnPropertyChanged(nameof(DebugVisibility));
@@ -748,6 +756,12 @@ public sealed class MainViewModel(
             newCollectionName,
             cancellationToken);
         await LoadCatalogAsync(true, gameFileId, cancellationToken);
+    }
+
+    public void SetGenerateSummary(string summary)
+    {
+        if (_activeSection == LibrarySection.Generate)
+            LibrarySummary = summary;
     }
 
     public async Task AddGamesToCollectionAsync(
@@ -2166,6 +2180,7 @@ public sealed class MainViewModel(
             LibrarySection.Discover => localization.Format(
                 "DiscoverSummary",
                 DiscoverItems.Count),
+            LibrarySection.Generate => localization.Get("GenerationReady"),
             LibrarySection.Favorites => localization.Format(
                 "FavoritesSummary",
                 _filteredCount),
@@ -2253,6 +2268,7 @@ public enum LibrarySection
     Home,
     Library,
     Discover,
+    Generate,
     Favorites,
     Recent,
     Downloads,

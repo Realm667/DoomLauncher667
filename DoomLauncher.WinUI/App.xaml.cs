@@ -26,11 +26,15 @@ public partial class App : Application
             databaseLocator,
             new SystemProcessStarter());
         NativeLibraryService = new SqliteNativeLibraryService(databaseLocator);
+        ObsidianService = new ObsidianService(
+            databaseLocator,
+            NativeLibraryService);
         MigrationService = new LegacyInstallationMigrationService(databaseLocator);
         FirstSetupService = new FirstSetupService(
             databaseLocator,
             NativeLibraryService,
-            Localization);
+            Localization,
+            ObsidianService);
         IdGamesService = new IdGamesService(databaseLocator);
         UserLibraryStateStore = new JsonUserLibraryStateStore();
     }
@@ -39,6 +43,7 @@ public partial class App : Application
     internal ILaunchOptionsCatalog LaunchOptionsCatalog { get; }
     internal ILaunchService LaunchService { get; }
     internal INativeLibraryService NativeLibraryService { get; }
+    internal IObsidianService ObsidianService { get; }
     internal ILegacyInstallationMigrationService MigrationService { get; }
     internal IFirstSetupService FirstSetupService { get; }
     internal IIdGamesService IdGamesService { get; }

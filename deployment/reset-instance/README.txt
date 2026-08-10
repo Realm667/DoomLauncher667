@@ -30,6 +30,7 @@ assistant. You can optionally populate these folders before starting:
   Data\Sourceports    one subdirectory per portable source port
   Data\Mods           mod archives and WAD, PK3 or PK7 files
   Data\Themes         custom XML color definitions
+  Data\Tools\Obsidian optional separately downloaded Obsidian-Content build
 
 DoomLauncher667-reset.cmd removes only mutable data inside this portable
 directory and restores the initial empty folder structure.
@@ -64,6 +65,7 @@ Optional koennen vor dem ersten Start Dateien abgelegt werden:
   Data\Sourceports    ein Unterordner je portablem Sourceport
   Data\Mods           Modarchive, WAD-, PK3- und PK7-Dateien
   Data\Themes         XML-Farbdefinitionen fuer Launcher-Themes
+  Data\Tools\Obsidian optionale, separat geladene Obsidian-Content-Version
 
 Die Reset-Datei entfernt ausschliesslich veraenderliche Daten innerhalb dieses
 Verzeichnisses und stellt danach die leere Verzeichnisstruktur wieder her.

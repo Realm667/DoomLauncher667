@@ -448,6 +448,11 @@
                 Tag="Library" />
             <NavigationViewItem Content="{Binding Collections}" Icon="Folder" Tag="Collections" />
             <NavigationViewItem Content="{Binding Discover}" Icon="World" Tag="Discover" />
+            <NavigationViewItem Content="{Binding Generate}" Tag="Generate">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE945;" />
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
             <NavigationViewItemSeparator />
             <NavigationViewItem Content="{Binding Favorites}" Icon="Favorite" Tag="Favorites" />
             <NavigationViewItem Content="{Binding Recent}" Icon="Clock" Tag="Recent" />
@@ -515,7 +520,8 @@
                     Grid.Column="1"
                     VerticalAlignment="Center"
                     PlaceholderText="{x:Bind ViewModel.SearchPlaceholder, Mode=OneWay}"
-                    TextChanged="SearchBox_TextChanged">
+                    TextChanged="SearchBox_TextChanged"
+                    Visibility="{x:Bind ViewModel.StandardToolbarVisibility, Mode=OneWay}">
                     <AutoSuggestBox.QueryIcon>
                         <SymbolIcon Symbol="Find" />
                     </AutoSuggestBox.QueryIcon>
@@ -531,7 +537,8 @@
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     Orientation="Horizontal"
-                    Spacing="8">
+                    Spacing="8"
+                    Visibility="{x:Bind ViewModel.StandardToolbarVisibility, Mode=OneWay}">
                     <Button
                         AutomationProperties.Name="{Binding ImportTooltip}"
                         Click="ImportButton_Click"
@@ -2088,6 +2095,195 @@
                     </ItemsControl>
                 </ScrollViewer>
             </Grid>
+
+            <ScrollViewer
+                Grid.Row="1"
+                Grid.RowSpan="2"
+                Padding="0,0,14,0"
+                VerticalScrollBarVisibility="Auto"
+                Visibility="{x:Bind ViewModel.GenerateVisibility, Mode=OneWay}">
+                <StackPanel MaxWidth="1240" HorizontalAlignment="Stretch" Spacing="16">
+                    <Border
+                        Padding="18"
+                        Background="{StaticResource DoomSurfaceElevatedBrush}"
+                        CornerRadius="12">
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Border
+                                x:Name="ObsidianStatusIndicator"
+                                Width="42"
+                                Height="42"
+                                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                CornerRadius="10">
+                                <FontIcon x:Name="ObsidianStatusIcon" Glyph="&#xE946;" />
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock
+                                        FontFamily="{StaticResource DoomHeadlineFontFamily}"
+                                        FontSize="18"
+                                        FontWeight="SemiBold"
+                                        Text="Obsidian Level Maker" />
+                                    <TextBlock
+                                        x:Name="ObsidianVersionText"
+                                        VerticalAlignment="Center"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                                <TextBlock
+                                    x:Name="ObsidianPathText"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+                                <Button Click="OpenObsidianFolderButton_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon FontSize="14" Glyph="&#xE838;" />
+                                        <TextBlock Text="{Binding ObsidianOpenFolder}" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Click="RefreshObsidianButton_Click" ToolTipService.ToolTip="{Binding ObsidianRefresh}">
+                                    <FontIcon Glyph="&#xE72C;" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Grid ColumnSpacing="16" RowSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Border Padding="20" Background="{StaticResource DoomSurfaceBrush}" CornerRadius="12">
+                            <StackPanel Spacing="12">
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="{Binding GeneratorBasics}" />
+                                <TextBlock Text="{Binding OutputName}" />
+                                <TextBox x:Name="ObsidianOutputNameBox" PlaceholderText="Obsidian level" />
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="{Binding Game}" />
+                                        <ComboBox x:Name="ObsidianGameBox" SelectedIndex="1">
+                                            <ComboBoxItem Content="Doom" Tag="doom1" />
+                                            <ComboBoxItem Content="Doom II" Tag="doom2" />
+                                            <ComboBoxItem Content="The Ultimate Doom" Tag="ultdoom" />
+                                            <ComboBoxItem Content="TNT: Evilution" Tag="tnt" />
+                                            <ComboBoxItem Content="Plutonia" Tag="plutonia" />
+                                            <ComboBoxItem Content="Heretic" Tag="heretic" />
+                                        </ComboBox>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="6">
+                                        <TextBlock Text="{Binding Compatibility}" />
+                                        <ComboBox x:Name="ObsidianPortBox" SelectedIndex="1">
+                                            <ComboBoxItem Content="Boom" Tag="boom" />
+                                            <ComboBoxItem Content="ZDoom / GZDoom / UZDoom" Tag="zdoom" />
+                                            <ComboBoxItem Content="EDGE / 3DGE" Tag="edge" />
+                                        </ComboBox>
+                                    </StackPanel>
+                                </Grid>
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="{Binding Length}" />
+                                        <ComboBox x:Name="ObsidianLengthBox" SelectedIndex="0">
+                                            <ComboBoxItem Content="Single level" Tag="single" />
+                                            <ComboBoxItem Content="A few levels" Tag="few" />
+                                            <ComboBoxItem Content="Episode" Tag="episode" />
+                                            <ComboBoxItem Content="Full game" Tag="game" />
+                                        </ComboBox>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="6">
+                                        <TextBlock Text="{Binding Theme}" />
+                                        <ComboBox x:Name="ObsidianThemeBox" SelectedIndex="0">
+                                            <ComboBoxItem Content="Original" Tag="original" />
+                                            <ComboBoxItem Content="Episode" Tag="epi" />
+                                            <ComboBoxItem Content="Tech" Tag="tech" />
+                                            <ComboBoxItem Content="Urban" Tag="urban" />
+                                            <ComboBoxItem Content="Hell" Tag="hell" />
+                                            <ComboBoxItem Content="Mostly random" Tag="mostly" />
+                                            <ComboBoxItem Content="Completely random" Tag="jumble" />
+                                        </ComboBox>
+                                    </StackPanel>
+                                </Grid>
+                                <TextBlock Text="{Binding Seed}" />
+                                <NumberBox x:Name="ObsidianSeedBox" Minimum="0" Maximum="2147483647" SpinButtonPlacementMode="Inline" Value="0" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="1" Padding="20" Background="{StaticResource DoomSurfaceBrush}" CornerRadius="12">
+                            <StackPanel Spacing="12">
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="{Binding GeneratorArchitecture}" />
+                                <Grid ColumnSpacing="12" RowSpacing="10">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                    <StackPanel Spacing="6"><TextBlock Text="{Binding MapSize}" /><ComboBox x:Name="ObsidianMapSizeBox" SelectedIndex="2"><ComboBoxItem Content="Small" Tag="22" /><ComboBoxItem Content="Medium" Tag="30" /><ComboBoxItem Content="Large" Tag="36" /><ComboBoxItem Content="Huge" Tag="50" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="6"><TextBlock Text="{Binding Outdoors}" /><ComboBox x:Name="ObsidianOutdoorsBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="1" Spacing="6"><TextBlock Text="{Binding Caves}" /><ComboBox x:Name="ObsidianCavesBox" SelectedIndex="1"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="6"><TextBlock Text="{Binding Liquids}" /><ComboBox x:Name="ObsidianLiquidsBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="2" Spacing="6"><TextBlock Text="{Binding Hallways}" /><ComboBox x:Name="ObsidianHallwaysBox" SelectedIndex="3"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="1" Spacing="6"><TextBlock Text="{Binding Steepness}" /><ComboBox x:Name="ObsidianSteepnessBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Row="1" Grid.ColumnSpan="2" Padding="20" Background="{StaticResource DoomSurfaceBrush}" CornerRadius="12">
+                            <StackPanel Spacing="12">
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="{Binding GeneratorCombat}" />
+                                <Grid ColumnSpacing="12" RowSpacing="10">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                    <StackPanel Spacing="6"><TextBlock Text="{Binding Monsters}" /><ComboBox x:Name="ObsidianMonstersBox" SelectedIndex="2"><ComboBoxItem Content="Few" Tag="0.5" /><ComboBoxItem Content="Less" Tag="0.75" /><ComboBoxItem Content="Normal" Tag="1" /><ComboBoxItem Content="More" Tag="1.5" /><ComboBoxItem Content="Heaps" Tag="2" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="6"><TextBlock Text="{Binding MonsterStrength}" /><ComboBox x:Name="ObsidianStrengthBox" SelectedIndex="2"><ComboBoxItem Content="Weak" Tag="0.5" /><ComboBoxItem Content="Easier" Tag="0.75" /><ComboBoxItem Content="Normal" Tag="1" /><ComboBoxItem Content="Harder" Tag="1.25" /><ComboBoxItem Content="Brutal" Tag="1.5" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Column="2" Spacing="6"><TextBlock Text="{Binding Bosses}" /><ComboBox x:Name="ObsidianBossesBox" SelectedIndex="1"><ComboBoxItem Content="Easier" Tag="easier" /><ComboBoxItem Content="Medium" Tag="medium" /><ComboBoxItem Content="Harder" Tag="harder" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Column="3" Spacing="6"><TextBlock Text="{Binding Traps}" /><ComboBox x:Name="ObsidianTrapsBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Column="4" Spacing="6"><TextBlock Text="{Binding Cages}" /><ComboBox x:Name="ObsidianCagesBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="1" Spacing="6"><TextBlock Text="{Binding Health}" /><ComboBox x:Name="ObsidianHealthBox" SelectedIndex="3"><ComboBoxItem Content="Scarce" Tag="scarce" /><ComboBoxItem Content="Less" Tag="less" /><ComboBoxItem Content="Normal" Tag="normal" /><ComboBoxItem Content="A bit more" Tag="bit_more" /><ComboBoxItem Content="More" Tag="more" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="6"><TextBlock Text="{Binding Ammo}" /><ComboBox x:Name="ObsidianAmmoBox" SelectedIndex="3"><ComboBoxItem Content="Scarce" Tag="scarce" /><ComboBoxItem Content="Less" Tag="less" /><ComboBoxItem Content="Normal" Tag="normal" /><ComboBoxItem Content="A bit more" Tag="bit_more" /><ComboBoxItem Content="More" Tag="more" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="2" Spacing="6"><TextBlock Text="{Binding Weapons}" /><ComboBox x:Name="ObsidianWeaponsBox" SelectedIndex="2"><ComboBoxItem Content="Less" Tag="less" /><ComboBoxItem Content="Normal" Tag="normal" /><ComboBoxItem Content="More" Tag="more" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" Spacing="6">
+                                        <TextBlock Text="{Binding GeneratorModules}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="18">
+                                            <ToggleSwitch x:Name="ObsidianSkySwitch" Header="{Binding GenerateSky}" IsOn="True" />
+                                            <ToggleSwitch x:Name="ObsidianMusicSwitch" Header="{Binding GenerateMusic}" IsOn="True" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Border
+                        x:Name="ObsidianProgressPanel"
+                        Padding="18"
+                        Background="{StaticResource DoomSurfaceElevatedBrush}"
+                        CornerRadius="12"
+                        Visibility="Collapsed">
+                        <Grid ColumnSpacing="14">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <StackPanel Spacing="8">
+                                <TextBlock x:Name="ObsidianProgressText" Text="{Binding GenerationReady}" TextWrapping="Wrap" />
+                                <ProgressBar x:Name="ObsidianProgressBar" Maximum="100" />
+                            </StackPanel>
+                            <Button Grid.Column="1" Click="CancelObsidianGenerationButton_Click" Content="{Binding CancelGeneration}" />
+                        </Grid>
+                    </Border>
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
+                        <Button Click="RandomizeObsidianButton_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE8B1;" /><TextBlock Text="{Binding RandomizeGenerator}" /></StackPanel>
+                        </Button>
+                        <Button x:Name="GenerateObsidianButton" MinWidth="190" Click="GenerateObsidianButton_Click" Style="{StaticResource AccentButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE768;" /><TextBlock Text="{Binding GenerateLevel}" /></StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
 
             <Grid
                 Grid.Row="2"

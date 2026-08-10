@@ -42,6 +42,8 @@ try {
     $customTheme = Join-Path $testRoot 'Data\Themes\MyTheme.xml'
     $customTile = Join-Path $testRoot `
         'Data\TileImages\colored\doom.png'
+    $obsidian = Join-Path $testRoot `
+        'Data\Tools\Obsidian\obsidian.exe'
     Write-Marker $database 'existing-database'
     Write-Marker $mod 'existing-mod'
     Write-Marker $iwad 'existing-iwad'
@@ -53,6 +55,7 @@ try {
     Write-Marker $state '{"Language":"de"}'
     Write-Marker $customTheme '<theme name="MyTheme" />'
     Write-Marker $customTile 'custom-tile-image'
+    Write-Marker $obsidian 'user-managed-obsidian'
 
     $before = @{}
     foreach ($path in @(
@@ -66,7 +69,8 @@ try {
             $collectionArtwork,
             $state,
             $customTheme,
-            $customTile)) {
+            $customTile,
+            $obsidian)) {
         $before[$path] = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
     }
 

@@ -445,6 +445,10 @@ public interface IFirstSetupService
         CancellationToken cancellationToken,
         IProgress<double>? progress,
         IReadOnlyDictionary<string, IwadInModsAction>? iwadDecisions);
+
+    Task<SetupScanResult> ScanObsidianAsync(
+        CancellationToken cancellationToken = default,
+        IProgress<double>? progress = null);
 }
 
 public enum IwadInModsAction
