@@ -12,6 +12,7 @@ $legacyBeta = $channel -eq 'Beta' -and -not $suffix
     FileVersion = "$numeric.0"
     Channel = $channel
     Prerelease = $channel -ne 'Stable'
+    PublishFlag = if ($channel -ne 'Stable') { '--prerelease' } else { '--latest' }
     PackageName = "DoomLauncher667-$Version$(if ($legacyBeta) { '-beta' })-win-x64"
     Title = "Doom Launcher 667 $Version$(if ($channel -ne 'Stable') { " $channel" })"
 }

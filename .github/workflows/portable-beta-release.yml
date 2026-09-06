@@ -85,12 +85,11 @@ jobs:
               --repo $env:GITHUB_REPOSITORY
           }
           else {
-            $channelArguments = if ($release.Prerelease) { @('--prerelease') } else { @('--latest') }
             gh release create $env:GITHUB_REF_NAME `
               $env:ARCHIVE `
               $env:CHECKSUM `
               --verify-tag `
-              @channelArguments `
+              $release.PublishFlag `
               --title $release.Title `
               --notes-file $notesPath `
               --repo $env:GITHUB_REPOSITORY
