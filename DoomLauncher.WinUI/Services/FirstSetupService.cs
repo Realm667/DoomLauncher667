@@ -786,10 +786,10 @@ public sealed class FirstSetupService(
         IProgress<double>? progress = null)
     {
         progress?.Report(0);
-        await EnsureManagedLayoutAsync(cancellationToken);
         var (_, root) = await GetLayoutAsync(cancellationToken);
         var directory = Path.Combine(root, "Mods");
-        var files = EnumerateFiles(directory, ModExtensions).ToArray();
+        var files = Directory.GetFiles(directory, "*", SearchOption.AllDirectories)
+            .Where(file => ModExtensions.Contains(Path.GetExtension(file))).ToArray();
         var prompts = new List<IwadInModsPrompt>();
         for (var index = 0; index < files.Length; index++)
         {
@@ -837,10 +837,16 @@ public sealed class FirstSetupService(
         IReadOnlyDictionary<string, IwadInModsAction>? iwadDecisions)
     {
         progress?.Report(0);
-        await EnsureManagedLayoutAsync(cancellationToken);
         var (databasePath, root) = await GetLayoutAsync(cancellationToken);
         var directory = Path.Combine(root, "Mods");
-        var files = EnumerateFiles(directory, ModExtensions).ToArray();
+        // Do not recreate a vanished directory before taking inventory: a
+        // disconnected drive must never look like an intentionally empty Mods.
+        var files = Directory.EnumerateFiles(directory, "*", new EnumerationOptions
+        {
+            RecurseSubdirectories = true, IgnoreInaccessible = false,
+            AttributesToSkip = 0,
+        }).Where(file => ModExtensions.Contains(Path.GetExtension(file)))
+            .OrderBy(file => file, StringComparer.OrdinalIgnoreCase).ToArray();
         var imported = 0;
         var updated = 0;
         var skipped = 0;
@@ -897,28 +903,16 @@ public sealed class FirstSetupService(
                         (fileIndex + 1) * 90d / Math.Max(1, files.Length));
                     continue;
                 }
-                var result = await libraryService.ImportAsync(file, cancellationToken);
+                var result = await libraryService.ImportAsync(file, ImportFileConflictResolution.Skip, cancellationToken);
+                if (result.WasSkipped)
+                {
+                    skipped++;
+                    progress?.Report((fileIndex + 1) * 90d / Math.Max(1, files.Length));
+                    continue;
+                }
                 imported++;
-                try
-                {
-                    await libraryService.TryImportTitlePicAsync(
-                        result.GameFileId,
-                        result.DestinationPath,
-                        cancellationToken);
-                }
-                catch (Exception exception) when (
-                    exception is IOException
-                    or InvalidDataException
-                    or NotSupportedException)
-                {
-                    warnings.Add($"{Path.GetFileName(file)}: {exception.Message}");
-                }
             }
-            catch (InvalidOperationException exception) when (
-                exception.Message.Contains("bereits", StringComparison.OrdinalIgnoreCase))
-            {
-                skipped++;
-            }
+            catch (OperationCanceledException) { throw; }
             catch (Exception exception)
             {
                 warnings.Add($"{Path.GetFileName(file)}: {exception.Message}");
@@ -936,9 +930,15 @@ public sealed class FirstSetupService(
             warnings.AddRange(iwadResult.Warnings);
         }
         progress?.Report(96);
+        cancellationToken.ThrowIfCancellationRequested();
+        // Re-enumerate before deleting rows so disappearing/inaccessible paths
+        // abort cleanup even if the initial scan succeeded.
+        var presentFiles = Directory.GetFiles(directory, "*", SearchOption.AllDirectories)
+            .Select(Path.GetFullPath).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var missingMods = await RemoveMissingModsAsync(
             databasePath,
             root,
+            presentFiles,
             cancellationToken);
         removedItems.AddRange(missingMods.RemovedItems);
         warnings.AddRange(missingMods.Warnings);
@@ -993,6 +993,7 @@ public sealed class FirstSetupService(
         IReadOnlyList<string> Warnings)> RemoveMissingModsAsync(
         string databasePath,
         string gameFilesRoot,
+        IReadOnlySet<string> presentFiles,
         CancellationToken cancellationToken)
     {
         var missing = new List<(int GameFileId, string Reference, string Title)>();
@@ -1019,7 +1020,10 @@ public sealed class FirstSetupService(
                 var path = Path.GetFullPath(Path.Combine(
                     gameFilesRoot,
                     reference));
-                if (!File.Exists(path))
+                var modsPrefix = Path.GetFullPath(Path.Combine(gameFilesRoot, "Mods"))
+                    .TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                if (path.StartsWith(modsPrefix, StringComparison.OrdinalIgnoreCase)
+                    && !presentFiles.Contains(path))
                 {
                     missing.Add((
                         reader.GetInt32(0),

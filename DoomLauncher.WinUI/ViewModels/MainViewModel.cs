@@ -903,21 +903,8 @@ public sealed class MainViewModel(
                 IdGamesStatus = localization.Get("ImportSkipped");
                 return;
             }
-            await nativeLibraryService.UpdateGameFromIdGamesAsync(
-                imported.GameFileId,
-                downloadItem,
-                cancellationToken);
-            try
-            {
-                await nativeLibraryService.TryImportTitlePicAsync(
-                    imported.GameFileId,
-                    temporaryPath,
-                    cancellationToken);
-            }
-            catch
-            {
-                // Artwork is optional; a valid /idgames import must remain usable.
-            }
+            await ApplyIdGamesMetadataAsync(imported.GameFileId, downloadItem,
+                downloadRemoteArtwork: false, progress: null, cancellationToken);
             item.IsDownloaded = true;
             item.LibraryGameFileId = imported.GameFileId;
             item.ActionText = localization.Get("OpenInLibrary");
@@ -1278,8 +1265,10 @@ public sealed class MainViewModel(
                 }
             }
         }
-        catch
+        catch (OperationCanceledException) { throw; }
+        catch (Exception exception) when (exception is IOException or InvalidDataException or NotSupportedException or HttpRequestException)
         {
+            System.Diagnostics.Trace.TraceWarning("Optional artwork: {0}", exception);
             // Metadata remains authoritative even if optional artwork is absent
             // or the remote archive cannot be inspected.
         }

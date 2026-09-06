@@ -165,11 +165,8 @@ Copy-Item -LiteralPath $bootstrapExecutable `
     -Destination (Join-Path $packageRoot 'DoomLauncher667.exe') `
     -Force
 
-$themeSource = Join-Path $repositoryRoot 'DoomLauncher.WinUI\Assets\Themes'
-Copy-Item -Path (Join-Path $themeSource '*') `
-    -Destination (Join-Path $packageRoot 'Data\Themes') `
-    -Recurse `
-    -Force
+# ThemeManager seeds missing themes from WinUI/Assets/Themes at startup.
+# Shipping them under Data would overwrite customized built-in themes on update.
 
 $revision = 'unknown'
 try {

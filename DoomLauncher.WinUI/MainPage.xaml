@@ -1033,296 +1033,19 @@
                     </StackPanel>
                 </Grid>
 
-                <Border
+                <local:GameDetailsPane
+                    x:Name="LibraryDetailsPane"
                     Grid.Column="1"
-                    Background="{StaticResource DoomSurfaceBrush}"
-                    BorderBrush="{StaticResource DoomStrokeBrush}"
-                    BorderThickness="1"
-                    CornerRadius="14">
-                    <ScrollViewer>
-                        <StackPanel Margin="20" Spacing="18">
-                            <Border
-                                Height="232"
-                                Background="{StaticResource DoomSurfaceElevatedBrush}"
-                                CornerRadius="10">
-                                <Grid>
-                                    <Image
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Source="{x:Bind ViewModel.SelectedGame.CurrentImage, Mode=OneWay}"
-                                        Stretch="{x:Bind ViewModel.SelectedGame.CurrentImageStretch, Mode=OneWay}" />
-                                    <Button
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Center"
-                                        AutomationProperties.Name="{Binding PreviousImage}"
-                                        Click="PreviousImageButton_Click"
-                                        Visibility="{x:Bind ViewModel.SelectedGame.SliderVisibility, Mode=OneWay}">
-                                        <FontIcon Glyph="&#xE76B;" />
-                                    </Button>
-                                    <Button
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Center"
-                                        AutomationProperties.Name="{Binding NextImage}"
-                                        Click="NextImageButton_Click"
-                                        Visibility="{x:Bind ViewModel.SelectedGame.SliderVisibility, Mode=OneWay}">
-                                        <FontIcon Glyph="&#xE76C;" />
-                                    </Button>
-                                    <Border
-                                        Margin="0,0,8,8"
-                                        Padding="8,3"
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Bottom"
-                                        Background="#B0000000"
-                                        CornerRadius="9"
-                                        Visibility="{x:Bind ViewModel.SelectedGame.SliderVisibility, Mode=OneWay}">
-                                        <TextBlock FontSize="11" Text="{x:Bind ViewModel.SelectedGame.ImageCounter, Mode=OneWay}" />
-                                    </Border>
-                                </Grid>
-                            </Border>
-
-                            <StackPanel Spacing="4">
-                                <TextBlock
-                                    FontFamily="{StaticResource DoomHeadlineFontFamily}"
-                                    FontSize="25"
-                                    FontWeight="SemiBold"
-                                    Text="{x:Bind ViewModel.SelectedGame.Title, Mode=OneWay}"
-                                    TextWrapping="Wrap" />
-                                <TextBlock
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind ViewModel.SelectedGame.Subtitle, Mode=OneWay}" />
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Border
-                                    Padding="10,5"
-                                    Background="{ThemeResource AccentFillColorSecondaryBrush}"
-                                    CornerRadius="12">
-                                    <TextBlock
-                                        FontSize="12"
-                                        Foreground="{ThemeResource DoomControlAccentForegroundBrush}"
-                                        Text="{x:Bind ViewModel.SelectedGame.Category, Mode=OneWay}" />
-                                </Border>
-                                <Border
-                                    Padding="10,5"
-                                    Background="{ThemeResource ControlFillColorDefaultBrush}"
-                                    CornerRadius="12">
-                                    <TextBlock
-                                        FontSize="12"
-                                        Text="{x:Bind ViewModel.SelectedGame.Year, Mode=OneWay}" />
-                                </Border>
-                            </StackPanel>
-
-                            <Grid ColumnSpacing="8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Button
-                                    HorizontalAlignment="Stretch"
-                                    AutomationProperties.Name="{x:Bind ViewModel.FavoriteButtonText, Mode=OneWay}"
-                                    Click="FavoriteButton_Click"
-                                    IsEnabled="{x:Bind ViewModel.CanLaunch, Mode=OneWay}">
-                                    <StackPanel Orientation="Horizontal" Spacing="7">
-                                        <FontIcon
-                                            FontSize="14"
-                                            Foreground="{StaticResource DoomAccentBrush}"
-                                            Glyph="{x:Bind ViewModel.FavoriteGlyph, Mode=OneWay}" />
-                                        <TextBlock Text="{x:Bind ViewModel.FavoriteButtonText, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
-                                    </StackPanel>
-                                </Button>
-                                <Button
-                                    Grid.Column="1"
-                                    HorizontalAlignment="Stretch"
-                                    AutomationProperties.Name="{x:Bind ViewModel.FinishedButtonText, Mode=OneWay}"
-                                    Click="FinishedButton_Click"
-                                    IsEnabled="{x:Bind ViewModel.CanLaunch, Mode=OneWay}">
-                                    <StackPanel Orientation="Horizontal" Spacing="7">
-                                        <FontIcon
-                                            FontSize="14"
-                                            Foreground="{ThemeResource DoomSuccessBrush}"
-                                            Glyph="{x:Bind ViewModel.FinishedGlyph, Mode=OneWay}" />
-                                        <TextBlock Text="{x:Bind ViewModel.FinishedButtonText, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
-                                    </StackPanel>
-                                </Button>
-                            </Grid>
-
-                            <Button
-                                HorizontalAlignment="Stretch"
-                                AutomationProperties.Name="{Binding EditEntry}"
-                                Click="EditButton_Click"
-                                IsEnabled="{x:Bind ViewModel.CanLaunch, Mode=OneWay}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon FontSize="14" Glyph="&#xE70F;" />
-                                    <TextBlock Text="{Binding EditEntry}" />
-                                </StackPanel>
-                            </Button>
-
-                            <Button
-                                HorizontalAlignment="Stretch"
-                                AutomationProperties.Name="{Binding ManageCollections}"
-                                Click="ManageCollectionsButton_Click"
-                                IsEnabled="{x:Bind ViewModel.CanLaunch, Mode=OneWay}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon FontSize="14" Glyph="&#xE8B7;" />
-                                    <TextBlock Text="{Binding ManageCollections}" />
-                                </StackPanel>
-                            </Button>
-
-                            <Button
-                                HorizontalAlignment="Stretch"
-                                AutomationProperties.HelpText="{Binding RescrapeIdGamesToolTip}"
-                                AutomationProperties.Name="{Binding RescrapeIdGames}"
-                                Click="RescrapeIdGamesButton_Click"
-                                IsEnabled="{x:Bind ViewModel.CanLaunch, Mode=OneWay}"
-                                ToolTipService.ToolTip="{Binding RescrapeIdGamesToolTip}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon FontSize="14" Glyph="&#xE71C;" />
-                                    <TextBlock Text="{Binding RescrapeIdGames}" />
-                                </StackPanel>
-                            </Button>
-
-                            <StackPanel Spacing="6">
-                                <TextBlock
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    LineHeight="21"
-                                    Text="{x:Bind ViewModel.SelectedGame.DescriptionPreview, Mode=OneWay}"
-                                    TextWrapping="Wrap" />
-                                <Button
-                                    Padding="0,4"
-                                    HorizontalAlignment="Left"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Click="ReadMoreButton_Click"
-                                    Content="{Binding ReadMore}"
-                                    Foreground="{ThemeResource DoomControlAccentBrush}"
-                                    Visibility="{x:Bind ViewModel.SelectedGame.ReadMoreVisibility, Mode=OneWay}" />
-                            </StackPanel>
-
-                            <StackPanel Spacing="4">
-                                <TextBlock Style="{StaticResource MetaTextStyle}" Text="{Binding Tags}" />
-                                <TextBlock
-                                    Text="{x:Bind ViewModel.SelectedGame.TagsText, Mode=OneWay}"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-
-                            <Grid ColumnSpacing="10" RowSpacing="10">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource MetaTextStyle}" Text="{Binding SourcePort}" />
-                                    <TextBlock Text="{x:Bind ViewModel.SelectedGame.SourcePort, Mode=OneWay}" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="1">
-                                    <TextBlock Style="{StaticResource MetaTextStyle}" Text="{Binding Iwad}" />
-                                    <TextBlock Text="{x:Bind ViewModel.SelectedGame.Iwad, Mode=OneWay}" />
-                                </StackPanel>
-                                <StackPanel Grid.Row="1">
-                                    <TextBlock Style="{StaticResource MetaTextStyle}" Text="{Binding Playtime}" />
-                                    <TextBlock Text="{x:Bind ViewModel.SelectedGame.Playtime, Mode=OneWay}" />
-                                </StackPanel>
-                                <StackPanel Grid.Row="1" Grid.Column="1">
-                                    <TextBlock Style="{StaticResource MetaTextStyle}" Text="{Binding LastPlayed}" />
-                                    <TextBlock Text="{x:Bind ViewModel.SelectedGame.LastPlayed, Mode=OneWay}" />
-                                </StackPanel>
-                            </Grid>
-
-                            <Grid ColumnSpacing="8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <Button
-                                    x:Name="PlayButton"
-                                    HorizontalAlignment="Stretch"
-                                    AutomationProperties.Name="{Binding Play}"
-                                    Click="PlayButton_Click"
-                                    IsEnabled="{x:Bind ViewModel.CanLaunch, Mode=OneWay}"
-                                    Style="{StaticResource AccentButtonStyle}">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <FontIcon FontSize="14" Glyph="&#xE768;" />
-                                        <ProgressRing
-                                            Width="14"
-                                            Height="14"
-                                            IsActive="{x:Bind ViewModel.IsLaunching, Mode=OneWay}"
-                                            Visibility="{x:Bind ViewModel.LaunchingVisibility, Mode=OneWay}" />
-                                        <TextBlock Text="{x:Bind ViewModel.LaunchButtonText, Mode=OneWay}" />
-                                    </StackPanel>
-                                </Button>
-                                <DropDownButton
-                                    Grid.Column="1"
-                                    AutomationProperties.Name="{Binding LaunchOptions}"
-                                    Click="LaunchOptionsButton_Click"
-                                    IsEnabled="{x:Bind ViewModel.CanLaunch, Mode=OneWay}"
-                                    ToolTipService.ToolTip="{Binding LaunchOptions}">
-                                    <DropDownButton.Content>
-                                        <FontIcon Glyph="&#xE713;" />
-                                    </DropDownButton.Content>
-                                    <DropDownButton.Flyout>
-                                        <Flyout x:Name="LaunchOptionsFlyout">
-                                            <StackPanel Width="340" Spacing="12">
-                                                <Grid>
-                                                    <TextBlock
-                                                        FontFamily="{StaticResource DoomHeadlineFontFamily}"
-                                                        FontSize="18"
-                                                        FontWeight="SemiBold"
-                                                        Text="{Binding LaunchOptions}" />
-                                                    <ProgressRing
-                                                        Width="18"
-                                                        Height="18"
-                                                        HorizontalAlignment="Right"
-                                                        IsActive="{x:Bind ViewModel.IsLaunchOptionsLoading, Mode=OneWay}"
-                                                        Visibility="{x:Bind ViewModel.LaunchOptionsLoadingVisibility, Mode=OneWay}" />
-                                                </Grid>
-                                                <ComboBox
-                                                    AutomationProperties.Name="{Binding SourcePort}"
-                                                    DisplayMemberPath="Name"
-                                                    Header="{Binding SourcePort}"
-                                                    ItemsSource="{x:Bind ViewModel.SourcePortOptions, Mode=OneWay}"
-                                                    SelectedItem="{x:Bind ViewModel.SelectedSourcePortOption, Mode=TwoWay}" />
-                                                <ComboBox
-                                                    AutomationProperties.Name="{Binding Iwad}"
-                                                    DisplayMemberPath="Name"
-                                                    Header="{Binding Iwad}"
-                                                    ItemsSource="{x:Bind ViewModel.IwadOptions, Mode=OneWay}"
-                                                    SelectedItem="{x:Bind ViewModel.SelectedIwadOption, Mode=TwoWay}" />
-                                                <ComboBox
-                                                    AutomationProperties.Name="{Binding Map}"
-                                                    DisplayMemberPath="Name"
-                                                    Header="{Binding Map}"
-                                                    ItemsSource="{x:Bind ViewModel.MapOptions, Mode=OneWay}"
-                                                    SelectedItem="{x:Bind ViewModel.SelectedMapOption, Mode=TwoWay}" />
-                                                <ComboBox
-                                                    AutomationProperties.Name="{Binding Difficulty}"
-                                                    DisplayMemberPath="Name"
-                                                    Header="{Binding Difficulty}"
-                                                    ItemsSource="{x:Bind ViewModel.SkillOptions, Mode=OneWay}"
-                                                    SelectedItem="{x:Bind ViewModel.SelectedSkillOption, Mode=TwoWay}" />
-                                                <Button
-                                                    HorizontalAlignment="Stretch"
-                                                    AutomationProperties.Name="{Binding LaunchWithSelection}"
-                                                    Click="LaunchWithOptionsButton_Click"
-                                                    IsEnabled="{x:Bind ViewModel.CanLaunchWithOptions, Mode=OneWay}"
-                                                    Style="{StaticResource AccentButtonStyle}">
-                                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                                        <FontIcon FontSize="14" Glyph="&#xE768;" />
-                                                        <TextBlock Text="{Binding LaunchWithSelection}" />
-                                                    </StackPanel>
-                                                </Button>
-                                            </StackPanel>
-                                        </Flyout>
-                                    </DropDownButton.Flyout>
-                                </DropDownButton>
-                            </Grid>
-                        </StackPanel>
-                    </ScrollViewer>
-                </Border>
+                    ViewModel="{x:Bind ViewModel}"
+                    EditRequested="EditButton_Click"
+                    FavoriteRequested="FavoriteButton_Click"
+                    FinishedRequested="FinishedButton_Click"
+                    LaunchOptionsRequested="LaunchOptionsButton_Click"
+                    LaunchWithOptionsRequested="LaunchWithOptionsButton_Click"
+                    ManageCollectionsRequested="ManageCollectionsButton_Click"
+                    PlayRequested="PlayButton_Click"
+                    ReadMoreRequested="ReadMoreButton_Click"
+                    RescrapeRequested="RescrapeIdGamesButton_Click" />
             </Grid>
 
             <ScrollViewer
@@ -2152,6 +1875,7 @@
                         </Grid>
                     </Border>
 
+                    <ContentControl x:Name="ObsidianOptionsPanel" IsTabStop="False" HorizontalContentAlignment="Stretch">
                     <Grid ColumnSpacing="16" RowSpacing="16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -2170,7 +1894,7 @@
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                                     <StackPanel Spacing="6">
                                         <TextBlock Text="{Binding Game}" />
-                                        <ComboBox x:Name="ObsidianGameBox" SelectedIndex="1">
+                                        <ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianGameBox" SelectedIndex="1">
                                             <ComboBoxItem Content="Doom" Tag="doom1" />
                                             <ComboBoxItem Content="Doom II" Tag="doom2" />
                                             <ComboBoxItem Content="The Ultimate Doom" Tag="ultdoom" />
@@ -2181,7 +1905,7 @@
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Spacing="6">
                                         <TextBlock Text="{Binding Compatibility}" />
-                                        <ComboBox x:Name="ObsidianPortBox" SelectedIndex="1">
+                                        <ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianPortBox" SelectedIndex="1">
                                             <ComboBoxItem Content="Boom" Tag="boom" />
                                             <ComboBoxItem Content="ZDoom / GZDoom / UZDoom" Tag="zdoom" />
                                             <ComboBoxItem Content="EDGE / 3DGE" Tag="edge" />
@@ -2192,7 +1916,7 @@
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                                     <StackPanel Spacing="6">
                                         <TextBlock Text="{Binding Length}" />
-                                        <ComboBox x:Name="ObsidianLengthBox" SelectedIndex="0">
+                                        <ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianLengthBox" SelectedIndex="0">
                                             <ComboBoxItem Content="Single level" Tag="single" />
                                             <ComboBoxItem Content="A few levels" Tag="few" />
                                             <ComboBoxItem Content="Episode" Tag="episode" />
@@ -2201,7 +1925,7 @@
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Spacing="6">
                                         <TextBlock Text="{Binding Theme}" />
-                                        <ComboBox x:Name="ObsidianThemeBox" SelectedIndex="0">
+                                        <ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianThemeBox" SelectedIndex="0">
                                             <ComboBoxItem Content="Original" Tag="original" />
                                             <ComboBoxItem Content="Episode" Tag="epi" />
                                             <ComboBoxItem Content="Tech" Tag="tech" />
@@ -2223,12 +1947,12 @@
                                 <Grid ColumnSpacing="12" RowSpacing="10">
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                                    <StackPanel Spacing="6"><TextBlock Text="{Binding MapSize}" /><ComboBox x:Name="ObsidianMapSizeBox" SelectedIndex="2"><ComboBoxItem Content="Small" Tag="22" /><ComboBoxItem Content="Medium" Tag="30" /><ComboBoxItem Content="Large" Tag="36" /><ComboBoxItem Content="Huge" Tag="50" /></ComboBox></StackPanel>
-                                    <StackPanel Grid.Column="1" Spacing="6"><TextBlock Text="{Binding Outdoors}" /><ComboBox x:Name="ObsidianOutdoorsBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
-                                    <StackPanel Grid.Row="1" Spacing="6"><TextBlock Text="{Binding Caves}" /><ComboBox x:Name="ObsidianCavesBox" SelectedIndex="1"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
-                                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="6"><TextBlock Text="{Binding Liquids}" /><ComboBox x:Name="ObsidianLiquidsBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
-                                    <StackPanel Grid.Row="2" Spacing="6"><TextBlock Text="{Binding Hallways}" /><ComboBox x:Name="ObsidianHallwaysBox" SelectedIndex="3"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
-                                    <StackPanel Grid.Row="2" Grid.Column="1" Spacing="6"><TextBlock Text="{Binding Steepness}" /><ComboBox x:Name="ObsidianSteepnessBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Spacing="6"><TextBlock Text="{Binding MapSize}" /><ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianMapSizeBox" SelectedIndex="2"><ComboBoxItem Content="Small" Tag="22" /><ComboBoxItem Content="Medium" Tag="30" /><ComboBoxItem Content="Large" Tag="36" /><ComboBoxItem Content="Huge" Tag="50" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="6"><TextBlock Text="{Binding Outdoors}" /><ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianOutdoorsBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="1" Spacing="6"><TextBlock Text="{Binding Caves}" /><ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianCavesBox" SelectedIndex="1"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="6"><TextBlock Text="{Binding Liquids}" /><ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianLiquidsBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="2" Spacing="6"><TextBlock Text="{Binding Hallways}" /><ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianHallwaysBox" SelectedIndex="3"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="1" Spacing="6"><TextBlock Text="{Binding Steepness}" /><ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianSteepnessBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Some" Tag="some" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
                                 </Grid>
                             </StackPanel>
                         </Border>
@@ -2239,14 +1963,14 @@
                                 <Grid ColumnSpacing="12" RowSpacing="10">
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                                    <StackPanel Spacing="6"><TextBlock Text="{Binding Monsters}" /><ComboBox x:Name="ObsidianMonstersBox" SelectedIndex="2"><ComboBoxItem Content="Few" Tag="0.5" /><ComboBoxItem Content="Less" Tag="0.75" /><ComboBoxItem Content="Normal" Tag="1" /><ComboBoxItem Content="More" Tag="1.5" /><ComboBoxItem Content="Heaps" Tag="2" /></ComboBox></StackPanel>
-                                    <StackPanel Grid.Column="1" Spacing="6"><TextBlock Text="{Binding MonsterStrength}" /><ComboBox x:Name="ObsidianStrengthBox" SelectedIndex="2"><ComboBoxItem Content="Weak" Tag="0.5" /><ComboBoxItem Content="Easier" Tag="0.75" /><ComboBoxItem Content="Normal" Tag="1" /><ComboBoxItem Content="Harder" Tag="1.25" /><ComboBoxItem Content="Brutal" Tag="1.5" /></ComboBox></StackPanel>
-                                    <StackPanel Grid.Column="2" Spacing="6"><TextBlock Text="{Binding Bosses}" /><ComboBox x:Name="ObsidianBossesBox" SelectedIndex="1"><ComboBoxItem Content="Easier" Tag="easier" /><ComboBoxItem Content="Medium" Tag="medium" /><ComboBoxItem Content="Harder" Tag="harder" /></ComboBox></StackPanel>
-                                    <StackPanel Grid.Column="3" Spacing="6"><TextBlock Text="{Binding Traps}" /><ComboBox x:Name="ObsidianTrapsBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
-                                    <StackPanel Grid.Column="4" Spacing="6"><TextBlock Text="{Binding Cages}" /><ComboBox x:Name="ObsidianCagesBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
-                                    <StackPanel Grid.Row="1" Spacing="6"><TextBlock Text="{Binding Health}" /><ComboBox x:Name="ObsidianHealthBox" SelectedIndex="3"><ComboBoxItem Content="Scarce" Tag="scarce" /><ComboBoxItem Content="Less" Tag="less" /><ComboBoxItem Content="Normal" Tag="normal" /><ComboBoxItem Content="A bit more" Tag="bit_more" /><ComboBoxItem Content="More" Tag="more" /></ComboBox></StackPanel>
-                                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="6"><TextBlock Text="{Binding Ammo}" /><ComboBox x:Name="ObsidianAmmoBox" SelectedIndex="3"><ComboBoxItem Content="Scarce" Tag="scarce" /><ComboBoxItem Content="Less" Tag="less" /><ComboBoxItem Content="Normal" Tag="normal" /><ComboBoxItem Content="A bit more" Tag="bit_more" /><ComboBoxItem Content="More" Tag="more" /></ComboBox></StackPanel>
-                                    <StackPanel Grid.Row="1" Grid.Column="2" Spacing="6"><TextBlock Text="{Binding Weapons}" /><ComboBox x:Name="ObsidianWeaponsBox" SelectedIndex="2"><ComboBoxItem Content="Less" Tag="less" /><ComboBoxItem Content="Normal" Tag="normal" /><ComboBoxItem Content="More" Tag="more" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Spacing="6"><TextBlock Text="{Binding Monsters}" /><ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianMonstersBox" SelectedIndex="2"><ComboBoxItem Content="Few" Tag="0.5" /><ComboBoxItem Content="Less" Tag="0.75" /><ComboBoxItem Content="Normal" Tag="1" /><ComboBoxItem Content="More" Tag="1.5" /><ComboBoxItem Content="Heaps" Tag="2" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="6"><TextBlock Text="{Binding MonsterStrength}" /><ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianStrengthBox" SelectedIndex="2"><ComboBoxItem Content="Weak" Tag="0.5" /><ComboBoxItem Content="Easier" Tag="0.75" /><ComboBoxItem Content="Normal" Tag="1" /><ComboBoxItem Content="Harder" Tag="1.25" /><ComboBoxItem Content="Brutal" Tag="1.5" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Column="2" Spacing="6"><TextBlock Text="{Binding Bosses}" /><ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianBossesBox" SelectedIndex="1"><ComboBoxItem Content="Easier" Tag="easier" /><ComboBoxItem Content="Medium" Tag="medium" /><ComboBoxItem Content="Harder" Tag="harder" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Column="3" Spacing="6"><TextBlock Text="{Binding Traps}" /><ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianTrapsBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Column="4" Spacing="6"><TextBlock Text="{Binding Cages}" /><ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianCagesBox" SelectedIndex="2"><ComboBoxItem Content="None" Tag="none" /><ComboBoxItem Content="Few" Tag="few" /><ComboBoxItem Content="Mixed" Tag="mixed" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="1" Spacing="6"><TextBlock Text="{Binding Health}" /><ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianHealthBox" SelectedIndex="3"><ComboBoxItem Content="Scarce" Tag="scarce" /><ComboBoxItem Content="Less" Tag="less" /><ComboBoxItem Content="Normal" Tag="normal" /><ComboBoxItem Content="A bit more" Tag="bit_more" /><ComboBoxItem Content="More" Tag="more" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="6"><TextBlock Text="{Binding Ammo}" /><ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianAmmoBox" SelectedIndex="3"><ComboBoxItem Content="Scarce" Tag="scarce" /><ComboBoxItem Content="Less" Tag="less" /><ComboBoxItem Content="Normal" Tag="normal" /><ComboBoxItem Content="A bit more" Tag="bit_more" /><ComboBoxItem Content="More" Tag="more" /></ComboBox></StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="2" Spacing="6"><TextBlock Text="{Binding Weapons}" /><ComboBox HorizontalAlignment="Stretch" x:Name="ObsidianWeaponsBox" SelectedIndex="2"><ComboBoxItem Content="Less" Tag="less" /><ComboBoxItem Content="Normal" Tag="normal" /><ComboBoxItem Content="More" Tag="more" /><ComboBoxItem Content="Heaps" Tag="heaps" /></ComboBox></StackPanel>
                                     <StackPanel Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" Spacing="6">
                                         <TextBlock Text="{Binding GeneratorModules}" />
                                         <StackPanel Orientation="Horizontal" Spacing="18">
@@ -2259,6 +1983,7 @@
                         </Border>
                     </Grid>
 
+                    </ContentControl>
                     <Border
                         x:Name="ObsidianProgressPanel"
                         Padding="18"
@@ -2275,7 +2000,7 @@
                         </Grid>
                     </Border>
                     <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
-                        <Button Click="RandomizeObsidianButton_Click">
+                        <Button x:Name="RandomizeObsidianButton" Click="RandomizeObsidianButton_Click">
                             <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE8B1;" /><TextBlock Text="{Binding RandomizeGenerator}" /></StackPanel>
                         </Button>
                         <Button x:Name="GenerateObsidianButton" MinWidth="190" Click="GenerateObsidianButton_Click" Style="{StaticResource AccentButtonStyle}">

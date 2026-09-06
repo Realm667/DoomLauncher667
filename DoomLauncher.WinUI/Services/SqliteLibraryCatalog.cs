@@ -11,7 +11,10 @@ public sealed class SqliteLibraryCatalog(
     private const int ThumbnailFileType = 4;
     private const int ScreenshotFileType = 1;
 
-    public async Task<LibraryCatalogResult> LoadAsync(CancellationToken cancellationToken = default)
+    public Task<LibraryCatalogResult> LoadAsync(CancellationToken cancellationToken = default) =>
+        Task.Run(() => LoadCoreAsync(cancellationToken), cancellationToken);
+
+    private async Task<LibraryCatalogResult> LoadCoreAsync(CancellationToken cancellationToken)
     {
         var databasePath = databaseLocator.FindDatabase();
         var connectionString = new SqliteConnectionStringBuilder
@@ -156,6 +159,7 @@ public sealed class SqliteLibraryCatalog(
         command.Parameters.AddWithValue("$screenshotFileType", ScreenshotFileType);
 
         var entries = new List<LibraryCatalogEntry>();
+        var placeholderPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
         {
@@ -178,7 +182,8 @@ public sealed class SqliteLibraryCatalog(
                 thumbnail,
                 iwad,
                 title,
-                placeholderArtworkStyle);
+                placeholderArtworkStyle,
+                placeholderPaths);
             var detailArtworkFileName =
                 GetNullableString(reader, "DetailArtworkFileName");
             var detailArtworkFileType =
@@ -394,7 +399,8 @@ public sealed class SqliteLibraryCatalog(
         string? thumbnailFileName,
         string iwad,
         string title,
-        string placeholderArtworkStyle)
+        string placeholderArtworkStyle,
+        IDictionary<string, string> placeholderPaths)
     {
         if (!string.IsNullOrWhiteSpace(thumbnailFileName))
         {
@@ -440,10 +446,12 @@ public sealed class SqliteLibraryCatalog(
             "TileImages",
             placeholderArtworkStyle,
             fallbackFile);
+        if (placeholderPaths.TryGetValue(portablePlaceholder, out var cached))
+            return cached;
         if (File.Exists(portablePlaceholder))
-            return new Uri(portablePlaceholder).AbsoluteUri;
+            return placeholderPaths[portablePlaceholder] = new Uri(portablePlaceholder).AbsoluteUri;
 
-        return $"ms-appx:///Assets/Library/{placeholderArtworkStyle}/{fallbackFile}";
+        return placeholderPaths[portablePlaceholder] = $"ms-appx:///Assets/Library/{placeholderArtworkStyle}/{fallbackFile}";
     }
 
     private static string ResolveDetailArtwork(
@@ -482,6 +490,17 @@ public sealed class SqliteLibraryCatalog(
             return false;
         try
         {
+            // PNG dimensions live in the 24-byte header. Decoding every full
+            // artwork during each catalog reload needlessly blocks large libraries.
+            using (var stream = File.OpenRead(path))
+            {
+                Span<byte> header = stackalloc byte[24];
+                if (stream.Read(header) == 24
+                    && header[..8].SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 })
+                    && header.Slice(12, 4).SequenceEqual("IHDR"u8))
+                    return System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(header[16..20]) == 320
+                        && System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(header[20..24]) == 200;
+            }
             using var image = Image.FromFile(path);
             return image.Width == 320 && image.Height == 200;
         }

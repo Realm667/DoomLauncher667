@@ -40,6 +40,9 @@ try {
     $state = Join-Path $testRoot `
         'Data\UserState\DoomLauncher.WinUI.state.json'
     $customTheme = Join-Path $testRoot 'Data\Themes\MyTheme.xml'
+    $builtInThemes = @(Get-ChildItem -LiteralPath (Join-Path $packageRoot 'WinUI\Assets\Themes') -Filter '*.xml' -File)
+    if ($builtInThemes.Count -eq 0) { throw 'Packaged theme defaults are missing.' }
+    $customizedDefault = Join-Path $testRoot ('Data\Themes\' + $builtInThemes[0].Name)
     $customTile = Join-Path $testRoot `
         'Data\TileImages\colored\doom.png'
     $obsidian = Join-Path $testRoot `
@@ -54,6 +57,7 @@ try {
     Write-Marker $collectionArtwork 'existing-collection-artwork'
     Write-Marker $state '{"Language":"de"}'
     Write-Marker $customTheme '<theme name="MyTheme" />'
+    Write-Marker $customizedDefault '<theme name="User-modified built-in theme" />'
     Write-Marker $customTile 'custom-tile-image'
     Write-Marker $obsidian 'user-managed-obsidian'
 
@@ -69,6 +73,7 @@ try {
             $collectionArtwork,
             $state,
             $customTheme,
+            $customizedDefault,
             $customTile,
             $obsidian)) {
         $before[$path] = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash

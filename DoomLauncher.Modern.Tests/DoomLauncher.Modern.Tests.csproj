@@ -14,6 +14,10 @@
     <PackageReference Include="System.Drawing.Common" Version="10.0.10" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\DoomLauncher.WinUI\Services\FileChangeJournal.cs" Link="Services\FileChangeJournal.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\SqliteLibraryCatalog.cs" Link="Services\SqliteLibraryCatalog.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\ILibraryCatalog.cs" Link="Services\ILibraryCatalog.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\ArchiveInspection.cs" Link="Services\ArchiveInspection.cs" />
     <Compile Include="..\DoomLauncher.Modern.Core\Launch\*.cs">
       <Link>Core\Launch\%(Filename)%(Extension)</Link>
     </Compile>

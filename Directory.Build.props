@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <DoomLauncher667Version>0.9.2</DoomLauncher667Version>
+    <DoomLauncher667Version>0.9.3</DoomLauncher667Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MSBuildProjectName)' == 'DoomLauncher.WinUI'

@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+## 0.9.3 - 2026-09-06
+
+Stabilization beta for the 1.0 release, without new product features.
+
+- Back up databases before schema upgrades; apply compatibility repairs and
+  schema changes atomically and persist a revision to avoid repeated work.
+- Restore replaced files on failed imports and interrupted migrations. Use
+  SQLite snapshots for migration copies, including committed WAL changes.
+- Never recreate an unavailable Mods directory during refresh or prune entries
+  from an incomplete inventory; propagate cancellation instead of treating it
+  as a scan warning.
+- Preserve customized built-in themes on portable updates. Only the application
+  seeds missing defaults, as it already does for custom placeholder artwork.
+- Share archive inspection, map counting, launch matching and optional artwork
+  extraction across import paths. Commit remote metadata and local map counts
+  together; preserve manual launch choices.
+- Match source-port families using names/executable identity and natural version
+  ordering instead of preferring longer display names.
+- Validate generated maps before import, roll back unfinished generated entries,
+  keep failure logs and report monotonic generation progress. Unreported seeds
+  are explicitly unverified, never substituted with the requested seed.
+- Reuse GameDetailsPane in Library and Collections, centralize progress accent
+  styles and localize generator choices in all four supported UI languages.
+- Move catalog loading/archive work off the UI thread, read PNG dimensions from
+  their headers and cache repeated placeholder resolutions per catalog load.
+- Add failure-injection, migration-cancellation, missing-directory, localization
+  and 5,000-entry regression tests; run first-setup checks in CI and release builds.
+
+Known upstream limitation: Obsidian-Content v21 can replace a requested batch
+seed. The description records the reported effective seed and the discrepancy;
+this release does not claim to repair or replace the user's Obsidian binary.
+
 ## 0.9.2 - 2026-08-10
 
 - Successful Obsidian generation now opens the generated entry directly in

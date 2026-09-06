@@ -279,13 +279,15 @@ internal static partial class LaunchDefinitionMatcher
                 .Select(item => new
                 {
                     Item = item,
-                    Score = SourcePortScore(sourceText, Normalize(item.Name)),
+                    Score = Math.Max(SourcePortScore(sourceText, Normalize(item.Name)),
+                        SourcePortScore(sourceText, Normalize(Path.GetFileNameWithoutExtension(item.Executable)))),
                 })
                 .Where(candidate => candidate.Score > 0)
                 .OrderByDescending(candidate => candidate.Score)
                 .ThenByDescending(
                     candidate => candidate.Item.Version,
                     NaturalVersionComparer.Instance)
+                .ThenBy(candidate => candidate.Item.SourcePortId)
                 .Select(candidate => candidate.Item)
                 .FirstOrDefault();
 
@@ -340,11 +342,19 @@ internal static partial class LaunchDefinitionMatcher
     {
         if (definitionName.Length < 3)
             return 0;
-        if (sourceText == definitionName)
-            return 1000 + definitionName.Length;
-        return Contains(sourceText, definitionName)
-            ? 500 + definitionName.Length
-            : 0;
+        // Explicit engine families, not label length, determine compatibility.
+        // Versions only compete inside the same family. The source's order
+        // describes preference when it lists multiple supported alternatives.
+        string[] families = ["uzdoom", "gzdoom", "qzdoom", "lzdoom", "vkdoom", "zdoom",
+            "zandronum", "dsda doom", "prboom plus", "prboom", "woof", "eternity",
+            "chocolate doom", "crispy doom", "3dge", "edge", "mbf21", "mbf", "boom"];
+        var family = families.FirstOrDefault(value => Contains(definitionName, value));
+        if (family is not null)
+        {
+            var index = (" " + sourceText + " ").IndexOf(" " + family + " ", StringComparison.Ordinal);
+            return index >= 0 ? 10000 - Math.Min(index, 9000) : 0;
+        }
+        return sourceText == definitionName ? 500 : 0;
     }
 
     private static bool Contains(string text, string phrase) =>

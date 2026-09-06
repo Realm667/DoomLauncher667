@@ -1361,6 +1361,44 @@ public sealed class UiLocalization
             },
         };
 
+    static UiLocalization()
+    {
+        string[][] generatorChoices =
+        [
+            ["Single level", "Einzelne Map", "Niveau unique", "Un nivel"],
+            ["A few levels", "Wenige Maps", "Quelques niveaux", "Varios niveles"],
+            ["Episode", "Episode", "Épisode", "Episodio"],
+            ["Full game", "Ganzes Spiel", "Jeu complet", "Juego completo"],
+            ["Original", "Original", "Original", "Original"],
+            ["Tech", "Technik", "Technologique", "Tecnológico"],
+            ["Urban", "Stadt", "Urbain", "Urbano"],
+            ["Hell", "Hölle", "Enfer", "Infierno"],
+            ["Mostly random", "Überwiegend zufällig", "Plutôt aléatoire", "Mayormente aleatorio"],
+            ["Completely random", "Völlig zufällig", "Entièrement aléatoire", "Totalmente aleatorio"],
+            ["Small", "Klein", "Petit", "Pequeño"],
+            ["Medium", "Mittel", "Moyen", "Medio"],
+            ["Large", "Groß", "Grand", "Grande"],
+            ["Huge", "Riesig", "Énorme", "Enorme"],
+            ["None", "Keine", "Aucun", "Ninguno"],
+            ["Few", "Wenige", "Peu", "Pocos"],
+            ["Some", "Einige", "Quelques-uns", "Algunos"],
+            ["Mixed", "Gemischt", "Mixte", "Mixto"],
+            ["Heaps", "Sehr viele", "Beaucoup", "Muchos"],
+            ["Scarce", "Knapp", "Rare", "Escaso"],
+            ["Less", "Weniger", "Moins", "Menos"],
+            ["Normal", "Normal", "Normal", "Normal"],
+            ["A bit more", "Etwas mehr", "Un peu plus", "Un poco más"],
+            ["More", "Mehr", "Plus", "Más"],
+            ["Easier", "Leichter", "Plus facile", "Más fácil"],
+            ["Harder", "Schwerer", "Plus difficile", "Más difícil"],
+            ["Brutal", "Brutal", "Brutal", "Brutal"],
+        ];
+        string[] languages = ["en-US", "de-DE", "fr-FR", "es-ES"];
+        foreach (var choice in generatorChoices)
+            for (var index = 0; index < languages.Length; index++)
+                ((IDictionary<string, string>)Translations[languages[index]])["GeneratorChoice" + choice[0].Replace(" ", "")] = choice[index];
+    }
+
     public UiLocalization() => SetLanguage("en-US");
 
     public string Language { get; private set; } = "en-US";
@@ -1390,6 +1428,7 @@ public sealed class UiLocalization
 
 public sealed class UiText(UiLocalization localization)
 {
+    public string Theme => this[nameof(Theme)];
     public string this[string key] => localization.Get(key);
 
     public string Home => this[nameof(Home)]; public string Library => this[nameof(Library)];

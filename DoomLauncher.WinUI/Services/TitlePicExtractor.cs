@@ -17,10 +17,14 @@ internal static class TitlePicExtractor
             internalWadFileName: null,
             cancellationToken);
 
-    public static async Task<byte[]?> TryExtractPngAsync(
+    public static Task<byte[]?> TryExtractPngAsync(
         string archivePath,
         string? internalWadFileName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken) =>
+        Task.Run(() => TryExtractCoreAsync(archivePath, internalWadFileName, cancellationToken), cancellationToken);
+
+    private static async Task<byte[]?> TryExtractCoreAsync(
+        string archivePath, string? internalWadFileName, CancellationToken cancellationToken)
     {
         archivePath = Path.GetFullPath(archivePath);
         if (!File.Exists(archivePath))

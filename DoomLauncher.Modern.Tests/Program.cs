@@ -358,8 +358,9 @@ void Check(bool condition, string message)
 
 try
 {
+    await StabilizationTests.RunAsync();
     Check(
-        AppVersion.Current == "0.9.2",
+        AppVersion.Current == "0.9.3",
         "Die sichtbare Version stammt aus der zentralen Buildversion");
     VerifyTileImageDefaults();
     Check(

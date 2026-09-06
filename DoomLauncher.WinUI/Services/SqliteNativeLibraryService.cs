@@ -246,6 +246,29 @@ public sealed class SqliteNativeLibraryService(
         ImportFileConflictResolution conflictResolution,
         CancellationToken cancellationToken = default)
     {
+        var result = await ImportCoreAsync(sourcePath, conflictResolution, cancellationToken);
+        if (!result.WasSkipped)
+        {
+            try
+            {
+                // The archive and metadata are committed. Optional artwork is a
+                // separate atomic update and must not turn a successful import
+                // into a reported cancellation after its commit point.
+                await TryImportTitlePicAsync(result.GameFileId, result.DestinationPath, CancellationToken.None);
+            }
+            catch (Exception exception) when (exception is IOException or InvalidDataException or NotSupportedException or ArgumentException)
+            {
+                System.Diagnostics.Trace.TraceWarning("Optional import artwork: {0}", exception);
+            }
+        }
+        return result;
+    }
+
+    private async Task<NativeImportResult> ImportCoreAsync(
+        string sourcePath,
+        ImportFileConflictResolution conflictResolution,
+        CancellationToken cancellationToken)
+    {
         sourcePath = Path.GetFullPath(sourcePath);
         if (!File.Exists(sourcePath))
             throw new FileNotFoundException("Die Importdatei wurde nicht gefunden.", sourcePath);
@@ -309,12 +332,12 @@ public sealed class SqliteNativeLibraryService(
                     ReusedExisting: existingGameFileId.HasValue);
             }
         }
-        var createdFile = false;
+        using var files = new FileChangeJournal();
 
-        try
         {
             if (!sourceIsManaged)
             {
+                files.Track(destinationPath);
                 Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
                 var temporaryPath = destinationPath + $".importing-{Guid.NewGuid():N}";
                 try
@@ -341,7 +364,6 @@ public sealed class SqliteNativeLibraryService(
                         temporaryPath,
                         destinationPath,
                         overwrite: conflictResolution == ImportFileConflictResolution.Overwrite);
-                    createdFile = !hasConflict;
                 }
                 finally
                 {
@@ -350,19 +372,21 @@ public sealed class SqliteNativeLibraryService(
                 }
             }
 
-            var detectedMaps = await MapNameExtractor.ExtractAsync(
-                destinationPath,
-                cancellationToken);
-            var textMetadata = await ArchiveTextMetadataReader.ReadAsync(
-                destinationPath,
-                cancellationToken);
+            var inspection = await ArchiveInspection.ReadAsync(destinationPath, cancellationToken);
+            var detectedMaps = inspection.Maps;
+            var textMetadata = inspection.Text;
+            var inferred = LaunchDefinitionMatcher.Infer(textMetadata,
+                await LoadLauncherDefinitionsAsync(cancellationToken));
+            await using var transaction = (SqliteTransaction)await connection.BeginTransactionAsync(cancellationToken);
             if (existingGameFileId.HasValue)
             {
                 await using var refresh = connection.CreateCommand();
+                refresh.Transaction = transaction;
                 refresh.CommandText =
                     """
                     UPDATE GameFiles
-                    SET Map=$maps, MapCount=$mapCount, IsSyncNeeded=1
+                    SET Map=$maps, MapCount=$mapCount, IsSyncNeeded=1,
+                        SourcePortID=COALESCE(SourcePortID, $port), IWadID=COALESCE(IWadID, $iwad)
                     WHERE GameFileID=$id;
                     """;
                 refresh.Parameters.AddWithValue(
@@ -372,10 +396,11 @@ public sealed class SqliteNativeLibraryService(
                         : string.Join(", ", detectedMaps));
                 refresh.Parameters.AddWithValue("$mapCount", detectedMaps.Count);
                 refresh.Parameters.AddWithValue("$id", existingGameFileId.Value);
+                refresh.Parameters.AddWithValue("$port", (object?)inferred.SourcePortId ?? DBNull.Value);
+                refresh.Parameters.AddWithValue("$iwad", (object?)inferred.IwadId ?? DBNull.Value);
                 await refresh.ExecuteNonQueryAsync(cancellationToken);
-                await InferLaunchDefinitionsAsync(
-                    existingGameFileId.Value,
-                    cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                files.Commit();
                 return new NativeImportResult(
                     existingGameFileId.Value,
                     destinationFileName,
@@ -383,14 +408,15 @@ public sealed class SqliteNativeLibraryService(
                     ReusedExisting: true);
             }
             await using var command = connection.CreateCommand();
+            command.Transaction = transaction;
             command.CommandText =
                 """
                 INSERT INTO GameFiles
                     (FileName, Title, Author, Description, ReleaseDate,
-                     Downloaded, MinutesPlayed, Map, MapCount, IsSyncNeeded)
+                     Downloaded, MinutesPlayed, Map, MapCount, IsSyncNeeded, SourcePortID, IWadID)
                 VALUES
                     ($fileName, $title, $author, $description, $releaseDate,
-                     $downloaded, 0, $maps, $mapCount, 1);
+                     $downloaded, 0, $maps, $mapCount, 1, $port, $iwad);
                 SELECT last_insert_rowid();
                 """;
             command.Parameters.AddWithValue("$fileName", destinationFileName);
@@ -426,17 +452,14 @@ public sealed class SqliteNativeLibraryService(
                     ? DBNull.Value
                     : string.Join(", ", detectedMaps));
             command.Parameters.AddWithValue("$mapCount", detectedMaps.Count);
+            command.Parameters.AddWithValue("$port", (object?)inferred.SourcePortId ?? DBNull.Value);
+            command.Parameters.AddWithValue("$iwad", (object?)inferred.IwadId ?? DBNull.Value);
             var gameFileId = Convert.ToInt32(
                 await command.ExecuteScalarAsync(cancellationToken),
                 CultureInfo.InvariantCulture);
-            await InferLaunchDefinitionsAsync(gameFileId, cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            files.Commit();
             return new NativeImportResult(gameFileId, destinationFileName, destinationPath);
-        }
-        catch
-        {
-            if (createdFile && File.Exists(destinationPath))
-                File.Delete(destinationPath);
-            throw;
         }
     }
 
@@ -851,6 +874,11 @@ public sealed class SqliteNativeLibraryService(
         IdGamesItem item,
         CancellationToken cancellationToken = default)
     {
+        var archivePath = await ResolveManagedGameFileAsync(gameFileId, cancellationToken);
+        var inspection = !string.IsNullOrWhiteSpace(archivePath) && File.Exists(archivePath)
+            ? await ArchiveInspection.ReadAsync(archivePath, cancellationToken) : null;
+        var inferred = LaunchDefinitionMatcher.Infer(inspection?.Text ?? ArchiveTextMetadata.Empty,
+            await LoadLauncherDefinitionsAsync(cancellationToken));
         await using var connection = await OpenConnectionAsync(cancellationToken);
         await using var transaction =
             (SqliteTransaction)await connection.BeginTransactionAsync(cancellationToken);
@@ -865,6 +893,10 @@ public sealed class SqliteNativeLibraryService(
                     Description = $description,
                     ReleaseDate = $releaseDate,
                     Rating = $rating,
+                    Map = CASE WHEN $hasArchive THEN $maps ELSE Map END,
+                    MapCount = CASE WHEN $hasArchive THEN $mapCount ELSE MapCount END,
+                    SourcePortID = COALESCE(SourcePortID, $port),
+                    IWadID = COALESCE(IWadID, $iwad),
                     IsSyncNeeded = 1
                 WHERE GameFileID = $gameFileId;
                 """;
@@ -883,6 +915,11 @@ public sealed class SqliteNativeLibraryService(
                     "yyyy-MM-dd HH:mm:ss",
                     CultureInfo.InvariantCulture) ?? (object)DBNull.Value);
             update.Parameters.AddWithValue("$rating", item.Rating);
+            update.Parameters.AddWithValue("$hasArchive", inspection is not null);
+            update.Parameters.AddWithValue("$maps", inspection?.Maps.Count > 0 ? string.Join(", ", inspection.Maps) : DBNull.Value);
+            update.Parameters.AddWithValue("$mapCount", inspection?.Maps.Count ?? 0);
+            update.Parameters.AddWithValue("$port", (object?)inferred.SourcePortId ?? DBNull.Value);
+            update.Parameters.AddWithValue("$iwad", (object?)inferred.IwadId ?? DBNull.Value);
             update.Parameters.AddWithValue("$gameFileId", gameFileId);
             if (await update.ExecuteNonQueryAsync(cancellationToken) != 1)
             {
@@ -914,8 +951,6 @@ public sealed class SqliteNativeLibraryService(
             await mapping.ExecuteNonQueryAsync(cancellationToken);
         }
         await transaction.CommitAsync(cancellationToken);
-        await RefreshMapMetadataAsync(gameFileId, cancellationToken);
-        await InferLaunchDefinitionsAsync(gameFileId, cancellationToken);
     }
 
     public async Task<string?> ResolveManagedGameFileAsync(
@@ -3627,32 +3662,6 @@ public sealed class SqliteNativeLibraryService(
         await connection.OpenAsync(cancellationToken);
         await WinUiDatabaseSchema.EnsureAsync(connection, cancellationToken);
         return connection;
-    }
-
-    private async Task RefreshMapMetadataAsync(
-        int gameFileId,
-        CancellationToken cancellationToken)
-    {
-        var archivePath = await ResolveManagedGameFileAsync(
-            gameFileId,
-            cancellationToken);
-        if (string.IsNullOrWhiteSpace(archivePath) || !File.Exists(archivePath))
-            return;
-
-        var maps = await MapNameExtractor.ExtractAsync(
-            archivePath,
-            cancellationToken);
-        await using var connection = await OpenConnectionAsync(cancellationToken);
-        var detectedMaps = maps
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(map => map, StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-        await UpdateMapMetadataAsync(
-            connection,
-            gameFileId,
-            detectedMaps,
-            detectedMaps.Length,
-            cancellationToken);
     }
 
     private static async Task UpdateMapMetadataAsync(

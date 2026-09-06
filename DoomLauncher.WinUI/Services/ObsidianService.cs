@@ -135,6 +135,10 @@ public sealed class ObsidianService(
         string? fatalOutput = null;
         string? actualSeed = null;
         var lastProgressReport = DateTimeOffset.MinValue;
+        double reportedProgress = 0.12;
+        int? importedGameId = null;
+        var completed = false;
+        using var generatedFiles = new FileChangeJournal();
         using var process = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -173,7 +177,6 @@ public sealed class ObsidianService(
                 outputLines.Enqueue(line);
                 while (outputLines.Count > 18)
                     outputLines.Dequeue();
-            }
             var match = ProgressPattern.Match(line);
             var value = match.Success
                 && double.TryParse(
@@ -187,8 +190,9 @@ public sealed class ObsidianService(
             if (match.Success || now - lastProgressReport >= TimeSpan.FromMilliseconds(200))
             {
                 lastProgressReport = now;
+                reportedProgress = Math.Max(reportedProgress, 0.12 + (value * 0.68));
                 progress?.Report(new ObsidianGenerationProgress(
-                    0.12 + (value * 0.68),
+                    reportedProgress,
                     line.Trim()));
             }
             if (line.Contains("FAILED!", StringComparison.OrdinalIgnoreCase)
@@ -208,6 +212,7 @@ public sealed class ObsidianService(
             var seedMatch = SeedPattern.Match(line);
             if (seedMatch.Success)
                 actualSeed = seedMatch.Groups["value"].Value.Trim();
+            }
         }
 
         process.OutputDataReceived += (_, args) => CaptureLine(args.Data);
@@ -216,11 +221,11 @@ public sealed class ObsidianService(
         {
             if (!process.Start())
                 throw new InvalidOperationException("Obsidian could not be started.");
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
             progress?.Report(new ObsidianGenerationProgress(
                 0.12,
                 "Generating level in Obsidian"));
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
             using var registration = cancellationToken.Register(() =>
             {
                 try
@@ -232,7 +237,13 @@ public sealed class ObsidianService(
                 {
                 }
             });
-            await process.WaitForExitAsync(cancellationToken);
+            try { await process.WaitForExitAsync(cancellationToken); }
+            catch (OperationCanceledException)
+            {
+                // Wait for the killed child to release its output before cleanup.
+                await process.WaitForExitAsync(CancellationToken.None);
+                throw;
+            }
             if (process.ExitCode != 0 || !string.IsNullOrWhiteSpace(fatalOutput))
             {
                 string details;
@@ -263,6 +274,9 @@ public sealed class ObsidianService(
                 temporaryOutput = candidate;
             }
 
+            var outputMaps = await Task.Run(() => MapNameExtractor.ExtractAsync(temporaryOutput, cancellationToken), cancellationToken);
+            ValidateGeneratedMaps(options, outputMaps);
+            cancellationToken.ThrowIfCancellationRequested();
             progress?.Report(new ObsidianGenerationProgress(
                 0.84,
                 "Importing generated level"));
@@ -270,17 +284,15 @@ public sealed class ObsidianService(
                 generatedDirectory,
                 safeBaseName,
                 Path.GetExtension(temporaryOutput));
+            generatedFiles.Track(destinationPath);
             File.Move(temporaryOutput, destinationPath);
             var import = await libraryService.ImportAsync(
                 destinationPath,
                 cancellationToken);
-            await libraryService.TryImportTitlePicAsync(
-                import.GameFileId,
-                import.DestinationPath,
-                cancellationToken);
+            importedGameId = import.GameFileId;
             var generatedAt = DateTime.Now;
             var effectiveSeed = string.IsNullOrWhiteSpace(actualSeed)
-                ? options.Seed.ToString(CultureInfo.InvariantCulture)
+                ? "not reported"
                 : actualSeed;
             var mapCount = await libraryService.UpdateGeneratedMetadataAsync(
                 import.GameFileId,
@@ -300,6 +312,8 @@ public sealed class ObsidianService(
             await AddToGeneratedCollectionAsync(
                 import.GameFileId,
                 cancellationToken);
+            generatedFiles.Commit();
+            completed = true;
             progress?.Report(new ObsidianGenerationProgress(
                 1,
                 "Generated level imported"));
@@ -312,13 +326,32 @@ public sealed class ObsidianService(
                 mapCount,
                 generatedAt);
         }
+        catch
+        {
+            if (importedGameId.HasValue)
+                await libraryService.DeleteGameAsync(importedGameId.Value, deletePhysicalFiles: true, CancellationToken.None);
+            throw;
+        }
         finally
         {
-            TryDelete(logPath);
+            // Failed runs retain their diagnostic log in Data/Temp/Obsidian.
+            if (completed) TryDelete(logPath);
             TryDelete(temporaryOutput);
             foreach (var extension in new[] { ".zip", ".pk3", ".pk7" })
                 TryDelete(Path.Combine(workingDirectory, temporaryOutputStem + extension));
         }
+    }
+
+    internal static void ValidateGeneratedMaps(ObsidianGenerationOptions options, IReadOnlyList<string> maps)
+    {
+        if (maps.Count == 0)
+            throw new InvalidDataException("Obsidian did not produce any playable maps.");
+        if (options.Length == "single" && maps.Count != 1)
+            throw new InvalidDataException($"Obsidian produced {maps.Count} maps instead of a single level.");
+        var episodic = options.Game is "doom1" or "ultdoom" or "heretic";
+        var pattern = episodic ? @"^E\d+M\d+$" : @"^MAP\d+$";
+        if (maps.Any(map => !Regex.IsMatch(map, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)))
+            throw new InvalidDataException($"Obsidian's map format does not match the selected game ({options.Game}).");
     }
 
     private async Task ApplyLaunchDefinitionsAsync(
@@ -356,7 +389,7 @@ public sealed class ObsidianService(
         };
         var sourcePort = options.Port switch
         {
-            "zdoom" => "ZDoom GZDoom UZDoom QZDoom",
+            "zdoom" => "UZDoom GZDoom QZDoom ZDoom",
             "edge" => "EDGE 3DGE",
             _ => "Boom MBF PrBoom DSDA-Doom Eternity",
         };
@@ -441,7 +474,9 @@ public sealed class ObsidianService(
             ? "unknown version"
             : version;
         var requestedSeed = options.Seed.ToString(CultureInfo.InvariantCulture);
-        var seedLines = seed.Equals(
+        var seedLines = seed == "not reported"
+            ? new[] { "Effective seed: not reported by Obsidian (not verified)", $"Requested seed: {requestedSeed}" }
+            : seed.Equals(
             requestedSeed,
             StringComparison.OrdinalIgnoreCase)
             ? new[] { $"Seed: {seed}" }

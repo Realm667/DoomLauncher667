@@ -61,6 +61,7 @@ public sealed partial class MainPage : Page
             ? Visibility.Visible
             : Visibility.Collapsed;
         DataContext = Strings;
+        ApplyGeneratorLocalization();
 
         Loaded += MainPage_Loaded;
         Unloaded += (_, _) =>
@@ -75,6 +76,33 @@ public sealed partial class MainPage : Page
     }
 
     public MainViewModel ViewModel { get; }
+    private readonly Dictionary<ComboBoxItem, string> _generatorChoiceKeys = [];
+
+    private void ApplyGeneratorLocalization()
+    {
+        // ComboBoxItems do not reliably inherit DataContext from the page.
+        // Keep their invariant option tags and localize only display content.
+        var boxes = new[] { ObsidianLengthBox, ObsidianThemeBox,
+                ObsidianMapSizeBox, ObsidianOutdoorsBox, ObsidianCavesBox,
+                ObsidianLiquidsBox, ObsidianHallwaysBox, ObsidianSteepnessBox,
+                ObsidianMonstersBox, ObsidianStrengthBox, ObsidianBossesBox,
+                ObsidianTrapsBox, ObsidianCagesBox, ObsidianHealthBox,
+                ObsidianAmmoBox, ObsidianWeaponsBox };
+        if (_generatorChoiceKeys.Count == 0)
+        {
+            foreach (var box in boxes)
+                foreach (var item in box.Items.OfType<ComboBoxItem>())
+                    _generatorChoiceKeys[item] = "GeneratorChoice" + item.Content.ToString()!.Replace(" ", "");
+        }
+        foreach (var (item, key) in _generatorChoiceKeys)
+            item.Content = Strings[key];
+        foreach (var box in boxes)
+        {
+            var selected = box.SelectedIndex;
+            box.SelectedIndex = -1;
+            box.SelectedIndex = selected;
+        }
+    }
     public UiText Strings => _app.Localization.Text;
     private ElementTheme EffectiveDialogTheme =>
         RequestedTheme == ElementTheme.Default ? ActualTheme : RequestedTheme;
@@ -116,6 +144,7 @@ public sealed partial class MainPage : Page
         ViewModel.NotifyLocalizationChanged();
         DataContext = null;
         DataContext = Strings;
+        ApplyGeneratorLocalization();
         ThemeManager.Apply(this, _userState.Theme);
         (_app.MainWindow as MainWindow)?.ApplyTitleBarTheme();
         ListDensity.Apply(_userState.ListDensity);
@@ -552,7 +581,7 @@ public sealed partial class MainPage : Page
         if (sender is GameDetailsPane detailsPane)
             detailsPane.CloseLaunchOptions();
         else
-            LaunchOptionsFlyout.Hide();
+            LibraryDetailsPane.CloseLaunchOptions();
         await ViewModel.LaunchSelectedWithOptionsAsync(_loadCancellation.Token);
     }
 
@@ -693,6 +722,8 @@ public sealed partial class MainPage : Page
         if (_obsidianGenerationCancellation is not null)
             return;
         await RefreshObsidianDetectionAsync();
+        if (_obsidianGenerationCancellation is not null)
+            return;
         if (_obsidianInstallation?.IsAvailable != true)
         {
             await ShowErrorAsync(
@@ -706,6 +737,8 @@ public sealed partial class MainPage : Page
         _obsidianGenerationCancellation = CancellationTokenSource.CreateLinkedTokenSource(
             _loadCancellation.Token);
         GenerateObsidianButton.IsEnabled = false;
+        ObsidianOptionsPanel.IsEnabled = false;
+        RandomizeObsidianButton.IsEnabled = false;
         ObsidianProgressPanel.Visibility = Visibility.Visible;
         ObsidianProgressBar.Value = 0;
         ObsidianProgressText.Text = Strings["GenerationReady"];
@@ -745,6 +778,8 @@ public sealed partial class MainPage : Page
             _obsidianGenerationCancellation.Dispose();
             _obsidianGenerationCancellation = null;
             GenerateObsidianButton.IsEnabled = _obsidianInstallation?.IsAvailable == true;
+            ObsidianOptionsPanel.IsEnabled = true;
+            RandomizeObsidianButton.IsEnabled = true;
         }
     }
 
@@ -2814,11 +2849,6 @@ public sealed partial class MainPage : Page
             layout.SetWidth(args.NewValue);
     }
 
-    private void PreviousImageButton_Click(object sender, RoutedEventArgs args) =>
-        ViewModel.SelectedGame.ShowPreviousImage();
-
-    private void NextImageButton_Click(object sender, RoutedEventArgs args) =>
-        ViewModel.SelectedGame.ShowNextImage();
 
     private async void ManageCollectionsButton_Click(object sender, RoutedEventArgs args) =>
         await ShowManageCollectionsDialogAsync();
@@ -3922,6 +3952,7 @@ public sealed partial class MainPage : Page
             _app.Localization.SetLanguage(language);
             DataContext = null;
             DataContext = Strings;
+            ApplyGeneratorLocalization();
             ThemeManager.Apply(this, theme);
             (_app.MainWindow as MainWindow)?.ApplyTitleBarTheme();
             ListDensity.Apply(listDensity);
@@ -5928,6 +5959,7 @@ public sealed partial class MainPage : Page
 
         var completion = new TaskCompletionSource<T>(
             TaskCreationOptions.RunContinuationsAsynchronously);
+        dialog.Closing += (_, args) => args.Cancel = !completion.Task.IsCompleted;
         dialog.Opened += async (_, _) =>
         {
             var progress = new Progress<double>(value =>

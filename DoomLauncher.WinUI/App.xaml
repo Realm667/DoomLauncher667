@@ -32,6 +32,12 @@
                     <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground" Color="#FF28A1A0" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
+            <Style TargetType="ProgressBar">
+                <Setter Property="Foreground" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+            </Style>
+            <Style TargetType="ProgressRing">
+                <Setter Property="Foreground" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+            </Style>
 
             <FontFamily x:Key="DoomBodyFontFamily">ms-appx:///Assets/Fonts/TitilliumWeb-Light.ttf#Titillium Web</FontFamily>
             <FontFamily x:Key="DoomHeadlineFontFamily">ms-appx:///Assets/Fonts/TitilliumWeb-SemiBold.ttf#Titillium Web</FontFamily>

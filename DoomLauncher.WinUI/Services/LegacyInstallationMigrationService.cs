@@ -50,6 +50,10 @@ public sealed class LegacyInstallationMigrationService(
 
         var destinationDatabase = GetDestinationDatabasePath();
         var destinationRoot = Path.GetDirectoryName(destinationDatabase)!;
+        if (destinationDatabase.Equals(sourceDatabase, StringComparison.OrdinalIgnoreCase)
+            || destinationRoot.StartsWith(legacyDirectory.TrimEnd('\\') + "\\", StringComparison.OrdinalIgnoreCase)
+            || legacyDirectory.StartsWith(destinationRoot.TrimEnd('\\') + "\\", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Source and destination installations must be separate folders.");
         Directory.CreateDirectory(destinationRoot);
         var backupPath = await BackupDestinationAsync(
             destinationDatabase,
@@ -71,6 +75,7 @@ public sealed class LegacyInstallationMigrationService(
             destinationGameDirectory,
             cancellationToken);
         var files = EnumerateMigrationFiles(sources).ToArray();
+        using var changedFiles = new FileChangeJournal();
         var copied = 0;
         foreach (var file in files)
         {
@@ -82,7 +87,14 @@ public sealed class LegacyInstallationMigrationService(
                 continue;
             }
             Directory.CreateDirectory(Path.GetDirectoryName(file.Target)!);
-            File.Copy(file.Source, file.Target, overwrite: true);
+            // Never overwrite customized launcher placeholder artwork.
+            if (file.Target.Contains("\\TileImages\\", StringComparison.OrdinalIgnoreCase)
+                && File.Exists(file.Target))
+                continue;
+            changedFiles.Track(file.Target);
+            await using (var source = File.OpenRead(file.Source))
+            await using (var target = File.Create(file.Target))
+                await source.CopyToAsync(target, cancellationToken);
             copied++;
             progress?.Report(
                 files.Length == 0
@@ -94,7 +106,7 @@ public sealed class LegacyInstallationMigrationService(
         var temporaryDatabase = destinationDatabase + $".migrating-{Guid.NewGuid():N}";
         try
         {
-            File.Copy(sourceDatabase, temporaryDatabase, overwrite: false);
+            await CopyDatabaseAsync(sourceDatabase, temporaryDatabase, cancellationToken);
             progress?.Report(76);
             await RewritePathsAsync(
                 temporaryDatabase,
@@ -108,7 +120,10 @@ public sealed class LegacyInstallationMigrationService(
             await VerifyIntegrityAsync(temporaryDatabase, cancellationToken);
             progress?.Report(98);
             SqliteConnection.ClearAllPools();
+            cancellationToken.ThrowIfCancellationRequested();
+            changedFiles.Track(destinationDatabase);
             File.Move(temporaryDatabase, destinationDatabase, overwrite: true);
+            changedFiles.Commit();
             Environment.SetEnvironmentVariable(
                 DoomLauncherDatabaseLocator.DatabaseEnvironmentVariable,
                 destinationDatabase);
@@ -308,9 +323,24 @@ public sealed class LegacyInstallationMigrationService(
             backupDirectory,
             $"DoomLauncher-before-migration-{DateTime.Now:yyyyMMdd-HHmmss}.sqlite");
         SqliteConnection.ClearAllPools();
-        File.Copy(destinationDatabase, backup, overwrite: false);
-        await Task.CompletedTask;
+        await CopyDatabaseAsync(destinationDatabase, backup, cancellationToken);
         return backup;
+    }
+
+    private static async Task CopyDatabaseAsync(string source, string destination, CancellationToken cancellationToken)
+    {
+        await using var input = new SqliteConnection(new SqliteConnectionStringBuilder
+        {
+            DataSource = source, Mode = SqliteOpenMode.ReadOnly, Pooling = false,
+        }.ToString());
+        await using var output = new SqliteConnection(new SqliteConnectionStringBuilder
+        {
+            DataSource = destination, Pooling = false,
+        }.ToString());
+        await input.OpenAsync(cancellationToken);
+        await output.OpenAsync(cancellationToken);
+        input.BackupDatabase(output); // Includes committed WAL pages, unlike File.Copy.
+        cancellationToken.ThrowIfCancellationRequested();
     }
 
     private static async Task<string> ReadConfiguredPathAsync(
@@ -512,7 +542,7 @@ public sealed class LegacyInstallationMigrationService(
                 Pooling = false,
             }.ToString());
         await connection.OpenAsync(cancellationToken);
-        await WinUiDatabaseSchema.EnsureAsync(connection, cancellationToken);
+        await WinUiDatabaseSchema.EnsureAsync(connection, cancellationToken, force: true);
     }
 
     private static async Task VerifyIntegrityAsync(

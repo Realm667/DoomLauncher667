@@ -125,6 +125,19 @@ be moved or backed up as one folder:
 Release builds validate that the visible client version, executable file
 versions and package version all match before an archive can be published.
 
+Updates preserve customized built-in themes as well as custom themes and artwork.
+The launcher seeds only missing theme files. Schema upgrades create a SQLite
+backup under `Backups` and roll back on failure. Keep a separate backup of your
+portable installation before updating; do not update while the launcher is running.
+
+Obsidian output is validated before import. Some Obsidian-Content v21 builds
+replace the requested batch seed internally. The generated description records
+the reported effective seed and any discrepancy; an unreported seed is marked
+as unverified. Failed generation logs remain in `Data/Temp/Obsidian`.
+
+See link:docs/stabilization-0.9.3.md[stabilization checks and known limitations]
+for the 1.0 preparation work.
+
 == Project status and feedback
 
 Doom Launcher 667 is currently in public beta. Please report reproducible
