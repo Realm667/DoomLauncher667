@@ -1,4 +1,4 @@
-Doom Launcher 667 - portable Beta
+Doom Launcher 667 - portable distribution (see VERSION.txt)
 =================================
 
 English
@@ -22,6 +22,12 @@ asked. The release package contains no user database or personal state, so the
 database, IWADs, source ports, mods, screenshots, settings, collection artwork
 and custom themes remain in place. Database schema updates are applied
 automatically on the next start.
+
+Back up the complete installation before updating. Never run the reset command
+as part of an update. To roll back, restore the complete backup, not just an
+older executable over an upgraded database. See Documentation for details.
+LICENSE, THIRD-PARTY-NOTICES.md and Licenses contain redistribution notices.
+Source code for this exact release is linked in VERSION.txt.
 
 This distribution intentionally contains no user database, IWADs, source
 ports, mods or personal settings. The first start opens the setup and migration
@@ -58,6 +64,11 @@ persoenlichen Status. Datenbank, IWADs, Sourceports, Mods, Screenshots,
 Einstellungen, Collection-Artworks und eigene Themes bleiben deshalb erhalten.
 Notwendige Datenbankschema-Aktualisierungen erfolgen beim naechsten Start
 automatisch.
+
+Vor dem Update das gesamte Verzeichnis sichern. Die Reset-Datei ist KEIN
+Update-Schritt. Fuer eine Rueckkehr zur alten Version die komplette Sicherung
+wiederherstellen, nicht nur eine alte EXE ueber die aktualisierte Datenbank
+kopieren. Weitere Hinweise stehen unter Documentation.
 
 Beim ersten Start erscheint der Einrichtungs- beziehungsweise Migrationsablauf.
 Optional koennen vor dem ersten Start Dateien abgelegt werden:

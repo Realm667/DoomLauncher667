@@ -1,14 +1,17 @@
 <Project>
   <PropertyGroup>
-    <DoomLauncher667Version>0.9.3</DoomLauncher667Version>
+    <DoomLauncher667VersionPrefix>1.0.0</DoomLauncher667VersionPrefix>
+    <DoomLauncher667VersionSuffix>rc.1</DoomLauncher667VersionSuffix>
+    <DoomLauncher667Version>$(DoomLauncher667VersionPrefix)</DoomLauncher667Version>
+    <DoomLauncher667Version Condition="'$(DoomLauncher667VersionSuffix)' != ''">$(DoomLauncher667VersionPrefix)-$(DoomLauncher667VersionSuffix)</DoomLauncher667Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MSBuildProjectName)' == 'DoomLauncher.WinUI'
                          Or '$(MSBuildProjectName)' == 'DoomLauncher.Bootstrap'
                          Or '$(MSBuildProjectName)' == 'DoomLauncher.Modern.Tests'">
     <Version>$(DoomLauncher667Version)</Version>
-    <AssemblyVersion>$(DoomLauncher667Version).0</AssemblyVersion>
-    <FileVersion>$(DoomLauncher667Version).0</FileVersion>
+    <AssemblyVersion>$(DoomLauncher667VersionPrefix).0</AssemblyVersion>
+    <FileVersion>$(DoomLauncher667VersionPrefix).0</FileVersion>
     <InformationalVersion>$(DoomLauncher667Version)</InformationalVersion>
   </PropertyGroup>
 </Project>

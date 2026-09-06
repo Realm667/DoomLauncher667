@@ -1,4 +1,33 @@
 ﻿# Third-Party Notices
+## Doom Launcher 667 portable distribution
+
+The launcher source is distributed under the repository's GNU GPL v3 license
+(see `LICENSE`). Original Doom Launcher attribution is retained in source and
+below. Game names, trademarks and game-derived preview artwork remain the
+property of their respective owners; the launcher license does not relicense
+third-party game assets. Commercial game data is not included.
+
+The WinUI release uses Microsoft .NET/Windows App SDK components,
+Microsoft.Data.Sqlite, SQLitePCLRaw/SQLite, SharpCompress and System.Drawing.Common.
+Each portable package contains `Licenses/DEPENDENCIES.md`, the restored packages'
+metadata and their included license/notice files. This inventory also lists
+build-time tooling, which need not be present as executable code in the package.
+License terms supplied by Microsoft packages are retained verbatim, rather than
+assuming that every Windows App SDK component has the same license.
+
+- SharpCompress: MIT; original license in `Licenses/SharpCompress-LICENSE.txt`.
+  Source: https://github.com/adamhathcock/sharpcompress/tree/1d9fd83a73db0144df3d2844133cf1b1f3699c7c
+- SQLitePCLRaw: Apache-2.0; Copyright 2014-2024 SourceGear, LLC (package metadata).
+  License in `Licenses/SQLitePCLRaw-LICENSE.txt`;
+  source: https://github.com/ericsink/SQLitePCL.raw/tree/v2.1.11
+- Bundled Titillium Web fonts: SIL Open Font License 1.1; original copyright
+  and terms are included in `WinUI/Assets/Fonts/OFL.txt`.
+- Self-contained .NET runtime notices are copied from the restored runtime
+  package into its versioned directory under `Licenses`.
+
+The older Gameloop.Vdf notice below is retained for the classic source tree;
+the current WinUI project does not directly reference that package.
+
 ## Optional Obsidian-Content interoperability
 
 Doom Launcher 667 can invoke a user-supplied installation of

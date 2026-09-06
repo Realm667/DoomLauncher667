@@ -25,6 +25,19 @@ try {
     }
 
     [void](New-Item -ItemType Directory -Path $testRoot -Force)
+    foreach ($required in @('LICENSE', 'THIRD-PARTY-NOTICES.md', 'Licenses/DEPENDENCIES.md',
+            'Licenses/SharpCompress-LICENSE.txt', 'Licenses/SQLitePCLRaw-LICENSE.txt',
+            'WinUI/Assets/Fonts/OFL.txt', 'Documentation/RELEASE-NOTES.md',
+            'Documentation/installation-and-updates.md', 'Documentation/migration.md',
+            'Documentation/reporting-problems.md')) {
+        if (-not (Test-Path -LiteralPath (Join-Path $packageRoot $required) -PathType Leaf)) {
+            throw "Required release documentation/license missing: $required"
+        }
+    }
+    if (@(Get-ChildItem -LiteralPath (Join-Path $packageRoot 'Data') -Recurse -File).Count -ne 0) {
+        throw 'Release package must not include files in user-owned Data.'
+    }
+    if (Test-Path -LiteralPath (Join-Path $packageRoot 'DoomLauncher.sqlite')) { throw 'Personal database in release package.' }
     $database = Join-Path $testRoot 'DoomLauncher.sqlite'
     $mod = Join-Path $testRoot 'Data\Mods\existing-mod.zip'
     $iwad = Join-Path $testRoot 'Data\GameWads\DOOM2.WAD'

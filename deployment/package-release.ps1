@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidatePattern('^\d+\.\d+\.\d+$')]
+    [ValidatePattern('^\d+\.\d+\.\d+(?:-(?:rc|beta)\.[1-9]\d*)?$')]
     [string]$Version,
 
     [string]$OutputDirectory,
@@ -19,7 +19,8 @@ if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
     $OutputDirectory = Join-Path $repositoryRoot 'artifacts'
 }
 $outputRoot = [IO.Path]::GetFullPath($OutputDirectory)
-$packageName = "DoomLauncher667-$Version-beta-win-x64"
+$release = & (Join-Path $PSScriptRoot 'release-version.ps1') -Version $Version
+$packageName = $release.PackageName
 $packageRoot = Join-Path $outputRoot $packageName
 $archivePath = Join-Path $outputRoot "$packageName.zip"
 $checksumPath = "$archivePath.sha256"
@@ -76,16 +77,18 @@ if (-not (Test-Path -LiteralPath $launcherExecutable -PathType Leaf)) {
 }
 $launcherVersion = (Get-Item -LiteralPath `
     $launcherExecutable).VersionInfo.FileVersion
-if ($launcherVersion -ne "$Version.0") {
-    throw "WinUI version $launcherVersion does not match package version $Version.0."
+if ($launcherVersion -ne $release.FileVersion) {
+    throw "WinUI version $launcherVersion does not match $($release.FileVersion)."
 }
+$productVersion = (Get-Item -LiteralPath $launcherExecutable).VersionInfo.ProductVersion.Split('+')[0]
+if ($productVersion -ne $Version) { throw "WinUI product version $productVersion does not match $Version." }
 
 $manifestPath = Join-Path $repositoryRoot `
     'DoomLauncher.WinUI\Package.appxmanifest'
 [xml]$manifest = Get-Content -LiteralPath $manifestPath -Raw
 $manifestVersion = [string]$manifest.Package.Identity.Version
-if ($manifestVersion -ne "$Version.0") {
-    throw "App manifest version $manifestVersion does not match package version $Version.0."
+if ($manifestVersion -ne $release.FileVersion) {
+    throw "App manifest version $manifestVersion does not match $($release.FileVersion)."
 }
 
 if ([string]::IsNullOrWhiteSpace($BootstrapPublishDirectory)) {
@@ -114,8 +117,8 @@ if ([string]::IsNullOrWhiteSpace($BootstrapPublishDirectory)) {
         $resolvedBootstrapPublish 'DoomLauncher667.exe'
     $compiledVersion = (Get-Item -LiteralPath `
         $bootstrapExecutable).VersionInfo.FileVersion
-    if ($compiledVersion -ne "$Version.0") {
-        throw "Bootstrap version $compiledVersion does not match package version $Version.0."
+    if ($compiledVersion -ne $release.FileVersion) {
+        throw "Bootstrap version $compiledVersion does not match $($release.FileVersion)."
     }
     $BootstrapPublishDirectory = $resolvedBootstrapPublish
 }
@@ -127,6 +130,10 @@ else {
 $bootstrapExecutable = Join-Path $BootstrapPublishDirectory 'DoomLauncher667.exe'
 if (-not (Test-Path -LiteralPath $bootstrapExecutable -PathType Leaf)) {
     throw "Published bootstrap not found: $bootstrapExecutable"
+}
+$bootstrapInfo = (Get-Item -LiteralPath $bootstrapExecutable).VersionInfo
+if ($bootstrapInfo.FileVersion -ne $release.FileVersion -or $bootstrapInfo.ProductVersion.Split('+')[0] -ne $Version) {
+    throw 'Bootstrap numeric/product version does not match the release.'
 }
 
 $templateRoot = Join-Path $repositoryRoot 'deployment\reset-instance'
@@ -165,6 +172,16 @@ Copy-Item -LiteralPath $bootstrapExecutable `
     -Destination (Join-Path $packageRoot 'DoomLauncher667.exe') `
     -Force
 
+foreach ($notice in @('LICENSE', 'THIRD-PARTY-NOTICES.md')) {
+    Copy-Item -LiteralPath (Join-Path $repositoryRoot $notice) -Destination $packageRoot
+}
+[void](New-Item -ItemType Directory -Path (Join-Path $packageRoot 'Documentation') -Force)
+foreach ($document in @('installation-and-updates.md', 'migration.md', 'reporting-problems.md')) {
+    Copy-Item -LiteralPath (Join-Path $repositoryRoot "docs/$document") -Destination (Join-Path $packageRoot 'Documentation')
+}
+Copy-Item -LiteralPath (Join-Path $repositoryRoot "docs/releases/$Version.md") -Destination (Join-Path $packageRoot 'Documentation/RELEASE-NOTES.md')
+& (Join-Path $PSScriptRoot 'package-notices.ps1') -RepositoryRoot $repositoryRoot -PackageRoot $packageRoot
+
 # ThemeManager seeds missing themes from WinUI/Assets/Themes at startup.
 # Shipping them under Data would overwrite customized built-in themes on update.
 
@@ -178,9 +195,10 @@ catch {
 [IO.File]::WriteAllLines(
     (Join-Path $packageRoot 'VERSION.txt'),
     @(
-        "Doom Launcher 667 $Version Beta",
+        $release.Title,
         'Platform: Windows x64',
-        "Source revision: $revision"
+        "Source revision: $revision",
+        "Source: https://github.com/Realm667/DoomLauncher667/tree/v$Version"
     ),
     [Text.UTF8Encoding]::new($false))
 

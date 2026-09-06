@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 1.0.0-rc.1 - 2026-09-06
+
+- Prepare the first Release Candidate without adding product features.
+- Separate semantic/product versions from Windows numeric file versions and
+  validate RC, beta and stable package/channel conventions in release automation.
+- Refresh release documentation, screenshots, update/rollback and migration
+  instructions, known limitations and the problem-reporting checklist.
+- Include licensing, dependency notices and user guides in portable downloads.
+- Retain the 0.9.3 stabilization baseline; extended acceptance testing remains
+  separate from this versioning/documentation/distribution preparation.
+
 ## 0.9.3 - 2026-09-06
 
 Stabilization beta for the 1.0 release, without new product features.

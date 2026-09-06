@@ -333,5 +333,9 @@ ASALocalRun/
 
 ReleaseBuild/
 
+# Versioned user-facing release notes are source, not build outputs.
+!docs/releases/
+!docs/releases/*.md
+
 # Reproducible application publish output
 publish-*/

@@ -38,3 +38,7 @@ jobs:
       - name: Test portable reset contract
         shell: pwsh
         run: ./deployment/test-reset-instance.ps1
+
+      - name: Test release version contracts
+        shell: pwsh
+        run: ./deployment/test-release-version.ps1

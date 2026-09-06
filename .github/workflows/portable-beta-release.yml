@@ -1,4 +1,4 @@
-name: Portable beta release
+name: Portable release
 
 on:
   push:
@@ -28,10 +28,12 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          if ($env:GITHUB_REF_NAME -notmatch '^v(\d+\.\d+\.\d+)$') {
+          if ($env:GITHUB_REF_NAME -notmatch '^v(\d+\.\d+\.\d+(?:-(?:rc|beta)\.[1-9]\d*)?)$') {
             throw "Unsupported release tag: $env:GITHUB_REF_NAME"
           }
-          "number=$($Matches[1])" | Out-File `
+          $version = $Matches[1]
+          ./deployment/test-release-version.ps1
+          "number=$version" | Out-File `
             -FilePath $env:GITHUB_OUTPUT `
             -Encoding utf8 `
             -Append
@@ -62,7 +64,7 @@ jobs:
         shell: pwsh
         run: ./deployment/test-portable-update.ps1 -PackageDirectory "${{ steps.package.outputs.package }}"
 
-      - name: Publish GitHub beta release
+      - name: Publish GitHub release
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -70,18 +72,11 @@ jobs:
           CHECKSUM: ${{ steps.package.outputs.checksum }}
           VERSION: ${{ steps.version.outputs.number }}
         run: |
-          $notes = @"
-          Portable Windows x64 beta package for testing.
-
-          1. Download and extract the ZIP into a writable folder.
-          2. Run `DoomLauncher667.exe`.
-          3. Follow the first-setup assistant to configure IWADs, source ports and mods.
-
-          The package is self-contained and does not require a separate .NET installation.
-          For an update, copy the new package over the existing portable installation.
-          Existing databases, mods, screenshots, settings and custom themes are preserved.
-          Verify the ZIP with the attached SHA-256 file before extracting it.
-          "@
+          $release = ./deployment/release-version.ps1 -Version $env:VERSION
+          $notesPath = "docs/releases/$env:VERSION.md"
+          if (-not (Test-Path -LiteralPath $notesPath)) {
+            throw "Release notes required: $notesPath"
+          }
           if (gh release view $env:GITHUB_REF_NAME --repo $env:GITHUB_REPOSITORY 2>$null) {
             gh release upload $env:GITHUB_REF_NAME `
               $env:ARCHIVE `
@@ -90,12 +85,14 @@ jobs:
               --repo $env:GITHUB_REPOSITORY
           }
           else {
+            $channelArguments = if ($release.Prerelease) { @('--prerelease') } else { @('--latest') }
             gh release create $env:GITHUB_REF_NAME `
               $env:ARCHIVE `
               $env:CHECKSUM `
               --verify-tag `
-              --prerelease `
-              --title "Doom Launcher 667 $env:VERSION Beta" `
-              --notes $notes `
+              @channelArguments `
+              --title $release.Title `
+              --notes-file $notesPath `
               --repo $env:GITHUB_REPOSITORY
           }
+          if ($LASTEXITCODE -ne 0) { throw 'GitHub release publication failed.' }

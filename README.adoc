@@ -16,27 +16,45 @@ remains its inspiration and the source of the migration compatibility work.
 
 == Download
 
-Download the latest Windows x64 beta ZIP from the
-https://github.com/Realm667/DoomLauncher667/releases/latest[GitHub Releases
-page]. Extract the complete archive into a writable folder and launch
+The current testing release is *1.0.0-rc.1* (Release Candidate, not final 1.0).
+Download its Windows x64 ZIP from the
+https://github.com/Realm667/DoomLauncher667/releases/tag/v1.0.0-rc.1[RC download page]
+or browse https://github.com/Realm667/DoomLauncher667/releases[all releases].
+Extract the complete archive into a writable folder and launch
 `DoomLauncher667.exe`.
 
 The **download** is self-contained; a separate .NET installation is not required.
 On first start, a guided setup can scan portable IWAD, source-port and mod
 folders or migrate an existing classic Doom Launcher installation.
 
-To **migrate**, extract Doom Launcher 667 and use the integrated function
-at the first launch of the software, it will guide you through the process.
+To **migrate**, use the first-launch prompt and choose the original installation
+folder containing `DoomLauncher.sqlite`. See link:docs/migration.md[the migration guide].
 
-To **update**, close Doom Launcher 667 and extract the newer package over the
+To **update**, close Doom Launcher 667, back up the entire portable folder,
+and extract the newer package over the
 existing installation. Release packages do not contain a personal database.
 Your database, mods, screenshots, artwork, settings and custom themes are
-preserved, and compatible schema migrations run automatically.
+preserved, and compatible schema migrations run automatically. Do not run the
+reset command when updating. See link:docs/installation-and-updates.md[installation,
+checksum verification, updates and rollback].
 
 NOTE: Commercial IWADs and other copyrighted game data are not distributed
 with Doom Launcher 667. Supply your legally obtained files during setup.
 
 == Screenshots
+
+The RC screenshots below use an isolated demonstration library, not bundled games.
+
+=== Release Candidate library
+
+image::docs/screenshots/rc1-library.jpg[Library in Doom Launcher 667 1.0.0-rc.1,link=docs/screenshots/rc1-library.jpg]
+
+=== Release Candidate achievements
+
+image::docs/screenshots/rc1-achievements.jpg[Achievements in Doom Launcher 667 1.0.0-rc.1,link=docs/screenshots/rc1-achievements.jpg]
+
+The following larger-library examples show earlier Doom Launcher 667 beta builds;
+they are not screenshots of the original Doom Launcher.
 
 === Collections
 
@@ -140,10 +158,12 @@ for the 1.0 preparation work.
 
 == Project status and feedback
 
-Doom Launcher 667 is currently in public beta. Please report reproducible
-problems and feature requests through
-https://github.com/Realm667/DoomLauncher667/issues[GitHub Issues]. Include the
-launcher version, source port and relevant diagnostic details where possible.
+Doom Launcher 667 is preparing its first stable 1.0 release. The RC is a
+prerelease intended for feedback, not a claim that final acceptance is complete.
+See link:docs/releases/1.0.0-rc.1.md[RC changes and known limitations].
+Please report reproducible problems through
+https://github.com/Realm667/DoomLauncher667/issues[GitHub Issues], following
+link:docs/reporting-problems.md[the reporting checklist].
 
 Technical architecture and migration notes are available in
 link:docs/winui-rebuild.md[the WinUI 3 implementation guide].
