@@ -39,6 +39,10 @@ public sealed partial class MainPage
         {
             await Layout();
             Check(GameList.IsLoaded && LibraryDetailsPane.IsLoaded, "Native list and shared details are loaded");
+            var iconWindow = WinRT.Interop.WindowNative.GetWindowHandle(_app.MainWindow!);
+            var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "DoomLauncher.ico");
+            Check(WindowIconMatchesAsset(iconWindow, 0, iconPath) && WindowIconMatchesAsset(iconWindow, 1, iconPath),
+                "Native small and large window icons match the shipped launcher artwork");
             var navigationItems = ShellNavigation.MenuItems.ToList();
             var multiplayerIndex = navigationItems.FindIndex(item => item is NavigationViewItem { Tag: "Multiplayer" });
             Check(multiplayerIndex >= 0 && navigationItems[multiplayerIndex + 1] is NavigationViewItemSeparator
@@ -207,5 +211,26 @@ public sealed partial class MainPage
         await File.WriteAllTextAsync(report + ".tmp", JsonSerializer.Serialize(new { Passed = failure is null, Checks = checks, Error = failure }));
         File.Move(report + ".tmp", report);
         _app.MainWindow!.Close();
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "SendMessageW")]
+    private static extern nint ReadWindowIcon(nint window, uint message, nint kind, nint parameter);
+
+    private static bool WindowIconMatchesAsset(nint window, int kind, string path)
+    {
+        var handle = ReadWindowIcon(window, 0x007F, kind, 0); // WM_GETICON; ICON_SMALL/ICON_BIG
+        if (handle == 0) return false;
+        using var borrowed = System.Drawing.Icon.FromHandle(handle); // Does not own the native HICON.
+        using var expected = new System.Drawing.Icon(path, borrowed.Size);
+        using var actualBitmap = borrowed.ToBitmap();
+        using var expectedBitmap = expected.ToBitmap();
+        if (actualBitmap.Size != expectedBitmap.Size) return false;
+        for (var y = 0; y < actualBitmap.Height; y++)
+            for (var x = 0; x < actualBitmap.Width; x++)
+            {
+                var actual = actualBitmap.GetPixel(x, y); var target = expectedBitmap.GetPixel(x, y);
+                if (actual.A != target.A || (actual.A != 0 && actual.ToArgb() != target.ToArgb())) return false;
+            }
+        return true;
     }
 }

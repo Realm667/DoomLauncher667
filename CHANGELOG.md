@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 1.0.0-rc.13 - 2026-11-08
+
+- Load the launcher window/taskbar icon using its absolute application asset path, as required by AppWindow.SetIcon, independently of the current working directory.
+- Verify the actual native small and large window icons against the shipped launcher artwork in the isolated native UI suite.
+
 ## 1.0.0-rc.12 - 2026-11-08
 
 - Move Multiplayer below Latest and directly above Achievements, separated by a horizontal rule.

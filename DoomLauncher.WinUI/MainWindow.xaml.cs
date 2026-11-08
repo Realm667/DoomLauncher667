@@ -29,7 +29,9 @@ public sealed partial class MainWindow : Window
         SetTitleBar(AppTitleBar);
         ApplyTitleBarTheme();
 
-        AppWindow.SetIcon("Assets/DoomLauncher.ico");
+        // SetIcon requires an absolute file path, not a working-directory or
+        // package-relative path. The portable app can start from any directory.
+        AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "DoomLauncher.ico"));
         RestoreWindowSize();
         AppWindow.Closing += AppWindow_Closing;
         RootFrame.Navigate(typeof(MainPage));

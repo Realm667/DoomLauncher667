@@ -16,9 +16,9 @@ remains its inspiration and the source of the migration compatibility work.
 
 == Download
 
-The current testing release is *1.0.0-rc.12* (Release Candidate, not final 1.0).
+The current testing release is *1.0.0-rc.13* (Release Candidate, not final 1.0).
 Download its Windows x64 ZIP from the
-https://github.com/Realm667/DoomLauncher667/releases/tag/v1.0.0-rc.12[RC download page]
+https://github.com/Realm667/DoomLauncher667/releases/tag/v1.0.0-rc.13[RC download page]
 or browse https://github.com/Realm667/DoomLauncher667/releases[all releases].
 Extract the complete archive into a writable folder and launch
 `DoomLauncher667.exe`.
@@ -176,7 +176,7 @@ for the 1.0 preparation work.
 
 Doom Launcher 667 is preparing its first stable 1.0 release. The RC is a
 prerelease intended for feedback, not a claim that final acceptance is complete.
-See link:docs/releases/1.0.0-rc.12.md[RC changes and known limitations].
+See link:docs/releases/1.0.0-rc.13.md[RC changes and known limitations].
 Please report reproducible problems through
 https://github.com/Realm667/DoomLauncher667/issues[GitHub Issues], following
 link:docs/reporting-problems.md[the reporting checklist].
