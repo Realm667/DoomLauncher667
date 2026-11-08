@@ -13,6 +13,10 @@ internal static class StabilizationTests
 
     public static async Task RunAsync()
     {
+        var now = new DateTime(2026, 11, 8, 12, 0, 0);
+        Require(RecentImport.IsNew(now, now) && RecentImport.IsNew(now.AddDays(-7).AddTicks(1), now)
+            && !RecentImport.IsNew(now.AddDays(-7), now) && !RecentImport.IsNew(null, now)
+            && !RecentImport.IsNew(now.AddSeconds(1), now), "New badge lasts exactly seven days from import");
         var root = Path.Combine(Path.GetTempPath(), "DoomLauncher stabilisation ä " + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         try

@@ -8,6 +8,7 @@
     <UseSystemDrawing>true</UseSystemDrawing>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\DoomLauncher.WinUI\Services\RecentImport.cs" Link="Services\RecentImport.cs" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.10" />
     <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.12" />
     <PackageReference Include="SharpCompress" Version="0.49.1" />

@@ -82,6 +82,18 @@ public sealed class MainViewModel(
 
     public event PropertyChangedEventHandler? PropertyChanged;
     public event Action<AchievementItem>? AchievementUnlocked;
+    public event Action? ImportsRevealed;
+
+    public void ShowLatestImports()
+    {
+        _searchText = string.Empty;
+        _collectionFilterTag = null;
+        _categoryFilter = LibraryCategoryFilter.All;
+        SetSection(LibrarySection.Downloads);
+        ApplyFilter();
+        SelectedGame = Games.FirstOrDefault() ?? LibraryItem.Empty;
+        ImportsRevealed?.Invoke();
+    }
 
     public ObservableCollection<LibraryItem> Games { get; private set; } = [];
     public ObservableCollection<LaunchOptionChoice> SourcePortOptions { get; } = [];
@@ -588,6 +600,8 @@ public sealed class MainViewModel(
                 cancellationToken);
         }
         await LoadCatalogAsync(true, null, cancellationToken);
+        if (result.ImportedEntries > 0)
+            ShowLatestImports();
         return result;
     }
 
@@ -913,6 +927,7 @@ public sealed class MainViewModel(
                 forceRefresh: true,
                 imported.GameFileId,
                 cancellationToken);
+            ShowLatestImports();
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -1332,6 +1347,7 @@ public sealed class MainViewModel(
             }
             LaunchStatus = localization.Format("NativeImported", result.FileName);
             await LoadCatalogAsync(true, result.GameFileId, cancellationToken);
+            ShowLatestImports();
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -1645,6 +1661,7 @@ public sealed class MainViewModel(
                 .ThenBy(game => game.Title, StringComparer.CurrentCultureIgnoreCase),
             LibrarySection.Downloads => matches
                 .OrderByDescending(game => game.DownloadedAt)
+                .ThenByDescending(game => game.GameFileId)
                 .ThenBy(game => game.Title, StringComparer.CurrentCultureIgnoreCase),
             _ => ApplySelectedSort(matches),
         };

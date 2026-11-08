@@ -15,6 +15,12 @@
     RequestedTheme="Dark"
     mc:Ignorable="d">
     <Page.Resources>
+        <DataTemplate x:Key="NewImportBadgeTemplate" x:DataType="models:LibraryItem">
+            <Border Padding="4,1" Background="{ThemeResource DoomControlAccentBrush}"
+                    CornerRadius="4" Visibility="{x:Bind NewBadgeVisibility, Mode=OneWay}">
+                <TextBlock Text="New" FontSize="10" FontWeight="SemiBold" Foreground="Black" />
+            </Border>
+        </DataTemplate>
         <models:ListColumnLayout x:Key="ListColumnLayout" />
         <models:ListColumnLayout x:Key="CollectionListColumnLayout" />
         <models:ListDensityLayout x:Key="ListDensityLayout" />
@@ -221,6 +227,8 @@
                                 Stretch="{x:Bind ArtworkStretch}" />
                         </Border.Background>
                         <Grid>
+                            <ContentControl Content="{x:Bind Self}" ContentTemplate="{StaticResource NewImportBadgeTemplate}"
+                                            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4" IsTabStop="False" />
                             <StackPanel
                                 Margin="0,0,8,8"
                                 HorizontalAlignment="Right"
@@ -318,6 +326,8 @@
                             ImageSource="{x:Bind Artwork}"
                             Stretch="{x:Bind ArtworkStretch}" />
                     </Border.Background>
+                    <ContentControl Content="{x:Bind Self}" ContentTemplate="{StaticResource NewImportBadgeTemplate}"
+                                    HorizontalAlignment="Left" VerticalAlignment="Top" IsTabStop="False" />
                 </Border>
                 <TextBlock Grid.Column="1" Margin="7,0" VerticalAlignment="Center" FontFamily="{StaticResource DoomHeadlineFontFamily}" FontSize="12" FontWeight="SemiBold" Text="{x:Bind Title}" TextTrimming="CharacterEllipsis" />
                 <TextBlock Grid.Column="2" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind Author}" TextTrimming="CharacterEllipsis" />
@@ -950,6 +960,8 @@
                                                     ImageSource="{x:Bind Artwork}"
                                                     Stretch="{x:Bind ArtworkStretch}" />
                                             </Border.Background>
+                                            <ContentControl Content="{x:Bind Self}" ContentTemplate="{StaticResource NewImportBadgeTemplate}"
+                                                            HorizontalAlignment="Left" VerticalAlignment="Top" IsTabStop="False" />
                                         </Border>
                                         <TextBlock
                                             Grid.Column="1"

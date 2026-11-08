@@ -33,6 +33,7 @@ public sealed partial class MainPage : Page
     private LibraryGroup? _selectedCollectionGroup;
     private readonly List<ToggleButton> _collectionFilterButtons = [];
     private readonly DispatcherTimer _statusDismissTimer = new();
+    private readonly DispatcherTimer _newBadgeTimer = new();
     private readonly DispatcherTimer _tileImageRefreshTimer = new();
     private readonly List<FileSystemWatcher> _tileImageWatchers = [];
     private readonly SemaphoreSlim _collectionStateGate = new(1, 1);
@@ -57,6 +58,14 @@ public sealed partial class MainPage : Page
         _tileImageRefreshTimer.Interval = TimeSpan.FromMilliseconds(650);
         _tileImageRefreshTimer.Tick += TileImageRefreshTimer_Tick;
         ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+        ViewModel.ImportsRevealed += RevealLatestImports;
+        _newBadgeTimer.Interval = TimeSpan.FromMinutes(1);
+        _newBadgeTimer.Tick += (_, _) =>
+        {
+            foreach (var game in ViewModel.CatalogItems)
+                game.RefreshNewBadge();
+        };
+        Loaded += (_, _) => _newBadgeTimer.Start();
         DebugNavigationItem.Visibility = _app.IsDebugMode
             ? Visibility.Visible
             : Visibility.Collapsed;
@@ -69,6 +78,7 @@ public sealed partial class MainPage : Page
             _searchCancellation?.Cancel();
             _loadCancellation.Cancel();
             _statusDismissTimer.Stop();
+            _newBadgeTimer.Stop();
             _tileImageRefreshTimer.Stop();
             _obsidianGenerationCancellation?.Cancel();
             DisposeTileImageWatchers();
@@ -759,10 +769,7 @@ public sealed partial class MainPage : Page
             ObsidianProgressText.Text = _app.Localization.Format(
                 "GenerationCompleted",
                 result.FileName);
-            var generatedGame = ViewModel.CatalogItems.FirstOrDefault(game =>
-                game.GameFileId == result.GameFileId);
-            if (generatedGame is not null)
-                OpenOverviewGame(generatedGame);
+            ViewModel.ShowLatestImports();
         }
         catch (OperationCanceledException)
         {
@@ -1250,8 +1257,8 @@ public sealed partial class MainPage : Page
 
         var windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(app.MainWindow);
         WinRT.Interop.InitializeWithWindow.Initialize(picker, windowHandle);
-        var file = await picker.PickSingleFileAsync();
-        if (file is not null)
+        var files = await picker.PickMultipleFilesAsync();
+        foreach (var file in files)
         {
             var conflict = await ViewModel.FindImportConflictAsync(
                 Path.GetFileName(file.Path),
@@ -1280,6 +1287,8 @@ public sealed partial class MainPage : Page
                     progress,
                     decisions));
             await ViewModel.RefreshAsync(_loadCancellation.Token);
+            if (result.Imported > 0)
+                ViewModel.ShowLatestImports();
             SyncSelection();
             await ShowActionMessageAsync(
                 Strings["LibraryRefreshComplete"],
@@ -1310,8 +1319,9 @@ public sealed partial class MainPage : Page
             return;
 
         var items = await args.DataView.GetStorageItemsAsync();
-        var file = items.OfType<Windows.Storage.StorageFile>().FirstOrDefault();
-        if (file is not null)
+        foreach (var file in items.OfType<Windows.Storage.StorageFile>().Where(file =>
+                     new[] { ".zip", ".wad", ".pk3", ".pk7", ".7z", ".rar" }
+                         .Contains(Path.GetExtension(file.Path), StringComparer.OrdinalIgnoreCase)))
         {
             var conflict = await ViewModel.FindImportConflictAsync(
                 Path.GetFileName(file.Path),
@@ -2797,6 +2807,27 @@ public sealed partial class MainPage : Page
                     ViewModel.SelectedGame,
                     ScrollIntoViewAlignment.Leading);
             }
+        });
+    }
+
+    private void RevealLatestImports()
+    {
+        _searchCancellation?.Cancel();
+        SearchBox.Text = string.Empty;
+        AllFilterButton.IsChecked = true;
+        IwadFilterButton.IsChecked = false;
+        ModsFilterButton.IsChecked = false;
+        UnplayedFilterButton.IsChecked = false;
+        foreach (var button in _collectionFilterButtons)
+            button.IsChecked = false;
+        RestoreActiveNavigationSelection();
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+        {
+            SyncSelection();
+            GameList.UpdateLayout();
+            GameGrid.UpdateLayout();
+            FindDescendant<ScrollViewer>(GameList)?.ChangeView(0, 0, null, true);
+            FindDescendant<ScrollViewer>(GameGrid)?.ChangeView(0, 0, null, true);
         });
     }
 

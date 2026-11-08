@@ -360,7 +360,7 @@ try
 {
     await StabilizationTests.RunAsync();
     Check(
-        AppVersion.Current == "1.0.0-rc.1",
+        AppVersion.Current == "1.0.0-rc.2",
         "Die sichtbare Version stammt aus der zentralen Buildversion");
     VerifyTileImageDefaults();
     Check(

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.0.0-rc.2 - 2026-11-08
+
+- Open Latest at the top after successful mod imports, including Discover,
+  packages, generation and library scans; clear filters hiding the new mods.
+- Overlay a New badge on mod artwork for seven days from the persisted import
+  date, including automatic expiry while the launcher remains open.
+
 ## 1.0.0-rc.1 - 2026-09-06
 
 - Prepare the first Release Candidate without adding product features.

@@ -122,6 +122,9 @@ public sealed class LibraryItem : INotifyPropertyChanged
     public DateTime? LastPlayedAt { get; }
     public DateTime? ReleaseDateAt { get; }
     public DateTime? DownloadedAt { get; }
+    public Visibility NewBadgeVisibility => Category == "Mod" && RecentImport.IsNew(DownloadedAt, DateTime.Now)
+        ? Visibility.Visible : Visibility.Collapsed;
+    public void RefreshNewBadge() => OnPropertyChanged(nameof(NewBadgeVisibility));
     public int MapCount { get; }
     public double RatingValue { get; }
     public int? IdGamesId { get; }
