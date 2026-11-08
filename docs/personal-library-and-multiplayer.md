@@ -48,6 +48,8 @@ the launched archive (or its IWAD for gameplay-only mods), then stored transacti
 The archive hash must still match. Manual marks from older versions remain stored
 but are excluded from validated progress. No mod or IWAD archive is modified.
 The passive helper is not serialized into saves and has a stable versioned name.
+Its current launch identity is captured before a save restores server CVars, so
+loading an older save cannot replace the identity used for completion reports.
 Older saves may still show the engine's changed-resource confirmation; keep backups.
 Multiplayer, extra-parameters-only launches, explicit custom logfile arguments,
 directory-only entries, missing API support and ambiguous cases remain untracked.
@@ -92,3 +94,17 @@ All players need the same IWAD, mods and compatible engine. Host/direct mod orde
 follows the displayed library order. Password entry happens in the engine; nothing
 is stored here. No firewall/router/UPnP changes and no internet host advertising
 occur. Internet reachability remains user-managed.
+
+## Optional real-engine tracking regression
+
+With an installed engine and your own legal Doom II IWAD (or ZIP containing it), run:
+
+```powershell
+dotnet run --project DoomLauncher.Modern.Tests -c Release -- --verify-map-tracker-regression "C:\Engines\gzdoom.exe" "C:\Games\doom2.wad"
+```
+
+Repeat with UZDoom/LZDoom as appropriate. Seven isolated cases cover the six-case
+warp/load matrix plus direct `-loadgame` startup. Each imports actual engine logs
+into a fresh SQLite database twice. Reports and disposable fixtures are retained
+in the printed temporary directory. Engines and IWADs are not bundled with tests;
+no existing engine configuration, saves or launcher library are modified.

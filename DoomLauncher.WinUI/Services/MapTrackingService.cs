@@ -30,7 +30,7 @@ internal static class MapTrackingService
                 }
                 var api = Read("zscript/doombase.zs"); var events = Read("zscript/events.zs");
                 if (api.Contains("LevelInfo info") && api.Contains("int clusterflags")
-                    && events.Contains("UiTick()") && events.Contains("NextMap")) return true;
+                    && events.Contains("UiTick()") && events.Contains("NextMap") && events.Contains("OnEngineInitialize()")) return true;
             }
         }
         catch (Exception error) when (error is IOException or InvalidDataException or UnauthorizedAccessException) { }

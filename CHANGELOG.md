@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.0.0-rc.11 - 2026-11-08
+
+- Capture the map tracker's launch identity once during engine initialization, before saved-game CVars are restored. Keep it in the non-serialized static handler rather than re-reading the saved server CVar.
+- Preserve strict session-bound completion imports and compatibility with existing save games and the versioned helper filename.
+- Pass validated resume paths relative to -savedir, avoiding duplicated absolute Windows paths in direct -loadgame starts.
+- Add opt-in real-engine regression coverage for warp, changemap, save/load, cross-process resume, direct -loadgame resume, and repeated SQLite import.
+
 ## 1.0.0-rc.10 - 2026-11-08
 
 - Bundle automatic, engine-validated map tracking for compatible GZDoom/UZDoom-based single-player launches; no manual completion controls or guessed completions.

@@ -66,6 +66,12 @@ public static class SaveGameService
         _ = await ReadEntryAsync(savePath, token); // reject malformed or unsupported save containers before starting an engine.
     }
 
+    // Call only after ValidateResumeAsync. GZDoom-family -loadgame prepends
+    // -savedir even to a Windows drive-qualified name. Retain managed sibling
+    // and import folders through a relative path, not a duplicated drive path.
+    internal static string BuildLoadGameArgument(string saveDirectory, string savePath) =>
+        Path.GetRelativePath(Path.GetFullPath(saveDirectory), Path.GetFullPath(savePath));
+
     public static async Task<IReadOnlyList<SaveGameEntry>> LoadAsync(string root, string libraryFile, string gameHash, CancellationToken token = default)
     {
         var directory = Path.Combine(root, "Data", "SaveGames"); if (!Directory.Exists(directory)) return [];

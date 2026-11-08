@@ -238,7 +238,7 @@ public sealed class NativeGameLaunchService(
                 if (request.SaveGamePath is not null)
                 {
                     await SaveGameService.ValidateResumeAsync(managedSaves, request.SaveGamePath, request.AllowUnverifiedSave, cancellationToken);
-                    arguments.AddRange(["-loadgame", Path.GetFullPath(request.SaveGamePath)]);
+                    arguments.AddRange(["-loadgame", SaveGameService.BuildLoadGameArgument(managedSaves.Directory, request.SaveGamePath)]);
                 }
             }
             else if (request.SaveGamePath is not null) throw new InvalidOperationException("This source port has no supported managed-save adapter.");

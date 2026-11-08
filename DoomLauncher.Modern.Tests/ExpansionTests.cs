@@ -150,6 +150,12 @@ internal static class ExpansionTests
         var saves = await SaveGameService.LoadAsync(a.Root, a.Mod.FileName, context.Metadata.GameHash);
         Check(saves.Count == 1 && saves[0].Title == "The test save" && saves[0].Map == "MAP01" && saves[0].Metadata?.EngineHash == context.Metadata.EngineHash, "Save browser reads titles, map and recorded engine fingerprint");
         await SaveGameService.ValidateResumeAsync(context, path, false, default);
+        Check(SaveGameService.BuildLoadGameArgument(context.Directory, path) == "save0.zds",
+            "Loadgame is relative to savedir, never a duplicated Windows absolute path");
+        var sibling = Path.Combine(Path.GetDirectoryName(context.Directory)!, "imported", "save with spaces.zds");
+        var relative = SaveGameService.BuildLoadGameArgument(context.Directory, sibling);
+        Check(!Path.IsPathFullyQualified(relative) && Path.GetFullPath(Path.Combine(context.Directory, relative)) == sibling,
+            "Relative loadgame paths preserve managed sibling folders and spaces");
         await Reject(() => SaveGameService.ValidateResumeAsync(context with { Metadata = context.Metadata with { LaunchFingerprint = "changed" } }, path, false, default), "Resume rejects changed launch environment without confirmation");
         var backup = await SaveGameService.BackupAsync(a.Root, context.Directory); File.Delete(path); Save(path, "Changed save");
         await SaveGameService.RestoreBackupAsync(a.Root, backup!); Check((await SaveGameService.ReadEntryAsync(path)).Title == "The test save", "Save backup restores verified content and preserves pre-overwrite snapshot");
@@ -185,7 +191,7 @@ internal static class ExpansionTests
         using (var zip = ZipFile.Open(Path.Combine(portDirectory, "gzdoom.pk3"), ZipArchiveMode.Create))
         {
             using (var writer = new StreamWriter(zip.CreateEntry("zscript/doombase.zs").Open())) writer.Write("native readonly LevelInfo info; native readonly int clusterflags;");
-            using (var writer = new StreamWriter(zip.CreateEntry("zscript/events.zs").Open())) writer.Write("UiTick() NextMap");
+            using (var writer = new StreamWriter(zip.CreateEntry("zscript/events.zs").Open())) writer.Write("UiTick() NextMap OnEngineInitialize()");
         }
         await using (var db = await a.Store.OpenAsync())
         {
@@ -199,6 +205,15 @@ internal static class ExpansionTests
         var sessionToken = arguments[arguments.IndexOf("dl667_track_session") + 1];
         Check(arguments.Count(argument => argument == "-file") == 1 && arguments.Any(argument => argument.EndsWith("dl667-map-tracker-v1.pk3")),
             "Compatible single-player launch loads built-in tracker without replacing the mod stack");
+        using (var helper = ZipFile.OpenRead(arguments.Single(argument => argument.EndsWith("dl667-map-tracker-v1.pk3"))))
+        using (var script = new StreamReader(helper.GetEntry("ZSCRIPT")!.Open()))
+        {
+            var source = await script.ReadToEndAsync();
+            Check(source.Contains("override void OnEngineInitialize()") && source.Contains("String SessionToken;")
+                && source.Split("CVar.FindCVar('dl667_track_session')").Length == 2
+                && !source[source.IndexOf("void Report()", StringComparison.Ordinal)..].Contains("session.GetString()"),
+                "Tracker captures the launch token once before save CVars restore and never re-reads it during reporting");
+        }
         await File.WriteAllLinesAsync(logPath, new[] { $"DL667_TRACK_V1|{sessionToken}|ready", $"DL667_TRACK_V1|{sessionToken}|complete|MAP01", $"DL667_TRACK_V1|{sessionToken}|complete|MAP02" });
         await launched.Session.WaitForExitAsync();
         Check((await a.Store.LoadAsync())[a.Mod.GameFileId].CompletedMaps.SetEquals(new[] { "MAP01" }),
@@ -211,6 +226,13 @@ internal static class ExpansionTests
         await File.WriteAllLinesAsync(changedContext.LogPath, new[] { "DL667_TRACK_V1|session|ready", "DL667_TRACK_V1|session|complete|MAP03" });
         await File.WriteAllTextAsync(changedArchive, "replaced archive"); await MapTrackingService.ImportAsync(changedContext, a.Store, a.Mod.GameFileId);
         Check(!(await a.Store.LoadAsync())[a.Mod.GameFileId].CompletedMaps.Contains("MAP03"), "Tracker never credits a replaced archive using evidence from the previous file");
+        var resumePath = Path.Combine(arguments[arguments.IndexOf("-savedir") + 1], "fixture save.zds"); Save(resumePath, "Resume fixture");
+        launched = await launcher.LaunchAsync(new(a.Mod.GameFileId, "Resume fixture", SourcePortId: sp.SourcePortId, IwadId: iw.IwadId,
+            SaveGamePath: resumePath, AllowUnverifiedSave: true));
+        var resumeArguments = starter.Info!.ArgumentList.ToList();
+        Check(resumeArguments[resumeArguments.IndexOf("-loadgame") + 1] == "fixture save.zds",
+            "Native resume passes the validated save relative to its savedir");
+        await launched.Session.WaitForExitAsync();
         launched = await launcher.LaunchAsync(new(iwad.GameFileId, "Network fixture", SourcePortId: sp.SourcePortId, IwadId: iw.IwadId,
             Multiplayer: new("join", "127.0.0.1", Mods: [new(a.Mod.GameFileId, "map.wad")])));
         Check(starter.Info!.ArgumentList.Contains("-join") && !starter.Info.ArgumentList.Contains("+exec") && starter.Info.ArgumentList.Any(value => value.EndsWith("map.wad")), "Multiplayer uses ordered explicit archive entries and excludes saved extra arguments");
