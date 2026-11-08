@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 1.0.0-rc.3 - 2026-11-08
+
+- Coordinate refreshes, batch file imports and reconcile visible entries while
+  retaining unchanged item instances and virtualized layouts.
+- Separate UI and database responsibilities into focused source modules.
+- Guard portable installations against concurrent launcher processes; retain and
+  recover settings backups instead of silently resetting unreadable JSON.
+- Add import progress, cancellation, shared conflict choices and result summaries;
+  improve Latest text, New badge contrast/tooltips and navigation/keyboard behavior.
+- Allow persistent source-port/IWAD assignment directly from mod details.
+- Add verified installation backup/restore and non-destructive SHA-256 duplicate checks.
+- Add failure-injection and native WinUI regression checks to release validation.
+
 ## 1.0.0-rc.2 - 2026-11-08
 
 - Open Latest at the top after successful mod imports, including Discover,

@@ -8,6 +8,14 @@
     <UseSystemDrawing>true</UseSystemDrawing>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\DoomLauncher.WinUI\Services\SqliteNativeLibraryService.*.cs" Link="Services\%(Filename)%(Extension)" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\UiLocalization.Ux.cs" Link="Services\UiLocalization.Ux.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\InstallationLease.cs" Link="Services\InstallationLease.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\CollectionReconciler.cs" Link="Services\CollectionReconciler.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\RefreshCoordinator.cs" Link="Services\RefreshCoordinator.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\ModImportBatch.cs" Link="Services\ModImportBatch.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\InstallationBackupService.cs" Link="Services\InstallationBackupService.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\DuplicateModService.cs" Link="Services\DuplicateModService.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\RecentImport.cs" Link="Services\RecentImport.cs" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.10" />
     <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.12" />

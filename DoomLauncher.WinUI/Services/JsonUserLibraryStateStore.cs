@@ -8,6 +8,7 @@ public sealed class JsonUserLibraryStateStore : IUserLibraryStateStore
     private const string StateFileName = "library-state.json";
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly string _statePath;
+    private bool _hasKnownState;
 
     public JsonUserLibraryStateStore()
     {
@@ -20,19 +21,39 @@ public sealed class JsonUserLibraryStateStore : IUserLibraryStateStore
             : Path.GetFullPath(configuredPath);
     }
 
-    public async Task<UserLibraryState> LoadAsync(
-        CancellationToken cancellationToken = default)
+    public string? RecoveryNoticeKey { get; private set; }
+
+    public async Task<UserLibraryState> LoadAsync(CancellationToken cancellationToken = default)
     {
         await _gate.WaitAsync(cancellationToken);
         try
         {
-            if (!File.Exists(_statePath))
-                return UserLibraryState.Empty;
+            try { var state = await ReadStateAsync(_statePath, cancellationToken); _hasKnownState = true; return state; }
+            catch (Exception error) when (error is JsonException or IOException or UnauthorizedAccessException)
+            {
+                if (File.Exists(_statePath + ".bak"))
+                {
+                    var recovered = await ReadStateAsync(_statePath + ".bak", cancellationToken);
+                    RecoveryNoticeKey = "StateRecovered";
+                    _hasKnownState = true;
+                    return recovered;
+                }
+                if (!_hasKnownState && error is (FileNotFoundException or DirectoryNotFoundException)
+                    && Directory.Exists(Path.GetPathRoot(_statePath)))
+                    return UserLibraryState.Empty;
+                throw new IOException("Launcher settings could not be read. Check storage access; no settings have been reset.", error);
+            }
+        }
+        finally { _gate.Release(); }
+    }
 
-            await using var stream = File.OpenRead(_statePath);
+    private static async Task<UserLibraryState> ReadStateAsync(string path, CancellationToken cancellationToken)
+    {
+            await using var stream = File.OpenRead(path);
             var state = await JsonSerializer.DeserializeAsync<PersistedState>(
                 stream,
                 cancellationToken: cancellationToken);
+            if (state is null) throw new JsonException("Settings file is empty.");
             var visibleColumns = NormalizeColumns(state?.VisibleColumns);
             return new UserLibraryState(
                 new HashSet<int>(state?.FavoriteGameFileIds ?? []),
@@ -56,18 +77,6 @@ public sealed class JsonUserLibraryStateStore : IUserLibraryStateStore
                 NormalizeCollectionArtworkPaths(state?.CollectionArtworkPaths),
                 NormalizeWindowDimension(state?.WindowWidth),
                 NormalizeWindowDimension(state?.WindowHeight));
-        }
-        catch (Exception exception) when (
-            exception is JsonException
-            or IOException
-            or UnauthorizedAccessException)
-        {
-            return UserLibraryState.Empty;
-        }
-        finally
-        {
-            _gate.Release();
-        }
     }
 
     public async Task SaveAsync(
@@ -77,9 +86,13 @@ public sealed class JsonUserLibraryStateStore : IUserLibraryStateStore
         await _gate.WaitAsync(cancellationToken);
         try
         {
+            if (_hasKnownState && !File.Exists(_statePath) && !File.Exists(_statePath + ".bak"))
+                throw new IOException("The settings storage disappeared. Check the connection before saving again.");
             var directory = Path.GetDirectoryName(_statePath)!;
             Directory.CreateDirectory(directory);
-            var temporaryPath = _statePath + ".tmp";
+            var temporaryPath = _statePath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            try
+            {
             await using (var stream = File.Create(temporaryPath))
             {
                 await JsonSerializer.SerializeAsync(
@@ -109,9 +122,32 @@ public sealed class JsonUserLibraryStateStore : IUserLibraryStateStore
                         NormalizeWindowDimension(state.WindowWidth),
                         NormalizeWindowDimension(state.WindowHeight)),
                     cancellationToken: cancellationToken);
+                await stream.FlushAsync(cancellationToken);
+                stream.Flush(flushToDisk: true);
             }
 
+            if (File.Exists(_statePath))
+            {
+                var valid = true;
+                try { await ReadStateAsync(_statePath, cancellationToken); }
+                catch (JsonException) { valid = false; }
+                if (valid)
+                {
+                    var backupTemp = temporaryPath + ".bak";
+                    File.Copy(_statePath, backupTemp);
+                    File.Move(backupTemp, _statePath + ".bak", overwrite: true);
+                }
+                else File.Copy(_statePath, _statePath + ".corrupt-" + Guid.NewGuid().ToString("N"));
+            }
             File.Move(temporaryPath, _statePath, overwrite: true);
+            if (!File.Exists(_statePath + ".bak")) File.Copy(_statePath, _statePath + ".bak");
+            _hasKnownState = true;
+            }
+            finally
+            {
+                if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
+                if (File.Exists(temporaryPath + ".bak")) File.Delete(temporaryPath + ".bak");
+            }
         }
         finally
         {

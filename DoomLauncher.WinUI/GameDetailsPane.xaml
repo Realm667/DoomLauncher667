@@ -187,11 +187,15 @@
                     </Grid.RowDefinitions>
                     <StackPanel>
                         <TextBlock Style="{StaticResource MetaTextStyle}" Text="{Binding SourcePort}" />
-                        <TextBlock Text="{Binding ViewModel.SelectedGame.SourcePort, ElementName=DetailsRoot}" />
+                        <Button Content="{Binding ViewModel.SelectedGame.SourcePort, ElementName=DetailsRoot}"
+                                AutomationProperties.Name="{Binding SourcePort}" ToolTipService.ToolTip="{Binding LaunchOptions}"
+                                Click="ChooseLaunchDefinition_Click" />
                     </StackPanel>
                     <StackPanel Grid.Column="1">
                         <TextBlock Style="{StaticResource MetaTextStyle}" Text="{Binding Iwad}" />
-                        <TextBlock Text="{Binding ViewModel.SelectedGame.Iwad, ElementName=DetailsRoot}" />
+                        <Button Content="{Binding ViewModel.SelectedGame.Iwad, ElementName=DetailsRoot}"
+                                AutomationProperties.Name="{Binding Iwad}" ToolTipService.ToolTip="{Binding LaunchOptions}"
+                                Click="ChooseLaunchDefinition_Click" />
                     </StackPanel>
                     <StackPanel Grid.Row="1">
                         <TextBlock Style="{StaticResource MetaTextStyle}" Text="{Binding Playtime}" />
@@ -203,6 +207,8 @@
                     </StackPanel>
                 </Grid>
 
+                <TextBlock Text="{Binding ViewModel.LaunchSetupHint, ElementName=DetailsRoot}" TextWrapping="Wrap"
+                           Visibility="{Binding ViewModel.LaunchSetupHintVisibility, ElementName=DetailsRoot}" />
                 <Grid ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -273,6 +279,11 @@
                                         Header="{Binding Difficulty}"
                                         ItemsSource="{x:Bind ViewModel.SkillOptions, Mode=OneWay}"
                                         SelectedItem="{x:Bind ViewModel.SelectedSkillOption, Mode=TwoWay}" />
+                                    <Button
+                                        HorizontalAlignment="Stretch"
+                                        Content="{Binding SaveLaunchChoices}"
+                                        Click="SaveLaunchChoices_Click"
+                                        IsEnabled="{x:Bind ViewModel.CanLaunchWithOptions, Mode=OneWay}" />
                                     <Button
                                         HorizontalAlignment="Stretch"
                                         AutomationProperties.Name="{Binding LaunchWithSelection}"

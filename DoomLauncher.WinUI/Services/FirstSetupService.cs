@@ -17,7 +17,7 @@ public sealed class FirstSetupService(
         [".zip", ".7z", ".rar", ".wad"],
         StringComparer.OrdinalIgnoreCase);
     private static readonly HashSet<string> ModExtensions = new(
-        [".zip", ".7z", ".rar", ".wad", ".pk3", ".ipk3", ".pk7", ".pke"],
+        ModImportBatch.SupportedExtensions,
         StringComparer.OrdinalIgnoreCase);
 
     public async Task<string> EnsureDatabaseAsync(

@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace DoomLauncher.WinUI.Services;
 
-public sealed class UiLocalization
+public sealed partial class UiLocalization
 {
     private static readonly IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> Translations =
         new Dictionary<string, IReadOnlyDictionary<string, string>>(StringComparer.OrdinalIgnoreCase)
@@ -265,7 +265,7 @@ public sealed class UiLocalization
                 ["DiscoverSummary"] = "{0} results loaded from /idgames",
                 ["FavoritesSummary"] = "{0} favorite mods",
                 ["RecentSummary"] = "{0} recently played mods",
-                ["LatestSummary"] = "{0} mods downloaded through /idgames",
+                ["LatestSummary"] = "{0} recently added mods",
                 ["CollectionsSummary"] = "{0} collections · {1} assigned mods",
                 ["AchievementsSummary"] = "{0} of {1} achievements unlocked",
                 ["Updating"] = "Refreshing library …", ["NotAvailable"] = "Library unavailable",
@@ -610,7 +610,7 @@ public sealed class UiLocalization
                 ["DiscoverSummary"]="{0} Ergebnisse von /idgames geladen",
                 ["FavoritesSummary"]="{0} favorisierte Mods",
                 ["RecentSummary"]="{0} zuletzt gespielte Mods",
-                ["LatestSummary"]="{0} über /idgames geladene Mods",
+                ["LatestSummary"]="{0} zuletzt hinzugefügte Mods",
                 ["CollectionsSummary"]="{0} Sammlungen · {1} zugeordnete Mods",
                 ["AchievementsSummary"]="{0} von {1} Achievements freigeschaltet",
                 ["Updating"]="Bibliothek wird aktualisiert …",["NotAvailable"]="Bibliothek nicht verfügbar",
@@ -931,7 +931,7 @@ public sealed class UiLocalization
                 ["DiscoverSummary"]="{0} résultats chargés depuis /idgames",
                 ["FavoritesSummary"]="{0} mods favoris",
                 ["RecentSummary"]="{0} mods joués récemment",
-                ["LatestSummary"]="{0} mods téléchargés via /idgames",
+                ["LatestSummary"]="{0} mods ajoutés récemment",
                 ["CollectionsSummary"]="{0} collections · {1} mods attribués",
                 ["AchievementsSummary"]="{0} succès sur {1} débloqués",
                 ["Updating"]="Actualisation de la bibliothèque…",["NotAvailable"]="Bibliothèque indisponible",
@@ -1252,7 +1252,7 @@ public sealed class UiLocalization
                 ["DiscoverSummary"]="{0} resultados cargados desde /idgames",
                 ["FavoritesSummary"]="{0} mods favoritos",
                 ["RecentSummary"]="{0} mods jugados recientemente",
-                ["LatestSummary"]="{0} mods descargados mediante /idgames",
+                ["LatestSummary"]="{0} mods añadidos recientemente",
                 ["CollectionsSummary"]="{0} colecciones · {1} mods asignados",
                 ["AchievementsSummary"]="{0} de {1} logros desbloqueados",
                 ["Updating"]="Actualizando biblioteca…",["NotAvailable"]="Biblioteca no disponible",
@@ -1363,6 +1363,7 @@ public sealed class UiLocalization
 
     static UiLocalization()
     {
+        AddUxTranslations();
         string[][] generatorChoices =
         [
             ["Single level", "Einzelne Map", "Niveau unique", "Un nivel"],
@@ -1537,4 +1538,5 @@ public sealed class UiText(UiLocalization localization)
     public string RandomizeGenerator => this[nameof(RandomizeGenerator)];
     public string GenerateLevel => this[nameof(GenerateLevel)];
     public string CancelGeneration => this[nameof(CancelGeneration)];
+    public string SaveLaunchChoices => this[nameof(SaveLaunchChoices)];
 }

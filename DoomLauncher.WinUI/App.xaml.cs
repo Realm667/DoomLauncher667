@@ -7,6 +7,7 @@ public partial class App : Application
 {
     private Window? _window;
     private SplashWindow? _splashWindow;
+    private InstallationLease? _installationLease;
 
     public App()
     {
@@ -60,11 +61,21 @@ public partial class App : Application
         {
             _splashWindow = new SplashWindow();
             _splashWindow.Activate();
+            var databasePath = Environment.GetEnvironmentVariable(DoomLauncherDatabaseLocator.DatabaseEnvironmentVariable);
+            if (string.IsNullOrWhiteSpace(databasePath))
+            {
+                try { databasePath = new DoomLauncherDatabaseLocator().FindDatabase(); }
+                catch (FileNotFoundException)
+                {
+                    var baseDirectory = new DirectoryInfo(AppContext.BaseDirectory);
+                    databasePath = Path.Combine(baseDirectory.Name.Equals("WinUI", StringComparison.OrdinalIgnoreCase)
+                        ? baseDirectory.Parent!.FullName : baseDirectory.FullName, DoomLauncherDatabaseLocator.DatabaseFileName);
+                }
+            }
+            _installationLease = await Task.Run(() => InstallationLease.Acquire(databasePath));
 
-            var minimumSplashTime = Task.Delay(1200);
             var stateLoad = UserLibraryStateStore.LoadAsync(
                 CancellationToken.None);
-            await Task.WhenAll(minimumSplashTime, stateLoad);
             InitialUserState = await stateLoad;
             TileImageDefaults.EnsurePortableCopies();
 
@@ -75,10 +86,19 @@ public partial class App : Application
         }
         catch (Exception exception)
         {
+            _ = Task.Run(() => WriteDiagnostic(exception));
+            _installationLease?.Dispose();
+            _installationLease = null;
+            _window = new Window { Title = "Doom Launcher 667" };
+            var panel = new Microsoft.UI.Xaml.Controls.StackPanel { Spacing = 16, Padding = new Thickness(32) };
+            panel.Children.Add(new Microsoft.UI.Xaml.Controls.TextBlock { Text = exception.Message, TextWrapping = TextWrapping.Wrap });
+            var close = new Microsoft.UI.Xaml.Controls.Button { Content = "Close" };
+            close.Click += (_, _) => _window.Close();
+            panel.Children.Add(close);
+            _window.Content = panel;
+            _window.Activate();
             _splashWindow?.Close();
             _splashWindow = null;
-            WriteDiagnostic(exception);
-            throw;
         }
     }
 

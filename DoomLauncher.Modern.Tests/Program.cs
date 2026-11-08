@@ -2,6 +2,27 @@ using DoomLauncher.Modern.Core.Launch;
 using DoomLauncher.WinUI.Services;
 using Microsoft.Data.Sqlite;
 
+if (args.Length == 3 && args[0] == "--hold-installation-lease")
+{
+    using var lease = InstallationLease.Acquire(args[1]);
+    await File.WriteAllTextAsync(args[2], "ready");
+    Console.ReadLine();
+    return 0;
+}
+if (args.Length == 2 && args[0] == "--prepare-ui-fixture")
+{
+    await ReliabilityTests.PrepareUiAsync(Path.GetFullPath(args[1]));
+    return 0;
+}
+if (args.Length == 2 && args[0] == "--verify-shared-storage")
+{
+    var testRoot = Path.Combine(Path.GetFullPath(args[1]), "DoomLauncher-storage-test-" + Guid.NewGuid().ToString("N"));
+    Directory.CreateDirectory(testRoot);
+    try { await ReliabilityTests.VerifyLeaseAsync(testRoot); }
+    finally { Directory.Delete(testRoot, true); }
+    return 0;
+}
+
 if (args.Length == 1
     && args[0].Equals(
         "--verify-archive-text-encoding",
@@ -359,8 +380,9 @@ void Check(bool condition, string message)
 try
 {
     await StabilizationTests.RunAsync();
+    await ReliabilityTests.RunAsync();
     Check(
-        AppVersion.Current == "1.0.0-rc.2",
+        AppVersion.Current == "1.0.0-rc.3",
         "Die sichtbare Version stammt aus der zentralen Buildversion");
     VerifyTileImageDefaults();
     Check(

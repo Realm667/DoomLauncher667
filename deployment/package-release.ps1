@@ -176,7 +176,7 @@ foreach ($notice in @('LICENSE', 'THIRD-PARTY-NOTICES.md')) {
     Copy-Item -LiteralPath (Join-Path $repositoryRoot $notice) -Destination $packageRoot
 }
 [void](New-Item -ItemType Directory -Path (Join-Path $packageRoot 'Documentation') -Force)
-foreach ($document in @('installation-and-updates.md', 'migration.md', 'reporting-problems.md')) {
+foreach ($document in @('installation-and-updates.md', 'migration.md', 'reporting-problems.md', 'maintenance.md')) {
     Copy-Item -LiteralPath (Join-Path $repositoryRoot "docs/$document") -Destination (Join-Path $packageRoot 'Documentation')
 }
 Copy-Item -LiteralPath (Join-Path $repositoryRoot "docs/releases/$Version.md") -Destination (Join-Path $packageRoot 'Documentation/RELEASE-NOTES.md')

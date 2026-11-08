@@ -17,8 +17,9 @@
     <Page.Resources>
         <DataTemplate x:Key="NewImportBadgeTemplate" x:DataType="models:LibraryItem">
             <Border Padding="4,1" Background="{ThemeResource DoomControlAccentBrush}"
-                    CornerRadius="4" Visibility="{x:Bind NewBadgeVisibility, Mode=OneWay}">
-                <TextBlock Text="New" FontSize="10" FontWeight="SemiBold" Foreground="Black" />
+                    CornerRadius="4" ToolTipService.ToolTip="{x:Bind ImportedOnText}"
+                    Visibility="{x:Bind NewBadgeVisibility, Mode=OneWay}">
+                <TextBlock Text="New" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource DoomControlAccentForegroundBrush}" />
             </Border>
         </DataTemplate>
         <models:ListColumnLayout x:Key="ListColumnLayout" />
@@ -1061,6 +1062,7 @@
             </Grid>
 
             <ScrollViewer
+                x:Name="HomeScrollViewer"
                 Grid.Row="2"
                 HorizontalScrollBarVisibility="Disabled"
                 Padding="0,0,24,0"
@@ -1832,6 +1834,7 @@
             </Grid>
 
             <ScrollViewer
+                x:Name="GenerateScrollViewer"
                 Grid.Row="1"
                 Grid.RowSpan="2"
                 Padding="0,0,14,0"
@@ -2023,6 +2026,7 @@
             </ScrollViewer>
 
             <Grid
+                x:Name="DiscoverHost"
                 Grid.Row="2"
                 Visibility="{x:Bind ViewModel.DiscoverVisibility, Mode=OneWay}">
                 <Grid.RowDefinitions>
@@ -2142,6 +2146,7 @@
                 Grid.Row="2"
                 Padding="0,0,18,0"
                 VerticalScrollBarVisibility="Auto"
+                x:Name="AchievementsScrollViewer"
                 Visibility="{Binding ViewModel.AchievementsVisibility, ElementName=RootPage}">
                     <StackPanel Spacing="24">
                     <ItemsControl ItemsSource="{Binding ViewModel.AchievementSummary, ElementName=RootPage}">

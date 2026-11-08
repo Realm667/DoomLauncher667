@@ -9,7 +9,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace DoomLauncher.WinUI.ViewModels;
 
-public sealed class MainViewModel(
+public sealed partial class MainViewModel(
     ILibraryCatalog libraryCatalog,
     ILaunchOptionsCatalog launchOptionsCatalog,
     ILaunchService launchService,
@@ -77,6 +77,13 @@ public sealed class MainViewModel(
     private HashSet<string> _unseenAchievementKeys =
         new(StringComparer.Ordinal);
     private readonly SemaphoreSlim _achievementStateGate = new(1, 1);
+    private readonly RefreshCoordinator _refreshCoordinator = new();
+    private sealed record SectionState(string Search, LibrarySortOrder Sort, bool Descending,
+        LibraryCategoryFilter Category, string? Collection, int? SelectedId);
+    private readonly Dictionary<LibrarySection, SectionState> _sectionStates = [];
+    public string NavigationSearchText => _activeSection == LibrarySection.Discover ? _discoverQuery : _searchText;
+    public LibraryCategoryFilter CurrentCategoryFilter => _categoryFilter;
+    public string? CurrentCollectionFilter => _collectionFilterTag;
     private LibraryStatisticsData _statistics =
         new(0, 0, 0, 0, 0, [], new SessionStatisticsData(0, 0, 0, 0, 0, 0, 0, 0));
 
@@ -86,10 +93,10 @@ public sealed class MainViewModel(
 
     public void ShowLatestImports()
     {
+        SetSection(LibrarySection.Downloads);
         _searchText = string.Empty;
         _collectionFilterTag = null;
         _categoryFilter = LibraryCategoryFilter.All;
-        SetSection(LibrarySection.Downloads);
         ApplyFilter();
         SelectedGame = Games.FirstOrDefault() ?? LibraryItem.Empty;
         ImportsRevealed?.Invoke();
@@ -125,6 +132,8 @@ public sealed class MainViewModel(
             OnPropertyChanged(nameof(FavoriteGlyph));
             OnPropertyChanged(nameof(FinishedButtonText));
             OnPropertyChanged(nameof(FinishedGlyph));
+            OnPropertyChanged(nameof(LaunchSetupHint));
+            OnPropertyChanged(nameof(LaunchSetupHintVisibility));
         }
     }
 
@@ -455,6 +464,9 @@ public sealed class MainViewModel(
         };
     public bool CanLaunchWithOptions =>
         CanLaunch && !IsLaunchOptionsLoading;
+    public string LaunchSetupHint => localization.Get("LaunchSetupHint");
+    public Visibility LaunchSetupHintVisibility => !SelectedGame.IsPlaceholder
+        && (SelectedGame.NeedsSourcePort || SelectedGame.NeedsIwad) ? Visibility.Visible : Visibility.Collapsed;
     public string LaunchButtonText => IsLaunching
         ? localization.Get("Launching")
         : IsGameRunning
@@ -499,6 +511,15 @@ public sealed class MainViewModel(
         if (_activeSection == section)
             return;
 
+        _sectionStates[_activeSection] = new(_searchText, _sortOrder, _sortDescending,
+            _categoryFilter, _collectionFilterTag, SelectedGame.IsPlaceholder ? null : SelectedGame.GameFileId);
+        var state = _sectionStates.GetValueOrDefault(section)
+            ?? new SectionState(string.Empty, LibrarySortOrder.Title, false, LibraryCategoryFilter.All, null, null);
+        _searchText = state.Search;
+        _sortOrder = state.Sort;
+        _sortDescending = state.Descending;
+        _categoryFilter = state.Category;
+        _collectionFilterTag = state.Collection;
         _activeSection = section;
         if (section == LibrarySection.Achievements)
             MarkAchievementNotificationsSeen();
@@ -520,7 +541,7 @@ public sealed class MainViewModel(
         else if (section == LibrarySection.Collections)
             RebuildCollectionGroups();
         else if (section != LibrarySection.Discover)
-            ApplyFilter();
+            ApplyFilter(state.SelectedId);
         else
             UpdateSectionSummary();
     }
@@ -793,263 +814,6 @@ public sealed class MainViewModel(
         await LoadCatalogAsync(true, selectedId, cancellationToken);
     }
 
-    public async Task EnsureDiscoverLoadedAsync(
-        CancellationToken cancellationToken = default)
-    {
-        if (_isDiscoverLoaded || IsDiscoverLoading)
-            return;
-        await LoadDiscoverAsync(null, cancellationToken);
-    }
-
-    public Task SearchDiscoverAsync(
-        string query,
-        CancellationToken cancellationToken = default) =>
-        LoadDiscoverAsync(query, cancellationToken);
-
-    public async Task LoadMoreDiscoverAsync(
-        CancellationToken cancellationToken = default)
-    {
-        if (!CanLoadMoreDiscover)
-            return;
-
-        IsDiscoverLoading = true;
-        try
-        {
-            _discoverLimit = Math.Min(_discoverLimit + DiscoverPageSize, 100);
-            if (string.IsNullOrWhiteSpace(_discoverQuery))
-            {
-                _discoverResults = await idGamesService.GetLatestAsync(
-                    _discoverLimit,
-                    cancellationToken);
-                MarkDownloadedItems(_discoverResults);
-            }
-            ReplaceItems(
-                DiscoverItems,
-                _discoverResults.Take(_discoverLimit));
-            _hasMoreDiscover =
-                _discoverResults.Count >= _discoverLimit
-                && _discoverLimit < 100;
-            NotifyDiscoverPagingChanged();
-            IdGamesStatus = localization.Format(
-                "IdGamesResults",
-                DiscoverItems.Count);
-            UpdateSectionSummary();
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-        }
-        catch (Exception exception)
-        {
-            IdGamesStatus = localization.Format(
-                "IdGamesLoadFailed",
-                GetInnermostMessage(exception));
-        }
-        finally
-        {
-            IsDiscoverLoading = false;
-        }
-    }
-
-    public async Task DownloadIdGamesItemAsync(
-        IdGamesItem item,
-        ImportFileConflictResolution conflictResolution = ImportFileConflictResolution.Fail,
-        CancellationToken cancellationToken = default)
-    {
-        if (!item.CanDownload)
-            return;
-
-        string? temporaryDirectory = null;
-        string? temporaryPath = null;
-        item.IsDownloading = true;
-        IdGamesStatus = localization.Format("IdGamesDownloading", item.Title);
-        try
-        {
-            IdGamesItem? detailedItem = null;
-            if (item.Id > 0)
-            {
-                try
-                {
-                    detailedItem = await idGamesService.RefreshByIdAsync(
-                        item.Id,
-                        cancellationToken);
-                }
-                catch (Exception exception)
-                    when (exception is not OperationCanceledException
-                          && !string.IsNullOrWhiteSpace(item.FileName))
-                {
-                    // The fully populated Discover result is still a valid
-                    // import source if the detail endpoint is temporarily down.
-                }
-            }
-            var downloadItem = detailedItem ?? item;
-            if (downloadItem is null
-                || string.IsNullOrWhiteSpace(downloadItem.FileName))
-            {
-                throw new InvalidOperationException(
-                    $"No downloadable /idgames archive was returned for ID {item.Id}.");
-            }
-            temporaryDirectory = Path.Combine(
-                Path.GetTempPath(),
-                $"DoomLauncher-download-{Guid.NewGuid():N}");
-            Directory.CreateDirectory(temporaryDirectory);
-            temporaryPath = Path.Combine(
-                temporaryDirectory,
-                Path.GetFileName(downloadItem.FileName));
-            var progress = new Progress<double>(value =>
-            {
-                IdGamesStatus = localization.Format(
-                    "IdGamesDownloadProgress",
-                    item.Title,
-                    value);
-            });
-            await idGamesService.DownloadAsync(
-                downloadItem,
-                temporaryPath,
-                progress,
-                cancellationToken);
-            var imported = await nativeLibraryService.ImportIdGamesAsync(
-                downloadItem,
-                temporaryPath,
-                conflictResolution,
-                cancellationToken);
-            if (imported.WasSkipped)
-            {
-                IdGamesStatus = localization.Get("ImportSkipped");
-                return;
-            }
-            await ApplyIdGamesMetadataAsync(imported.GameFileId, downloadItem,
-                downloadRemoteArtwork: false, progress: null, cancellationToken);
-            item.IsDownloaded = true;
-            item.LibraryGameFileId = imported.GameFileId;
-            item.ActionText = localization.Get("OpenInLibrary");
-            IdGamesStatus = localization.Format("IdGamesDownloaded", item.Title);
-            await LoadCatalogAsync(
-                forceRefresh: true,
-                imported.GameFileId,
-                cancellationToken);
-            ShowLatestImports();
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            IdGamesStatus = string.Empty;
-        }
-        catch (Exception exception)
-        {
-            IdGamesStatus = localization.Format(
-                "IdGamesDownloadFailed",
-                GetInnermostMessage(exception));
-        }
-        finally
-        {
-            item.IsDownloading = false;
-            if (!string.IsNullOrWhiteSpace(temporaryDirectory)
-                && Directory.Exists(temporaryDirectory))
-                Directory.Delete(temporaryDirectory, recursive: true);
-        }
-    }
-
-    public Task<NativeImportConflict?> FindImportConflictAsync(
-        string originalFileName,
-        CancellationToken cancellationToken = default) =>
-        nativeLibraryService.FindImportConflictAsync(
-            originalFileName,
-            cancellationToken);
-
-    public async Task<string?> ResolveIdGamesArchiveFileNameAsync(
-        IdGamesItem item,
-        CancellationToken cancellationToken = default)
-    {
-        if (!string.IsNullOrWhiteSpace(item.FileName))
-            return Path.GetFileName(item.FileName);
-        var resolved = await idGamesService.GetByIdAsync(item.Id, cancellationToken);
-        return string.IsNullOrWhiteSpace(resolved?.FileName)
-            ? null
-            : Path.GetFileName(resolved.FileName);
-    }
-
-    private async Task LoadDiscoverAsync(
-        string? query,
-        CancellationToken cancellationToken)
-    {
-        IsDiscoverLoading = true;
-        _discoverQuery = query?.Trim() ?? string.Empty;
-        _discoverLimit = DiscoverPageSize;
-        IdGamesStatus = localization.Get("IdGamesConnecting");
-        try
-        {
-            _discoverResults = string.IsNullOrWhiteSpace(_discoverQuery)
-                ? await idGamesService.GetLatestAsync(
-                    DiscoverPageSize,
-                    cancellationToken)
-                : await idGamesService.SearchAsync(
-                    _discoverQuery,
-                    cancellationToken);
-            MarkDownloadedItems(_discoverResults);
-            ReplaceItems(
-                DiscoverItems,
-                _discoverResults.Take(DiscoverPageSize));
-            _hasMoreDiscover = _discoverResults.Count > DiscoverPageSize
-                || (string.IsNullOrWhiteSpace(_discoverQuery)
-                    && _discoverResults.Count == DiscoverPageSize);
-            NotifyDiscoverPagingChanged();
-            _isDiscoverLoaded = string.IsNullOrWhiteSpace(_discoverQuery);
-            IdGamesStatus = DiscoverItems.Count == 0
-                ? localization.Get("IdGamesNoResults")
-                : localization.Format("IdGamesResults", DiscoverItems.Count);
-            UpdateSectionSummary();
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-        }
-        catch (Exception exception)
-        {
-            IdGamesStatus = localization.Format(
-                "IdGamesLoadFailed",
-                GetInnermostMessage(exception));
-        }
-        finally
-        {
-            IsDiscoverLoading = false;
-        }
-    }
-
-    private void MarkDownloadedItems(IEnumerable<IdGamesItem> items)
-    {
-        var localById = _catalog
-            .Where(game => game.IdGamesId.HasValue)
-            .GroupBy(game => game.IdGamesId!.Value)
-            .ToDictionary(group => group.Key, group => group.First());
-        var localByFileName = _catalog
-            .GroupBy(
-                game => Path.GetFileName(game.FileName),
-                StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(
-                group => group.Key,
-                group => group.First(),
-                StringComparer.OrdinalIgnoreCase);
-        foreach (var item in items)
-        {
-            var local = localById.GetValueOrDefault(item.Id);
-            if (local is null
-                && !string.IsNullOrWhiteSpace(item.FileName))
-            {
-                localByFileName.TryGetValue(
-                    Path.GetFileName(item.FileName),
-                    out local);
-            }
-            item.LibraryGameFileId = local?.GameFileId;
-            item.IsDownloaded = local is not null;
-            item.ActionText = localization.Get(
-                item.IsDownloaded ? "OpenInLibrary" : "Download");
-        }
-    }
-
-    private void NotifyDiscoverPagingChanged()
-    {
-        OnPropertyChanged(nameof(LoadMoreDiscoverVisibility));
-        OnPropertyChanged(nameof(CanLoadMoreDiscover));
-    }
-
     public async Task ToggleSelectedFavoriteAsync(
         CancellationToken cancellationToken = default)
     {
@@ -1105,6 +869,18 @@ public sealed class MainViewModel(
         CancellationToken cancellationToken = default)
     {
         return ImportNativeFileAsync(filePath, conflictResolution, cancellationToken);
+    }
+
+    public async Task<ModImportSummary> ImportFilesAsync(IReadOnlyList<ModImportRequest> requests,
+        IProgress<ModImportProgress>? progress, CancellationToken cancellationToken)
+    {
+        var summary = await new ModImportBatch(nativeLibraryService).RunAsync(requests, progress, cancellationToken);
+        if (summary.HasChanges)
+        {
+            await LoadCatalogAsync(true, null, CancellationToken.None);
+            ShowLatestImports();
+        }
+        return summary;
     }
 
     public Task<GameEditData> LoadSelectedGameForEditAsync(
@@ -1391,6 +1167,7 @@ public sealed class MainViewModel(
         try
         {
             var result = await launchOptionsCatalog.LoadAsync(gameFileId, cancellationToken);
+            var definitions = await nativeLibraryService.LoadGameAsync(gameFileId, cancellationToken);
             if (SelectedGame.GameFileId != gameFileId)
                 return;
 
@@ -1399,8 +1176,8 @@ public sealed class MainViewModel(
             ReplaceItems(MapOptions, result.Maps);
             ReplaceItems(SkillOptions, result.Skills);
             _launchOptionsGameFileId = gameFileId;
-            SelectedSourcePortOption = SourcePortOptions.FirstOrDefault();
-            SelectedIwadOption = IwadOptions.FirstOrDefault();
+            SelectedSourcePortOption = SourcePortOptions.FirstOrDefault(choice => choice.Id == definitions.SourcePortId) ?? SourcePortOptions.FirstOrDefault();
+            SelectedIwadOption = IwadOptions.FirstOrDefault(choice => choice.Id == definitions.IwadId) ?? IwadOptions.FirstOrDefault();
             SelectedMapOption = MapOptions.FirstOrDefault();
             SelectedSkillOption = SkillOptions.FirstOrDefault();
         }
@@ -1416,6 +1193,20 @@ public sealed class MainViewModel(
         {
             IsLaunchOptionsLoading = false;
         }
+    }
+
+    public async Task SaveLaunchDefinitionsAsync(CancellationToken cancellationToken = default)
+    {
+        if (SelectedGame.IsPlaceholder || IsLaunchOptionsLoading) return;
+        var gameId = SelectedGame.GameFileId;
+        var sourcePortId = SelectedSourcePortOption?.Id;
+        var iwadId = SelectedIwadOption?.Id;
+        var game = await nativeLibraryService.LoadGameAsync(gameId, cancellationToken);
+        await nativeLibraryService.UpdateGameAsync(game with
+        { SourcePortId = sourcePortId, IwadId = iwadId }, cancellationToken);
+        _launchOptionsGameFileId = null;
+        await LoadCatalogAsync(true, SelectedGame.IsPlaceholder ? gameId : SelectedGame.GameFileId, cancellationToken);
+        LaunchStatus = localization.Get("LaunchChoicesSaved");
     }
 
     public async Task LaunchSelectedWithOptionsAsync(
@@ -1492,7 +1283,8 @@ public sealed class MainViewModel(
         catch (Exception exception)
         {
             LaunchStatus = string.Empty;
-            LaunchErrorMessage = exception.Message;
+            LaunchErrorMessage = exception is MissingLaunchDefinitionException missing
+                ? localization.Get(missing.LocalizationKey) : exception.Message;
         }
         finally
         {
@@ -1501,12 +1293,21 @@ public sealed class MainViewModel(
         }
     }
 
-    private async Task<bool> LoadCatalogAsync(
+    private Task<bool> LoadCatalogAsync(
         bool forceRefresh,
         int? preferredGameFileId,
         CancellationToken cancellationToken)
     {
-        if ((!forceRefresh && _isInitialized) || IsLoading)
+        if (!forceRefresh && _isInitialized && !IsLoading) return Task.FromResult(true);
+        return _refreshCoordinator.RequestAsync(() => LoadCatalogCoreAsync(forceRefresh, preferredGameFileId, cancellationToken));
+    }
+
+    private async Task<bool> LoadCatalogCoreAsync(
+        bool forceRefresh,
+        int? preferredGameFileId,
+        CancellationToken cancellationToken)
+    {
+        if (!forceRefresh && _isInitialized)
             return true;
 
         var previousCatalog = _catalog;
@@ -1556,13 +1357,19 @@ public sealed class MainViewModel(
 
             LibraryItem.ClearArtworkCache();
             var result = await libraryCatalog.LoadAsync(cancellationToken);
+            var statistics = await nativeLibraryService.LoadStatisticsAsync(cancellationToken);
+            var existingItems = _catalog.ToDictionary(item => item.GameFileId);
             _catalog = result.Entries
-                .Select(entry => new LibraryItem(
+                .Select(entry => existingItems.TryGetValue(entry.GameFileId, out var existing)
+                    && entry.GameFileId != preferredGameFileId && existing.Matches(entry)
+                    ? existing : new LibraryItem(
                     entry,
                     localization,
                     _finishedGameFileIds.Contains(entry.GameFileId),
                     _favoriteGameFileIds.Contains(entry.GameFileId)))
                 .ToArray();
+            foreach (var item in _catalog)
+                item.IsFavorite = _favoriteGameFileIds.Contains(item.GameFileId);
             _finishedGameFileIds = _catalog
                 .Where(game => game.IsFinished)
                 .Select(game => game.GameFileId)
@@ -1574,7 +1381,7 @@ public sealed class MainViewModel(
             ApplyFilter(preferredGameFileId);
             RebuildHomeGroups();
             RebuildCollectionGroups();
-            _statistics = await nativeLibraryService.LoadStatisticsAsync(cancellationToken);
+            _statistics = statistics;
             RebuildAchievements();
             NotifyStatisticsChanged();
             _isInitialized = true;
@@ -1667,8 +1474,7 @@ public sealed class MainViewModel(
         };
         var filteredGames = matches.ToArray();
         _filteredCount = filteredGames.Length;
-        Games = new ObservableCollection<LibraryItem>(filteredGames);
-        OnPropertyChanged(nameof(Games));
+        CollectionReconciler.Apply(Games, filteredGames);
 
         UpdateSectionSummary();
 

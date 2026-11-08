@@ -24,6 +24,7 @@ public sealed class LibraryItem : INotifyPropertyChanged
     private bool _isFinished;
     private readonly UiLocalization? _localization;
     private readonly bool _usesDoomPixelAspect;
+    private readonly LibraryCatalogEntry? _entry;
 
     public static LibraryItem Empty { get; } = new();
     public LibraryItem Self => this;
@@ -37,6 +38,7 @@ public sealed class LibraryItem : INotifyPropertyChanged
         bool isFavorite = false)
     {
         _localization = localization;
+        _entry = entry;
         GameFileId = entry.GameFileId;
         FileName = entry.FileName;
         Title = entry.Title;
@@ -115,6 +117,8 @@ public sealed class LibraryItem : INotifyPropertyChanged
     public Visibility ReadMoreVisibility =>
         HasLongDescription ? Visibility.Visible : Visibility.Collapsed;
     public string SourcePort { get; }
+    public bool NeedsSourcePort => SourcePort == _localization?.Get("NotSet") || SourcePort == "—";
+    public bool NeedsIwad => Iwad == _localization?.Get("NotSet") || Iwad == "—";
     public string Iwad { get; }
     public string Playtime { get; }
     public string LastPlayed { get; }
@@ -122,9 +126,31 @@ public sealed class LibraryItem : INotifyPropertyChanged
     public DateTime? LastPlayedAt { get; }
     public DateTime? ReleaseDateAt { get; }
     public DateTime? DownloadedAt { get; }
-    public Visibility NewBadgeVisibility => Category == "Mod" && RecentImport.IsNew(DownloadedAt, DateTime.Now)
+    private Visibility? _newBadgeVisibility;
+    private Visibility CalculateNewBadgeVisibility() => Category == "Mod" && RecentImport.IsNew(DownloadedAt, DateTime.Now)
         ? Visibility.Visible : Visibility.Collapsed;
-    public void RefreshNewBadge() => OnPropertyChanged(nameof(NewBadgeVisibility));
+    public Visibility NewBadgeVisibility => _newBadgeVisibility ??= CalculateNewBadgeVisibility();
+    public void RefreshNewBadge()
+    {
+        var visibility = CalculateNewBadgeVisibility();
+        if (_newBadgeVisibility == visibility) return;
+        _newBadgeVisibility = visibility;
+        OnPropertyChanged(nameof(NewBadgeVisibility));
+    }
+    public string ImportedOnText => DownloadedAt is { } date
+        ? $"{_localization?.Get("ImportedOn")}: {date:g}" : string.Empty;
+
+    public bool Matches(LibraryCatalogEntry entry) => _entry is not null
+        && _entry.Tags.SequenceEqual(entry.Tags)
+        && _entry.ScreenshotPaths.SequenceEqual(entry.ScreenshotPaths)
+        && _entry == entry with { Tags = _entry.Tags, ScreenshotPaths = _entry.ScreenshotPaths };
+
+    public void InvalidateArtwork()
+    {
+        _artwork = null; _detailArtwork = null; _images = null; _currentImageIndex = 0;
+        foreach (var property in new[] { nameof(Artwork), nameof(DetailArtwork), nameof(Images), nameof(CurrentImage), nameof(CurrentImageStretch), nameof(ImageCounter) })
+            OnPropertyChanged(property);
+    }
     public int MapCount { get; }
     public double RatingValue { get; }
     public int? IdGamesId { get; }
@@ -241,6 +267,7 @@ public sealed class LibraryItem : INotifyPropertyChanged
 
         var image = new BitmapImage
         {
+            CreateOptions = BitmapCreateOptions.IgnoreImageCache,
             DecodePixelWidth = decodePixelWidth,
             UriSource = new Uri(artworkPath),
         };

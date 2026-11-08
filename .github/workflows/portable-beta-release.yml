@@ -64,6 +64,10 @@ jobs:
         shell: pwsh
         run: ./deployment/test-portable-update.ps1 -PackageDirectory "${{ steps.package.outputs.package }}"
 
+      - name: Test native UI workflows
+        shell: pwsh
+        run: ./deployment/test-native-ui.ps1 -PackageDirectory "${{ steps.package.outputs.package }}"
+
       - name: Publish GitHub release
         shell: pwsh
         env:

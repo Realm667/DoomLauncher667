@@ -85,9 +85,9 @@ public sealed class NativeGameLaunchService(
             ?? game.IwadId
             ?? ParseInt(configuration.GetValueOrDefault("DefaultIWad"));
         if (!sourcePortId.HasValue)
-            throw new InvalidOperationException("Kein Sourceport wurde definiert.");
+            throw new MissingLaunchDefinitionException("MissingSourcePortAction");
         if (!iwadId.HasValue)
-            throw new InvalidOperationException("Kein IWAD wurde definiert.");
+            throw new MissingLaunchDefinitionException("MissingIwadAction");
 
         var sourcePort = await LoadSourcePortAsync(
             connection,

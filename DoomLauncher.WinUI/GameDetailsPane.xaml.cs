@@ -1,4 +1,5 @@
 using DoomLauncher.WinUI.ViewModels;
+using DoomLauncher.WinUI.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -35,6 +36,26 @@ public sealed partial class GameDetailsPane : UserControl
     public event RoutedEventHandler? ReadMoreRequested;
 
     public void CloseLaunchOptions() => LaunchOptionsFlyout.Hide();
+
+    private void ChooseLaunchDefinition_Click(object sender, RoutedEventArgs args)
+    {
+        LaunchOptionsRequested?.Invoke(this, args);
+        LaunchOptionsFlyout.ShowAt((FrameworkElement)sender);
+    }
+
+    private async void SaveLaunchChoices_Click(object sender, RoutedEventArgs args)
+    {
+        if (ViewModel is null) return;
+        var button = (Button)sender; button.IsEnabled = false;
+        try { await ViewModel.SaveLaunchDefinitionsAsync(); LaunchOptionsFlyout.Hide(); }
+        catch (Exception error)
+        {
+            var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = "Doom Launcher 667", Content = error.Message,
+                CloseButtonText = DataContext is UiText text ? text["Close"] : "Close", RequestedTheme = ActualTheme };
+            await dialog.ShowAsync();
+        }
+        finally { button.IsEnabled = true; }
+    }
 
     private void PreviousImageButton_Click(
         object sender,

@@ -16,9 +16,9 @@ remains its inspiration and the source of the migration compatibility work.
 
 == Download
 
-The current testing release is *1.0.0-rc.2* (Release Candidate, not final 1.0).
+The current testing release is *1.0.0-rc.3* (Release Candidate, not final 1.0).
 Download its Windows x64 ZIP from the
-https://github.com/Realm667/DoomLauncher667/releases/tag/v1.0.0-rc.2[RC download page]
+https://github.com/Realm667/DoomLauncher667/releases/tag/v1.0.0-rc.3[RC download page]
 or browse https://github.com/Realm667/DoomLauncher667/releases[all releases].
 Extract the complete archive into a writable folder and launch
 `DoomLauncher667.exe`.
@@ -111,6 +111,11 @@ These familiar workflows were rebuilt natively for Doom Launcher 667:
 * selective import and export of individual mods, groups or complete
   collections, including archives, artwork, screenshots and metadata;
 * guided first setup, database-health tools and an opt-in diagnostic mode;
+* complete installation backups, optional mod-archive exclusion and verified
+  restoration into a separate empty folder;
+* SHA-256 duplicate-mod inspection with grouped file paths and space savings;
+* batch import progress, persistent launch assignments, section navigation state
+  and keyboard shortcuts. See link:docs/maintenance.md[the maintenance guide];
 * tested overlay-update contract for backwards-compatible portable upgrades.
 * migration from hobomaster22's original Doom Launcher at startup, alternatively
   scanning for mods, iwads and sourceports in their responsive directories with
@@ -160,7 +165,7 @@ for the 1.0 preparation work.
 
 Doom Launcher 667 is preparing its first stable 1.0 release. The RC is a
 prerelease intended for feedback, not a claim that final acceptance is complete.
-See link:docs/releases/1.0.0-rc.2.md[RC changes and known limitations].
+See link:docs/releases/1.0.0-rc.3.md[RC changes and known limitations].
 Please report reproducible problems through
 https://github.com/Realm667/DoomLauncher667/issues[GitHub Issues], following
 link:docs/reporting-problems.md[the reporting checklist].

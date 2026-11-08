@@ -29,7 +29,7 @@ try {
             'Licenses/SharpCompress-LICENSE.txt', 'Licenses/SQLitePCLRaw-LICENSE.txt',
             'WinUI/Assets/Fonts/OFL.txt', 'Documentation/RELEASE-NOTES.md',
             'Documentation/installation-and-updates.md', 'Documentation/migration.md',
-            'Documentation/reporting-problems.md')) {
+            'Documentation/reporting-problems.md', 'Documentation/maintenance.md')) {
         if (-not (Test-Path -LiteralPath (Join-Path $packageRoot $required) -PathType Leaf)) {
             throw "Required release documentation/license missing: $required"
         }
@@ -141,3 +141,4 @@ finally {
         Remove-Item -LiteralPath $testRoot -Recurse -Force
     }
 }
+$global:LASTEXITCODE = 0
