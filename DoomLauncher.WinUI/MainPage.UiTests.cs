@@ -39,6 +39,12 @@ public sealed partial class MainPage
         {
             await Layout();
             Check(GameList.IsLoaded && LibraryDetailsPane.IsLoaded, "Native list and shared details are loaded");
+            var navigationItems = ShellNavigation.MenuItems.ToList();
+            var multiplayerIndex = navigationItems.FindIndex(item => item is NavigationViewItem { Tag: "Multiplayer" });
+            Check(multiplayerIndex >= 0 && navigationItems[multiplayerIndex + 1] is NavigationViewItemSeparator
+                && navigationItems[multiplayerIndex + 2] is NavigationViewItem { Tag: "Achievements" }
+                && navigationItems[multiplayerIndex - 1] is NavigationViewItem { Tag: "Downloads" },
+                "Multiplayer follows Latest and sits above Achievements with a separator");
             var ratingRow = (Grid)LibraryDetailsPane.FindName("PersonalRatingRow");
             var ratingLabel = (TextBlock)LibraryDetailsPane.FindName("PersonalRatingLabel");
             var ratingStars = (RatingControl)LibraryDetailsPane.FindName("PersonalRatingStars");
@@ -107,6 +113,25 @@ public sealed partial class MainPage
             Check(ViewModel.Games.Any(game => game.GameFileId == chosenGame), "Play later sidebar displays queued entries");
             await _app.LibraryFeatures.RecordValidatedMapsAsync(chosenGame, new HashSet<string> { "MAP01" }); await ViewModel.ReloadPersonalDataAsync();
             Check(ViewModel.SelectedPersonalData.CompletedMaps.Contains("MAP01"), "Map progress reloads into shared details");
+            Check(!ViewModel.CanTrackSelectedGame && LibraryDetailsPane.FindName("MapProgressSummary") is TextBlock { Visibility: Visibility.Collapsed }
+                && LibraryDetailsPane.FindName("MapsProgressButton") is Button { Content: var mapLabel } && (string?)mapLabel == Strings["Maps"],
+                "Unsupported source port hides progress and retains a plain Maps button");
+            var apiPath = Path.Combine(portDirectory, "ui-test.pk3");
+            using (var zip = System.IO.Compression.ZipFile.Open(apiPath, System.IO.Compression.ZipArchiveMode.Create))
+            {
+                using (var writer = new StreamWriter(zip.CreateEntry("zscript/doombase.zs").Open())) writer.Write("LevelInfo info int clusterflags");
+                using (var writer = new StreamWriter(zip.CreateEntry("zscript/events.zs").Open())) writer.Write("UiTick() NextMap OnEngineInitialize()");
+            }
+            await ViewModel.RefreshAsync(); await Layout();
+            Check(ViewModel.CanTrackSelectedGame && LibraryDetailsPane.FindName("MapProgressSummary") is TextBlock { Visibility: Visibility.Visible }
+                && LibraryDetailsPane.FindName("MapsProgressButton") is Button { Content: var trackingLabel } && (string?)trackingLabel == Strings["MapsAndProgress"],
+                "Compatible engine API reveals progress without restarting the application");
+            File.Delete(apiPath); await ViewModel.RefreshAsync(); await Layout();
+            Check(!ViewModel.CanTrackSelectedGame && ViewModel.SelectedPersonalData.CompletedMaps.Contains("MAP01")
+                && LibraryDetailsPane.FindName("MapProgressSummary") is TextBlock { Visibility: Visibility.Collapsed },
+                "Lost compatibility hides tracking immediately but preserves recorded completions");
+            Check(CreateMapProgressItem(new MapDocument("MAP01", "Test", "fixture.wad", "UDMF", [], [], 0, 0, null, null, null), true, false).Content is TextBlock { Text: "MAP01 · Test" },
+                "Unsupported map browser omits completion symbols");
             Check(CreateMapProgressItem(new MapDocument("MAP01", "Test", "fixture.wad", "UDMF", [], [], 0, 0, null, null, null), true).Content is TextBlock
                 && typeof(LibraryFeatureStore).GetMethod("SetMapFinishedAsync") is null,
                 "Map progress has read-only status rows and no manual completion API");

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.0.0-rc.12 - 2026-11-08
+
+- Move Multiplayer below Latest and directly above Achievements, separated by a horizontal rule.
+- Show automatic map progress only for entries whose assigned/default source port passes the launcher's actual engine API check. Probe each executable once per catalog refresh off the UI thread.
+- Retain the map browser for other source ports as Maps, without completion symbols, tracking notice or next-unconfirmed-map action. Keep existing progress data intact.
+- Add service and native UI regression checks for compatibility changes, Automatic/default resolution and preserved progress.
+
 ## 1.0.0-rc.11 - 2026-11-08
 
 - Capture the map tracker's launch identity once during engine initialization, before saved-game CVars are restored. Keep it in the non-serialized static handler rather than re-reading the saved server CVar.

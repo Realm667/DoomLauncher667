@@ -1,6 +1,7 @@
 using System.IO.Compression;
 using System.Reflection;
 using System.Text;
+using Microsoft.Data.Sqlite;
 
 namespace DoomLauncher.WinUI.Services;
 
@@ -10,6 +11,49 @@ internal sealed record MapTrackingContext(string HelperPath, string LogPath, str
 internal static class MapTrackingService
 {
     internal const string ResourceName = "DoomLauncher667.MapTracker.zs";
+    // Refresh with the catalog, not on every selection. Probe each distinct
+    // executable once off the UI thread, using the same API gate as launching.
+    internal static async Task<IReadOnlySet<int>> LoadCompatibleGameIdsAsync(string database, CancellationToken token = default)
+    {
+        var games = new List<(int Id, string Executable)>();
+        await using var connection = new SqliteConnection(new SqliteConnectionStringBuilder
+        { DataSource = database, Mode = SqliteOpenMode.ReadOnly }.ToString());
+        await connection.OpenAsync(token);
+        await using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT game.GameFileID, source.Directory, source.Executable
+            FROM GameFiles game
+            JOIN SourcePorts source ON source.SourcePortID = COALESCE(game.SourcePortID,
+                (SELECT CAST(Value AS INTEGER) FROM Configuration WHERE Name='DefaultSourcePort' LIMIT 1))
+            WHERE COALESCE(source.Archived,0)=0;
+            """;
+        await using var reader = await command.ExecuteReaderAsync(token);
+        var root = Path.GetDirectoryName(Path.GetFullPath(database))!;
+        while (await reader.ReadAsync(token))
+        {
+            try
+            {
+                var directory = Environment.ExpandEnvironmentVariables(reader.GetString(1).Trim());
+                var executable = Path.GetFullPath(Path.Combine(root, directory, reader.GetString(2)));
+                games.Add((reader.GetInt32(0), executable));
+            }
+            catch (Exception error) when (error is ArgumentException or NotSupportedException or InvalidCastException) { }
+        }
+        return await Task.Run<IReadOnlySet<int>>(() =>
+        {
+            var supported = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+            var result = new HashSet<int>();
+            foreach (var game in games)
+            {
+                token.ThrowIfCancellationRequested();
+                if (!supported.TryGetValue(game.Executable, out var compatible))
+                    supported[game.Executable] = compatible = SupportsEngine(game.Executable);
+                if (compatible) result.Add(game.Id);
+            }
+            return result;
+        }, token);
+    }
+
     internal static bool SupportsEngine(string executable)
     {
         // Inspect the actual bundled engine API rather than trusting a display

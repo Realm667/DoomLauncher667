@@ -188,11 +188,24 @@ internal static class ExpansionTests
         await a.Library.SaveSourcePortAsync(new(null, "Fixture GZDoom", portDirectory, "gzdoom.exe", ".wad,.pk3", "-file", "+exec unwanted.cfg", ScreenshotSupport: "None"));
         var definitions = await a.Library.LoadLauncherDefinitionsAsync(); var sp = definitions.SourcePorts.Single(); var iw = definitions.Iwads.Single();
         var starter = new Starter(); var launcher = new NativeGameLaunchService(new Locator(a.Store.DatabasePath), starter);
+        await a.Library.UpdateGameAsync((await a.Library.LoadGameAsync(a.Mod.GameFileId)) with { SourcePortId = sp.SourcePortId });
+        Check(!(await MapTrackingService.LoadCompatibleGameIdsAsync(a.Store.DatabasePath)).Contains(a.Mod.GameFileId),
+            "Tracking UI excludes engine labels without a compatible API");
         using (var zip = ZipFile.Open(Path.Combine(portDirectory, "gzdoom.pk3"), ZipArchiveMode.Create))
         {
             using (var writer = new StreamWriter(zip.CreateEntry("zscript/doombase.zs").Open())) writer.Write("native readonly LevelInfo info; native readonly int clusterflags;");
             using (var writer = new StreamWriter(zip.CreateEntry("zscript/events.zs").Open())) writer.Write("UiTick() NextMap OnEngineInitialize()");
         }
+        Check((await MapTrackingService.LoadCompatibleGameIdsAsync(a.Store.DatabasePath)).Contains(a.Mod.GameFileId),
+            "Tracking UI includes a compatible assigned engine");
+        await a.Library.UpdateGameAsync((await a.Library.LoadGameAsync(a.Mod.GameFileId)) with { SourcePortId = null });
+        await a.Library.UpdateSettingsAsync((await a.Library.LoadSettingsAsync()) with { DefaultSourcePortId = sp.SourcePortId });
+        Check((await MapTrackingService.LoadCompatibleGameIdsAsync(a.Store.DatabasePath)).Contains(a.Mod.GameFileId),
+            "Tracking UI resolves Automatic through the configured default engine");
+        await a.Library.SaveSourcePortAsync(sp with { Directory = "Data/Sourceports/missing" });
+        Check(!(await MapTrackingService.LoadCompatibleGameIdsAsync(a.Store.DatabasePath)).Contains(a.Mod.GameFileId),
+            "Tracking UI hides progress when the configured executable is missing");
+        await a.Library.SaveSourcePortAsync(sp);
         await using (var db = await a.Store.OpenAsync())
         {
             await using var command = db.CreateCommand(); command.CommandText = "DELETE FROM WinUI_MapProgress; INSERT INTO WinUI_MapProgress(GameFileID,MapName,Finished,UpdatedUtc) VALUES($id,'MAP02',1,'legacy');";

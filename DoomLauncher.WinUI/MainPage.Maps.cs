@@ -9,19 +9,21 @@ namespace DoomLauncher.WinUI;
 
 public sealed partial class MainPage
 {
-    private static ListViewItem CreateMapProgressItem(MapDocument map, bool completed) => new()
+    private static ListViewItem CreateMapProgressItem(MapDocument map, bool completed, bool trackingAvailable = true) => new()
     {
-        Content = new TextBlock { Text = (completed ? "✓ " : "○ ") + map.Label, TextWrapping = TextWrapping.Wrap, MaxWidth = 250 }, Tag = map,
+        Content = new TextBlock { Text = (trackingAvailable ? (completed ? "✓ " : "○ ") : "") + map.Label, TextWrapping = TextWrapping.Wrap, MaxWidth = 250 }, Tag = map,
     };
     private async Task ShowMapsAsync()
     {
         var game = ViewModel.SelectedGame; if (game.IsPlaceholder) return;
+        var trackingAvailable = ViewModel.CanTrackSelectedGame;
+        var title = ViewModel.MapsActionText;
         var path = await _app.NativeLibraryService.ResolveManagedGameFileAsync(game.GameFileId, _loadCancellation.Token);
         if (path is null || !File.Exists(path)) throw new FileNotFoundException(Strings["ArchiveMissing"], path);
         var doomGame = new[] { "doom", "plutonia", "tnt" }.Any(word => game.Iwad.Contains(word, StringComparison.OrdinalIgnoreCase));
-        var maps = await RunProgressDialogAsync(Strings["MapsAndProgress"], game.Title, async progress =>
+        var maps = await RunProgressDialogAsync(title, game.Title, async progress =>
         { var result = await MapBrowserService.ReadAsync(path, doomGame, _loadCancellation.Token); progress.Report(100); return result; });
-        if (maps.Count == 0) { await ShowActionMessageAsync(Strings["MapsAndProgress"], Strings["NoMaps"], Strings["Close"]); return; }
+        if (maps.Count == 0) { await ShowActionMessageAsync(title, Strings["NoMaps"], Strings["Close"]); return; }
         var personal = (await _app.LibraryFeatures.LoadAsync(_loadCancellation.Token)).GetValueOrDefault(game.GameFileId) ?? PersonalModData.Empty(game.GameFileId);
         var completed = personal.CompletedMaps.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var list = new ListView { Width = 275, Height = 440, SelectionMode = ListViewSelectionMode.Single };
@@ -35,7 +37,7 @@ public sealed partial class MainPage
         CancellationTokenSource? rendering = null; var temporaryFiles = new List<string>();
         foreach (var map in maps)
         {
-            list.Items.Add(CreateMapProgressItem(map, completed.Contains(map.Name)));
+            list.Items.Add(CreateMapProgressItem(map, completed.Contains(map.Name), trackingAvailable));
         }
         async Task ShowSelection()
         {
@@ -57,9 +59,11 @@ public sealed partial class MainPage
         list.SelectionChanged += async (_, _) => await ShowSelection(); showPreview.Click += async (_, _) => await ShowSelection();
         var right = new StackPanel { Width = 670, Spacing = 8, Children = { stats, showPreview, imageScroll } };
         var columns = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 16, Children = { list, right } };
-        var content = new StackPanel { Spacing = 10, Children = { new TextBlock { Text = Strings["MapProgressNotice"], TextWrapping = TextWrapping.Wrap, MaxWidth = 950 }, columns, status } };
-        var dialog = FeatureDialog(Strings["MapsAndProgress"], new ScrollViewer { Content = content, MaxHeight = 720 }, Strings["LaunchSelectedMap"]);
-        dialog.SecondaryButtonText = Strings["LaunchNextMap"];
+        var content = new StackPanel { Spacing = 10 };
+        if (trackingAvailable) content.Children.Add(new TextBlock { Text = Strings["MapProgressNotice"], TextWrapping = TextWrapping.Wrap, MaxWidth = 950 });
+        content.Children.Add(columns); content.Children.Add(status);
+        var dialog = FeatureDialog(title, new ScrollViewer { Content = content, MaxHeight = 720 }, Strings["LaunchSelectedMap"]);
+        if (trackingAvailable) dialog.SecondaryButtonText = Strings["LaunchNextMap"];
         list.SelectedIndex = 0; var result = await dialog.ShowAsync(); rendering?.Cancel();
         var selected = result == ContentDialogResult.Primary ? (list.SelectedItem as ListViewItem)?.Tag as MapDocument
             : result == ContentDialogResult.Secondary ? maps.FirstOrDefault(map => !completed.Contains(map.Name)) : null;

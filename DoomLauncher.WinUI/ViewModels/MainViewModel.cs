@@ -1379,6 +1379,7 @@ public sealed partial class MainViewModel(
             var result = await libraryCatalog.LoadAsync(cancellationToken);
             var statistics = await nativeLibraryService.LoadStatisticsAsync(cancellationToken);
             var personalData = await _features.LoadAsync(cancellationToken);
+            _trackingGameIds = await MapTrackingService.LoadCompatibleGameIdsAsync(_features.DatabasePath, cancellationToken);
             var existingItems = _catalog.ToDictionary(item => item.GameFileId);
             _catalog = result.Entries
                 .Select(entry => existingItems.TryGetValue(entry.GameFileId, out var existing)
@@ -1390,6 +1391,7 @@ public sealed partial class MainViewModel(
                     _favoriteGameFileIds.Contains(entry.GameFileId)))
                 .ToArray();
             _personalData = personalData;
+            NotifyPersonalSelection();
             foreach (var item in _catalog)
             {
                 item.IsFavorite = _favoriteGameFileIds.Contains(item.GameFileId);

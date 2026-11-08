@@ -192,8 +192,8 @@
                     </StackPanel>
                 </Button>
 
-                <Button Content="{Binding MapsAndProgress}" Click="MapsButton_Click" HorizontalAlignment="Stretch" />
-                <TextBlock Text="{Binding ViewModel.SelectedMapProgressText, ElementName=DetailsRoot}" Style="{StaticResource MetaTextStyle}" />
+                <Button x:Name="MapsProgressButton" Content="{Binding ViewModel.MapsActionText, ElementName=DetailsRoot}" Click="MapsButton_Click" HorizontalAlignment="Stretch" />
+                <TextBlock x:Name="MapProgressSummary" Text="{Binding ViewModel.SelectedMapProgressText, ElementName=DetailsRoot}" Visibility="{Binding ViewModel.MapProgressVisibility, ElementName=DetailsRoot}" Style="{StaticResource MetaTextStyle}" />
                 <Button Content="{Binding SaveGames}" Click="SavesButton_Click" HorizontalAlignment="Stretch" />
                 <Button Content="{Binding MetadataHistory}" Click="HistoryButton_Click" HorizontalAlignment="Stretch" />
                 <StackPanel Spacing="6">

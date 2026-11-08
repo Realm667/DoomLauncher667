@@ -33,6 +33,12 @@ remain unknown. Launch a selected map or the next unconfirmed map. There are no
 manual completion controls. Only automatically validated engine completions count.
 
 The launcher embeds an open-source ZScript helper and mounts a temporary PK3 on
+compatible engines. The details progress summary, completion markers and next-unconfirmed-map
+action are only shown when the assigned source port (or configured default for Automatic)
+passes the actual API probe. Other ports retain a plain Maps browser and previews;
+stored progress is preserved, not deleted. Refresh the library after replacing engine files.
+
+The helper runs on
 compatible GZDoom/UZDoom-based single-player launches. The adjacent engine PK3 is
 checked for the required event/level API; an engine label alone does not enable it.
 The helper requires a genuine transition followed by the engine setting its

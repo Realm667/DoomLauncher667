@@ -17,6 +17,11 @@ public sealed partial class MainViewModel
     public PersonalModData SelectedPersonalData => _personalData.GetValueOrDefault(SelectedGame.GameFileId) ?? PersonalModData.Empty(SelectedGame.GameFileId);
     public double PersonalRatingValue => SelectedPersonalData.Rating ?? -1;
     public string QueueActionText => localization.Get(SelectedPersonalData.QueuePosition.HasValue ? "RemovePlayLater" : "AddPlayLater");
+    private IReadOnlySet<int> _trackingGameIds = new HashSet<int>();
+    public bool CanTrackSelectedGame => !SelectedGame.IsPlaceholder && _trackingGameIds.Contains(SelectedGame.GameFileId);
+    public Microsoft.UI.Xaml.Visibility MapProgressVisibility => CanTrackSelectedGame
+        ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
+    public string MapsActionText => localization.Get(CanTrackSelectedGame ? "MapsAndProgress" : "Maps");
     public string SelectedMapProgressText => SelectedGame.MapCount > 0
         ? localization.Format("MapProgressSummary", SelectedPersonalData.CompletedMaps.Count, SelectedGame.MapCount)
         : localization.Format("VerifiedMapsCount", SelectedPersonalData.CompletedMaps.Count);
@@ -25,6 +30,8 @@ public sealed partial class MainViewModel
     {
         OnPropertyChanged(nameof(PersonalRatingValue)); OnPropertyChanged(nameof(QueueActionText));
         OnPropertyChanged(nameof(SelectedMapProgressText)); OnPropertyChanged(nameof(SelectedPersonalData));
+        OnPropertyChanged(nameof(CanTrackSelectedGame)); OnPropertyChanged(nameof(MapProgressVisibility));
+        OnPropertyChanged(nameof(MapsActionText));
     }
 
     public async Task SetPersonalRatingAsync(int gameId, int? rating, CancellationToken token = default)
