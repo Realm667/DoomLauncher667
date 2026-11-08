@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 1.0.0-rc.6 - 2026-11-08
+
+- Personal stars, ordered Play later queue, constrained random choice and transactional bulk editing.
+- Metadata field previews/locks and guarded history undo; original IWAD protections retained.
+- Per-map progress and classic/Hexen/UDMF geometry browser with spoiler-opt-in previews.
+- Managed ZDoom-family save browsing, fingerprint-aware resume, import and verified backups/restore.
+- Native Zandronum internet/LAN discovery, required-mod checks and confirmed downloads, LAN hosting/direct join.
+- Content-identified cross-PC folder sync, explicit conflicts, optional settings/saves, no shared live SQLite.
+- Isolated tests for retention, rollback, hostile input, save compatibility and multiplayer protocols.
+
 ## 1.0.0-rc.5 - 2026-11-08
 
 - Randomize Home Featured from the complete favorite-mod pool on startup and each

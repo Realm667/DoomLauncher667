@@ -34,6 +34,28 @@ public sealed partial class GameDetailsPane : UserControl
     public event RoutedEventHandler? RescrapeRequested;
     public event RoutedEventHandler? ManageCollectionsRequested;
     public event RoutedEventHandler? ReadMoreRequested;
+    public event RoutedEventHandler? QueueRequested;
+    public event RoutedEventHandler? MapsRequested;
+    public event RoutedEventHandler? SavesRequested;
+    public event RoutedEventHandler? HistoryRequested;
+
+    private async void PersonalRating_Changed(RatingControl sender, object args)
+    {
+        if (ViewModel is null || ViewModel.SelectedGame.IsPlaceholder) return;
+        int? value = sender.Value < 1 ? null : Math.Clamp((int)sender.Value, 1, 5);
+        if (ViewModel.SelectedPersonalData.Rating == value) return;
+        try { await ViewModel.SetPersonalRatingAsync(ViewModel.SelectedGame.GameFileId, value); }
+        catch (Exception error)
+        {
+            var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = "Doom Launcher 667", Content = error.Message,
+                CloseButtonText = DataContext is UiText text ? text["Close"] : "Close", RequestedTheme = ActualTheme };
+            await dialog.ShowAsync();
+        }
+    }
+    private void QueueButton_Click(object sender, RoutedEventArgs args) => QueueRequested?.Invoke(this, args);
+    private void MapsButton_Click(object sender, RoutedEventArgs args) => MapsRequested?.Invoke(this, args);
+    private void SavesButton_Click(object sender, RoutedEventArgs args) => SavesRequested?.Invoke(this, args);
+    private void HistoryButton_Click(object sender, RoutedEventArgs args) => HistoryRequested?.Invoke(this, args);
 
     public void CloseLaunchOptions() => LaunchOptionsFlyout.Hide();
 

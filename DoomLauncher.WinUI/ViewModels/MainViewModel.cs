@@ -16,7 +16,8 @@ public sealed partial class MainViewModel(
     INativeLibraryService nativeLibraryService,
     IIdGamesService idGamesService,
     IUserLibraryStateStore userLibraryStateStore,
-    UiLocalization localization) : INotifyPropertyChanged
+    UiLocalization localization,
+    LibraryFeatureStore? featureStore = null) : INotifyPropertyChanged
 {
     private const int DiscoverPageSize = 20;
 
@@ -135,6 +136,7 @@ public sealed partial class MainViewModel(
             OnPropertyChanged(nameof(FinishedGlyph));
             OnPropertyChanged(nameof(LaunchSetupHint));
             OnPropertyChanged(nameof(LaunchSetupHintVisibility));
+            NotifyPersonalSelection();
         }
     }
 
@@ -418,8 +420,9 @@ public sealed partial class MainViewModel(
         _activeSection == LibrarySection.Discover ? Visibility.Visible : Visibility.Collapsed;
     public Visibility GenerateVisibility =>
         _activeSection == LibrarySection.Generate ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility MultiplayerVisibility => _activeSection == LibrarySection.Multiplayer ? Visibility.Visible : Visibility.Collapsed;
     public Visibility StandardToolbarVisibility =>
-        _activeSection == LibrarySection.Generate ? Visibility.Collapsed : Visibility.Visible;
+        _activeSection is LibrarySection.Generate or LibrarySection.Multiplayer ? Visibility.Collapsed : Visibility.Visible;
     public Visibility CollectionsVisibility =>
         _activeSection == LibrarySection.Collections ? Visibility.Visible : Visibility.Collapsed;
     public Visibility AchievementsVisibility =>
@@ -430,6 +433,7 @@ public sealed partial class MainViewModel(
         _activeSection is LibrarySection.Home
             or LibrarySection.Discover
             or LibrarySection.Generate
+            or LibrarySection.Multiplayer
             or LibrarySection.Collections
             or LibrarySection.Achievements
             or LibrarySection.Debug
@@ -444,10 +448,12 @@ public sealed partial class MainViewModel(
     {
         LibrarySection.Home => localization.Get("Home"),
         LibrarySection.Favorites => localization.Get("Favorites"),
+        LibrarySection.Queue => localization.Get("PlayLater"),
         LibrarySection.Recent => localization.Get("Recent"),
         LibrarySection.Downloads => localization.Get("Downloads"),
         LibrarySection.Discover => localization.Get("Discover"),
         LibrarySection.Generate => localization.Get("Generate"),
+        LibrarySection.Multiplayer => localization.Get("Multiplayer"),
         LibrarySection.Collections => localization.Get("Collections"),
         LibrarySection.Achievements => localization.Get("Achievements"),
         LibrarySection.Debug => localization.Get("Debug"),
@@ -531,6 +537,7 @@ public sealed partial class MainViewModel(
         OnPropertyChanged(nameof(HomeVisibility));
         OnPropertyChanged(nameof(DiscoverVisibility));
         OnPropertyChanged(nameof(GenerateVisibility));
+        OnPropertyChanged(nameof(MultiplayerVisibility));
         OnPropertyChanged(nameof(StandardToolbarVisibility));
         OnPropertyChanged(nameof(CollectionsVisibility));
         OnPropertyChanged(nameof(AchievementsVisibility));
@@ -744,6 +751,7 @@ public sealed partial class MainViewModel(
             gameFileId,
             isFinished,
             cancellationToken);
+        await ReloadPersonalDataAsync(cancellationToken);
         _statistics = _statistics with
         {
             Finished = Math.Max(0, _statistics.Finished + (isFinished ? 1 : -1)),
@@ -919,7 +927,8 @@ public sealed partial class MainViewModel(
     public async Task ApplySelectedIdGamesMetadataAsync(
         IdGamesItem item,
         IProgress<double>? progress = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IReadOnlySet<string>? fieldsToUpdate = null)
     {
         if (SelectedGame.IsPlaceholder)
             throw new InvalidOperationException(localization.Get("SelectEntry"));
@@ -931,7 +940,8 @@ public sealed partial class MainViewModel(
             item,
             downloadRemoteArtwork: true,
             progress,
-            cancellationToken);
+            cancellationToken,
+            fieldsToUpdate);
         LaunchErrorMessage = string.Empty;
         LaunchStatus = localization.Format(
             artworkImported
@@ -1012,13 +1022,15 @@ public sealed partial class MainViewModel(
         IdGamesItem item,
         bool downloadRemoteArtwork,
         IProgress<double>? progress,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        IReadOnlySet<string>? fieldsToUpdate = null)
     {
         progress?.Report(0.08);
         await nativeLibraryService.UpdateGameFromIdGamesAsync(
             gameFileId,
             item,
-            cancellationToken);
+            cancellationToken,
+            fieldsToUpdate);
         progress?.Report(0.55);
         var artworkImported = false;
         try
@@ -1090,6 +1102,7 @@ public sealed partial class MainViewModel(
 
     public void NotifyLocalizationChanged()
     {
+        NotifyPersonalSelection();
         OnPropertyChanged(nameof(SectionTitle));
         OnPropertyChanged(nameof(EmptyStateMessage));
         OnPropertyChanged(nameof(FavoriteButtonText));
@@ -1329,6 +1342,7 @@ public sealed partial class MainViewModel(
         try
         {
             var userState = await userLibraryStateStore.LoadAsync(cancellationToken);
+            _favoriteGameFileIds = new HashSet<int>(userState.FavoriteGameFileIds);
             _collectionArtworkPaths = new Dictionary<string, string>(
                 userState.CollectionArtworkPaths,
                 StringComparer.OrdinalIgnoreCase);
@@ -1364,6 +1378,7 @@ public sealed partial class MainViewModel(
             LibraryItem.ClearArtworkCache();
             var result = await libraryCatalog.LoadAsync(cancellationToken);
             var statistics = await nativeLibraryService.LoadStatisticsAsync(cancellationToken);
+            var personalData = await _features.LoadAsync(cancellationToken);
             var existingItems = _catalog.ToDictionary(item => item.GameFileId);
             _catalog = result.Entries
                 .Select(entry => existingItems.TryGetValue(entry.GameFileId, out var existing)
@@ -1374,8 +1389,12 @@ public sealed partial class MainViewModel(
                     _finishedGameFileIds.Contains(entry.GameFileId),
                     _favoriteGameFileIds.Contains(entry.GameFileId)))
                 .ToArray();
+            _personalData = personalData;
             foreach (var item in _catalog)
+            {
                 item.IsFavorite = _favoriteGameFileIds.Contains(item.GameFileId);
+                item.SetPersonalData(personalData.GetValueOrDefault(item.GameFileId) ?? PersonalModData.Empty(item.GameFileId));
+            }
             _finishedGameFileIds = _catalog
                 .Where(game => game.IsFinished)
                 .Select(game => game.GameFileId)
@@ -1436,6 +1455,7 @@ public sealed partial class MainViewModel(
         {
             LibrarySection.Favorites => matches.Where(
                 game => _favoriteGameFileIds.Contains(game.GameFileId)),
+            LibrarySection.Queue => matches.Where(game => _personalData.GetValueOrDefault(game.GameFileId)?.QueuePosition.HasValue == true),
             LibrarySection.Recent => matches
                 .Where(game => game.LastPlayedAt.HasValue),
             LibrarySection.Downloads => matches.Where(
@@ -1469,6 +1489,7 @@ public sealed partial class MainViewModel(
 
         matches = _activeSection switch
         {
+            LibrarySection.Queue => matches.OrderBy(game => _personalData.GetValueOrDefault(game.GameFileId)?.QueuePosition),
             LibrarySection.Recent => matches
                 .OrderByDescending(game => game.LastPlayedAt)
                 .ThenBy(game => game.Title, StringComparer.CurrentCultureIgnoreCase),
@@ -2084,6 +2105,8 @@ public sealed record IdGamesBulkRefreshResult(
 
 public enum LibrarySection
 {
+    Multiplayer,
+    Queue,
     Home,
     Library,
     Discover,

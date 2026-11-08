@@ -8,6 +8,13 @@
     <UseSystemDrawing>true</UseSystemDrawing>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\DoomLauncher.WinUI\Services\PersonalSyncService.cs" Link="Services\PersonalSyncService.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\MultiplayerDownloadService.cs" Link="Services\MultiplayerDownloadService.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\MultiplayerService.cs" Link="Services\MultiplayerService.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\ZandronumHuffman.cs" Link="Services\ZandronumHuffman.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\SaveGameService.cs" Link="Services\SaveGameService.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\MapBrowserService.cs" Link="Services\MapBrowserService.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\LibraryFeatureStore.cs" Link="Services\LibraryFeatureStore.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\FeaturedModSelector.cs" Link="Services\FeaturedModSelector.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\SqliteNativeLibraryService.*.cs" Link="Services\%(Filename)%(Extension)" />
     <Compile Include="..\DoomLauncher.WinUI\Services\UiLocalization.Ux.cs" Link="Services\UiLocalization.Ux.cs" />

@@ -88,7 +88,10 @@ public sealed partial class SqliteNativeLibraryService(
             throw new ArgumentException("Der Titel darf nicht leer sein.", nameof(game));
 
         await using var connection = await OpenConnectionAsync(cancellationToken);
+        await using var transaction = (SqliteTransaction)await connection.BeginTransactionAsync(cancellationToken);
+        var before = await LibraryFeatureStore.CaptureMetadataAsync(connection, transaction, game.GameFileId, cancellationToken);
         await using var command = connection.CreateCommand();
+        command.Transaction = transaction;
         command.CommandText =
             """
             UPDATE GameFiles
@@ -108,6 +111,8 @@ public sealed partial class SqliteNativeLibraryService(
         command.Parameters.AddWithValue("$gameFileId", game.GameFileId);
         if (await command.ExecuteNonQueryAsync(cancellationToken) != 1)
             throw new InvalidOperationException("Der Bibliothekseintrag konnte nicht aktualisiert werden.");
+        await LibraryFeatureStore.RecordMetadataAsync(connection, transaction, game.GameFileId, "manual", before, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
     }
 
     public async Task<LauncherSettingsData> LoadSettingsAsync(
@@ -743,6 +748,8 @@ public sealed partial class SqliteNativeLibraryService(
             INSERT INTO WinUI_GameState (GameFileID, Finished)
             VALUES ($gameFileId, $finished)
             ON CONFLICT(GameFileID) DO UPDATE SET Finished = excluded.Finished;
+            UPDATE WinUI_PersonalMods SET QueuePosition=NULL,UpdatedUtc=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+            WHERE GameFileID=$gameFileId AND AutoDequeue=1 AND $finished=1;
             """;
         command.Parameters.AddWithValue("$gameFileId", gameFileId);
         command.Parameters.AddWithValue("$finished", isFinished ? 1 : 0);
@@ -872,7 +879,8 @@ public sealed partial class SqliteNativeLibraryService(
     public async Task UpdateGameFromIdGamesAsync(
         int gameFileId,
         IdGamesItem item,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IReadOnlySet<string>? fieldsToUpdate = null)
     {
         await using var connection = await OpenConnectionAsync(cancellationToken);
         await using (var guard = connection.CreateCommand())
@@ -882,6 +890,15 @@ public sealed partial class SqliteNativeLibraryService(
             if (Convert.ToInt32(await guard.ExecuteScalarAsync(cancellationToken)) != 0)
                 throw new InvalidOperationException("IWADs are excluded from /idgames mod metadata updates.");
         }
+        var enabled = new HashSet<string>(fieldsToUpdate ?? LibraryFeatureStore.MetadataFields.ToHashSet(), StringComparer.Ordinal);
+        if (enabled.Any(field => !LibraryFeatureStore.MetadataFields.Contains(field))) throw new ArgumentException("Unknown metadata field.");
+        await using (var locks = connection.CreateCommand())
+        {
+            locks.CommandText = "SELECT Field FROM WinUI_MetadataLocks WHERE GameFileID=$id;"; locks.Parameters.AddWithValue("$id", gameFileId);
+            await using var rows = await locks.ExecuteReaderAsync(cancellationToken);
+            while (await rows.ReadAsync(cancellationToken)) enabled.Remove(rows.GetString(0));
+        }
+        if (enabled.Count == 0) return;
         var archivePath = await ResolveManagedGameFileAsync(gameFileId, cancellationToken);
         var inspection = !string.IsNullOrWhiteSpace(archivePath) && File.Exists(archivePath)
             ? await ArchiveInspection.ReadAsync(archivePath, cancellationToken) : null;
@@ -889,19 +906,20 @@ public sealed partial class SqliteNativeLibraryService(
             await LoadLauncherDefinitionsAsync(cancellationToken));
         await using var transaction =
             (SqliteTransaction)await connection.BeginTransactionAsync(cancellationToken);
+        var beforeMetadata = await LibraryFeatureStore.CaptureMetadataAsync(connection, transaction, gameFileId, cancellationToken);
         await using (var update = connection.CreateCommand())
         {
             update.Transaction = transaction;
             update.CommandText =
                 """
                 UPDATE GameFiles
-                SET Title = $title,
-                    Author = $author,
-                    Description = $description,
-                    ReleaseDate = $releaseDate,
-                    Rating = $rating,
-                    Map = CASE WHEN $hasArchive THEN $maps ELSE Map END,
-                    MapCount = CASE WHEN $hasArchive THEN $mapCount ELSE MapCount END,
+                SET Title = CASE WHEN $TitleEnabled THEN $title ELSE Title END,
+                    Author = CASE WHEN $AuthorEnabled THEN $author ELSE Author END,
+                    Description = CASE WHEN $DescriptionEnabled THEN $description ELSE Description END,
+                    ReleaseDate = CASE WHEN $ReleaseDateEnabled THEN $releaseDate ELSE ReleaseDate END,
+                    Rating = CASE WHEN $RatingEnabled THEN $rating ELSE Rating END,
+                    Map = CASE WHEN $hasArchive AND $MapsEnabled THEN $maps ELSE Map END,
+                    MapCount = CASE WHEN $hasArchive AND $MapsEnabled THEN $mapCount ELSE MapCount END,
                     SourcePortID = COALESCE(SourcePortID, $port),
                     IWadID = COALESCE(IWadID, $iwad),
                     IsSyncNeeded = 1
@@ -929,6 +947,7 @@ public sealed partial class SqliteNativeLibraryService(
             update.Parameters.AddWithValue("$port", (object?)inferred.SourcePortId ?? DBNull.Value);
             update.Parameters.AddWithValue("$iwad", (object?)inferred.IwadId ?? DBNull.Value);
             update.Parameters.AddWithValue("$gameFileId", gameFileId);
+            foreach (var field in LibraryFeatureStore.MetadataFields) update.Parameters.AddWithValue("$" + field + "Enabled", enabled.Contains(field) ? 1 : 0);
             if (await update.ExecuteNonQueryAsync(cancellationToken) != 1)
             {
                 throw new InvalidOperationException(
@@ -958,6 +977,7 @@ public sealed partial class SqliteNativeLibraryService(
                 DateTime.Now.ToString("O", CultureInfo.InvariantCulture));
             await mapping.ExecuteNonQueryAsync(cancellationToken);
         }
+        await LibraryFeatureStore.RecordMetadataAsync(connection, transaction, gameFileId, "idgames:" + item.Id, beforeMetadata, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
     }
 

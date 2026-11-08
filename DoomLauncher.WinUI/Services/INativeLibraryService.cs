@@ -86,7 +86,8 @@ public interface INativeLibraryService
     Task UpdateGameFromIdGamesAsync(
         int gameFileId,
         IdGamesItem item,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default,
+        IReadOnlySet<string>? fieldsToUpdate = null);
 
     Task<bool> TryImportTitlePicAsync(
         int gameFileId,

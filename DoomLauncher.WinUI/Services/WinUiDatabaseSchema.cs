@@ -17,7 +17,7 @@ internal static class WinUiDatabaseSchema
         if (Convert.ToInt32(await revision.ExecuteScalarAsync(cancellationToken)) != 0)
         {
             revision.CommandText = "SELECT COALESCE(MAX(Revision), 0) FROM WinUI_SchemaRevision;";
-            if (Convert.ToInt32(await revision.ExecuteScalarAsync(cancellationToken)) >= 1 && !force)
+            if (Convert.ToInt32(await revision.ExecuteScalarAsync(cancellationToken)) >= 2 && !force)
                 return;
         }
 
@@ -25,7 +25,7 @@ internal static class WinUiDatabaseSchema
         {
             var backupDirectory = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(connection.DataSource))!, "Backups");
             Directory.CreateDirectory(backupDirectory);
-            var backupPath = Path.Combine(backupDirectory, $"schema-before-0.9.3-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}.sqlite");
+            var backupPath = Path.Combine(backupDirectory, $"schema-before-{AppVersion.Current}-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}.sqlite");
             await using var backup = new SqliteConnection(new SqliteConnectionStringBuilder
             {
                 DataSource = backupPath, Pooling = false,
@@ -53,7 +53,8 @@ internal static class WinUiDatabaseSchema
                     await revision.ExecuteNonQueryAsync(cancellationToken);
                 }
             }
-            revision.CommandText = "CREATE TABLE IF NOT EXISTS WinUI_SchemaRevision (Revision INTEGER NOT NULL PRIMARY KEY); INSERT OR IGNORE INTO WinUI_SchemaRevision VALUES (1); RELEASE winui_schema;";
+            await LibraryFeatureStore.CreateTablesAsync(connection, cancellationToken);
+            revision.CommandText = "CREATE TABLE IF NOT EXISTS WinUI_SchemaRevision (Revision INTEGER NOT NULL PRIMARY KEY); INSERT OR IGNORE INTO WinUI_SchemaRevision VALUES (2); RELEASE winui_schema;";
             await revision.ExecuteNonQueryAsync(cancellationToken);
         }
         catch

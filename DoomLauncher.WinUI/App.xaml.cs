@@ -27,6 +27,7 @@ public partial class App : Application
             databaseLocator,
             new SystemProcessStarter());
         NativeLibraryService = new SqliteNativeLibraryService(databaseLocator);
+        LibraryFeatures = new LibraryFeatureStore(databaseLocator);
         ObsidianService = new ObsidianService(
             databaseLocator,
             NativeLibraryService);
@@ -44,6 +45,7 @@ public partial class App : Application
     internal ILaunchOptionsCatalog LaunchOptionsCatalog { get; }
     internal ILaunchService LaunchService { get; }
     internal INativeLibraryService NativeLibraryService { get; }
+    internal LibraryFeatureStore LibraryFeatures { get; }
     internal IObsidianService ObsidianService { get; }
     internal ILegacyInstallationMigrationService MigrationService { get; }
     internal IFirstSetupService FirstSetupService { get; }

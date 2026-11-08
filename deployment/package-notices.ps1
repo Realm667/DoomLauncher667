@@ -12,6 +12,7 @@ foreach ($framework in $assets.project.frameworks.PSObject.Properties.Value) {
 $noticeRoot = Join-Path $PackageRoot 'Licenses'
 [void](New-Item -ItemType Directory -Path $noticeRoot -Force)
 Copy-Item -Path (Join-Path $RepositoryRoot 'deployment/licenses/*') -Destination $noticeRoot -Recurse -Force
+Copy-Item -LiteralPath (Join-Path $RepositoryRoot 'Licenses/Skulltag-Huffman-MIT.txt') -Destination $noticeRoot -Force
 $inventory = @('# Restored dependency notices', '', 'Includes runtime dependencies and build-time tooling; not every listed component is shipped as an executable.', '', '| Package | License declared by package | Copyright |', '| --- | --- | --- |')
 foreach ($package in ($packages | Sort-Object -Unique)) {
     $source = $folders | ForEach-Object { Join-Path $_ $package } | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1

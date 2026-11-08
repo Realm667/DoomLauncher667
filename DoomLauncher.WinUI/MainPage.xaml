@@ -466,6 +466,8 @@
             </NavigationViewItem>
             <NavigationViewItemSeparator />
             <NavigationViewItem Content="{Binding Favorites}" Icon="Favorite" Tag="Favorites" />
+            <NavigationViewItem Content="{Binding PlayLater}" Icon="Bookmarks" Tag="Queue" />
+            <NavigationViewItem Content="{Binding Multiplayer}" Icon="People" Tag="Multiplayer" />
             <NavigationViewItem Content="{Binding Recent}" Icon="Clock" Tag="Recent" />
             <NavigationViewItem Content="{Binding Downloads}" Icon="Download" Tag="Downloads" />
             <NavigationViewItemSeparator />
@@ -550,6 +552,15 @@
                     Orientation="Horizontal"
                     Spacing="8"
                     Visibility="{x:Bind ViewModel.StandardToolbarVisibility, Mode=OneWay}">
+                    <DropDownButton x:Name="LibraryToolsButton" AutomationProperties.Name="{Binding LibraryTools}" ToolTipService.ToolTip="{Binding LibraryTools}">
+                        <FontIcon Glyph="&#xE713;" />
+                        <DropDownButton.Flyout><MenuFlyout Opening="LibraryTools_Opening">
+                            <MenuFlyoutItem Tag="RandomMod" Click="LibraryTool_Click" />
+                            <MenuFlyoutItem Tag="BulkEdit" Click="LibraryTool_Click" />
+                            <MenuFlyoutItem Tag="PlayLater" Click="LibraryTool_Click" />
+                            <MenuFlyoutItem Tag="Synchronization" Click="LibraryTool_Click" />
+                        </MenuFlyout></DropDownButton.Flyout>
+                    </DropDownButton>
                     <Button
                         AutomationProperties.Name="{Binding ImportTooltip}"
                         Click="ImportButton_Click"
@@ -1058,7 +1069,8 @@
                     ManageCollectionsRequested="ManageCollectionsButton_Click"
                     PlayRequested="PlayButton_Click"
                     ReadMoreRequested="ReadMoreButton_Click"
-                    RescrapeRequested="RescrapeIdGamesButton_Click" />
+                    RescrapeRequested="RescrapeIdGamesButton_Click" QueueRequested="PersonalQueue_Click"
+                    MapsRequested="MapsProgress_Click" SavesRequested="Saves_Click" HistoryRequested="MetadataHistory_Click" />
             </Grid>
 
             <ScrollViewer
@@ -1519,7 +1531,8 @@
                                     ManageCollectionsRequested="ManageCollectionsButton_Click"
                                     PlayRequested="PlayButton_Click"
                                     ReadMoreRequested="ReadMoreButton_Click"
-                                    RescrapeRequested="RescrapeIdGamesButton_Click" />
+                                    RescrapeRequested="RescrapeIdGamesButton_Click" QueueRequested="PersonalQueue_Click"
+                                    MapsRequested="MapsProgress_Click" SavesRequested="Saves_Click" HistoryRequested="MetadataHistory_Click" />
                             </Grid>
 
                             <Grid
@@ -1622,7 +1635,8 @@
                                     ManageCollectionsRequested="ManageCollectionsButton_Click"
                                     PlayRequested="PlayButton_Click"
                                     ReadMoreRequested="ReadMoreButton_Click"
-                                    RescrapeRequested="RescrapeIdGamesButton_Click" />
+                                    RescrapeRequested="RescrapeIdGamesButton_Click" QueueRequested="PersonalQueue_Click"
+                                    MapsRequested="MapsProgress_Click" SavesRequested="Saves_Click" HistoryRequested="MetadataHistory_Click" />
                             </Grid>
                         </Grid>
                     </Grid>
@@ -2025,6 +2039,8 @@
                 </StackPanel>
             </ScrollViewer>
 
+            <ContentControl x:Name="MultiplayerHost" Grid.Row="2" HorizontalContentAlignment="Stretch"
+                Visibility="{x:Bind ViewModel.MultiplayerVisibility, Mode=OneWay}" />
             <Grid
                 x:Name="DiscoverHost"
                 Grid.Row="2"

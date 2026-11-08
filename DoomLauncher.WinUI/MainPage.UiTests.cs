@@ -85,6 +85,18 @@ public sealed partial class MainPage
             await ViewModel.SaveLaunchDefinitionsAsync();
             Check((await _app.NativeLibraryService.LoadGameAsync(chosenGame)).SourcePortId == chosenPort,
                 "Details launch assignment persists without altering mod metadata");
+            await ViewModel.SetPersonalRatingAsync(chosenGame, 4); await Layout();
+            Check(ViewModel.PersonalRatingValue == 4 && FindDescendant<RatingControl>(LibraryDetailsPane)?.Value == 4,
+                "Personal stars persist and bind to the native details control");
+            await ViewModel.ToggleQueueAsync(); await Navigate(LibrarySection.Queue);
+            Check(ViewModel.Games.Any(game => game.GameFileId == chosenGame), "Play later sidebar displays queued entries");
+            await _app.LibraryFeatures.SetMapFinishedAsync(chosenGame, "MAP01", true); await ViewModel.ReloadPersonalDataAsync();
+            Check(ViewModel.SelectedPersonalData.CompletedMaps.Contains("MAP01"), "Map progress reloads into shared details");
+            await Navigate(LibrarySection.Library); await Layout();
+            LibraryToolsButton.Flyout.ShowAt(LibraryToolsButton); await Layout();
+            Check(LibraryToolsButton.IsLoaded && ((MenuFlyout)LibraryToolsButton.Flyout).Items.OfType<MenuFlyoutItem>().All(item => !string.IsNullOrWhiteSpace(item.Text)),
+                "Library tools are visible and all feature actions are labeled");
+            LibraryToolsButton.Flyout.Hide();
             Check(Strings["ImportBatchTitle"] != "ImportBatchTitle" && Strings["Maintenance"] != "Maintenance", "New workflow labels resolve");
             await using (var connection = new Microsoft.Data.Sqlite.SqliteConnection(new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder
                 { DataSource = Path.Combine(root, "DoomLauncher.sqlite"), Pooling = false }.ToString()))

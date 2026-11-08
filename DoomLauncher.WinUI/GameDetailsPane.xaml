@@ -83,6 +83,15 @@
                     </Border>
                 </StackPanel>
 
+                <StackPanel Spacing="4">
+                    <TextBlock Text="{Binding PersonalRating}" Style="{StaticResource MetaTextStyle}" />
+                    <RatingControl MaxRating="5" IsClearEnabled="True" AutomationProperties.Name="{Binding PersonalRating}"
+                        IsEnabled="{Binding ViewModel.CanLaunch, ElementName=DetailsRoot}"
+                        Value="{Binding ViewModel.PersonalRatingValue, ElementName=DetailsRoot, Mode=OneWay}"
+                        ValueChanged="PersonalRating_Changed" />
+                </StackPanel>
+                <Button Content="{Binding ViewModel.QueueActionText, ElementName=DetailsRoot}" Click="QueueButton_Click"
+                    HorizontalAlignment="Stretch" IsEnabled="{Binding ViewModel.CanLaunch, ElementName=DetailsRoot}" />
                 <Grid ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -153,6 +162,10 @@
                     </StackPanel>
                 </Button>
 
+                <Button Content="{Binding MapsAndProgress}" Click="MapsButton_Click" HorizontalAlignment="Stretch" />
+                <TextBlock Text="{Binding ViewModel.SelectedMapProgressText, ElementName=DetailsRoot}" Style="{StaticResource MetaTextStyle}" />
+                <Button Content="{Binding SaveGames}" Click="SavesButton_Click" HorizontalAlignment="Stretch" />
+                <Button Content="{Binding MetadataHistory}" Click="HistoryButton_Click" HorizontalAlignment="Stretch" />
                 <StackPanel Spacing="6">
                     <TextBlock
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"

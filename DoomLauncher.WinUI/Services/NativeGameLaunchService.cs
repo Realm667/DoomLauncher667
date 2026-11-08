@@ -149,6 +149,7 @@ public sealed class NativeGameLaunchService(
                 Map = request.Map ?? storedSettings.Map,
                 Skill = request.Skill ?? storedSettings.Skill,
             };
+            if (request.Multiplayer is not null) settings = settings with { Map = request.Map, Skill = request.Skill, Files = null, FilesIwad = null, FilesSourcePort = null, SpecificFiles = null, ExtraParameters = null, ExtraParametersOnly = false };
             var launchFiles = new List<string>();
             if (isDeathkings)
             {
@@ -159,7 +160,7 @@ public sealed class NativeGameLaunchService(
                     selectedIwad,
                     cancellationToken));
             }
-            if (game.GameFileId != selectedIwad.GameFileId)
+            if (game.GameFileId != selectedIwad.GameFileId && request.Multiplayer is null)
             {
                 launchFiles.AddRange(await PrepareGameArchiveAsync(
                     Path.Combine(gameDirectory, game.FileName),
@@ -169,10 +170,19 @@ public sealed class NativeGameLaunchService(
                     cancellationToken));
             }
 
+            if (request.Multiplayer?.Mods is { } networkFiles)
+                foreach (var file in networkFiles)
+                {
+                    var networkMod = await LoadGameAsync(connection, file.GameFileId, cancellationToken);
+                    launchFiles.AddRange(await PrepareGameArchiveAsync(Path.Combine(gameDirectory, networkMod.FileName), sessionDirectory,
+                        supportedExtensions, string.IsNullOrEmpty(file.InternalName) ? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                            : new HashSet<string>(new[] { file.InternalName }, StringComparer.OrdinalIgnoreCase), cancellationToken));
+                }
+
             var additionalNames = SplitValues(settings.Files)
                 .Concat(SplitValues(settings.FilesSourcePort))
                 .Concat(SplitValues(settings.FilesIwad))
-                .Concat(SplitValues(sourcePort.SettingsFiles))
+                .Concat(request.Multiplayer is null ? SplitValues(sourcePort.SettingsFiles) : [])
                 .Distinct(StringComparer.OrdinalIgnoreCase);
             foreach (var additionalName in additionalNames)
             {
@@ -191,10 +201,26 @@ public sealed class NativeGameLaunchService(
             }
 
             var arguments = BuildArguments(
-                sourcePort,
+                request.Multiplayer is null ? sourcePort : sourcePort with { ExtraParameters = "" },
                 iwadPath,
                 launchFiles.Distinct(StringComparer.OrdinalIgnoreCase).ToArray(),
                 settings).ToList();
+            ManagedSaveContext? managedSaves = null;
+            if (SaveGameService.SupportsManagedSaves(sourcePort.Executable)
+                && File.Exists(Path.Combine(gameDirectory, game.FileName)) && launchFiles.All(File.Exists))
+            {
+                managedSaves = await SaveGameService.PrepareAsync(databaseDirectory, game.FileName,
+                    Path.Combine(gameDirectory, game.FileName), executablePath, sourcePort.Name,
+                    iwadPath, launchFiles, settings.ExtraParameters ?? "", cancellationToken);
+                arguments.AddRange(["-savedir", managedSaves.Directory]);
+                if (request.SaveGamePath is not null)
+                {
+                    await SaveGameService.ValidateResumeAsync(managedSaves, request.SaveGamePath, request.AllowUnverifiedSave, cancellationToken);
+                    arguments.AddRange(["-loadgame", Path.GetFullPath(request.SaveGamePath)]);
+                }
+            }
+            else if (request.SaveGamePath is not null) throw new InvalidOperationException("This source port has no supported managed-save adapter.");
+            if (request.Multiplayer is not null) arguments.AddRange(MultiplayerService.BuildLaunchArguments(sourcePort.Executable, request.Multiplayer));
             var screenshotCaptureDirectories =
                 sourcePort.ScreenshotSupport.Equals(
                     "None",
@@ -218,6 +244,7 @@ public sealed class NativeGameLaunchService(
                         sourcePort.StatisticsDirectories,
                         configuration.GetValueOrDefault("ScreenshotCaptureDirectories"),
                     includeKnownDefaults: true);
+            if (managedSaves is not null) statisticsCaptureDirectories = statisticsCaptureDirectories.Append(managedSaves.Directory).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
             return new NativeLaunchPlan(
                 databasePath,
                 executablePath,
@@ -246,7 +273,7 @@ public sealed class NativeGameLaunchService(
                     && !sourcePort.ScreenshotSupport.Equals(
                         "None",
                         StringComparison.OrdinalIgnoreCase),
-                ParseBool(configuration.GetValueOrDefault("DeleteScreenshotsAfterImport"), false));
+                ParseBool(configuration.GetValueOrDefault("DeleteScreenshotsAfterImport"), false), managedSaves);
         }
         catch
         {
@@ -340,6 +367,7 @@ public sealed class NativeGameLaunchService(
             plan.StatisticsCaptureDirectories,
             plan.SaveGameExtensions,
             beforeSaveGames);
+        if (plan.ManagedSaves is not null) await SaveGameService.RecordSessionAsync(plan.ManagedSaves);
         if (plan.StatisticsAdapter.Equals(
                 "ZDoomSave",
                 StringComparison.OrdinalIgnoreCase))
@@ -452,7 +480,8 @@ public sealed class NativeGameLaunchService(
         if (Directory.Exists(archivePath))
             return [archivePath];
         var extension = Path.GetExtension(archivePath);
-        if (supportedExtensions.Contains(extension))
+        var container = extension.ToLowerInvariant() is ".zip" or ".7z" or ".rar" or ".pk3" or ".ipk3" or ".pk7" or ".pke";
+        if (supportedExtensions.Contains(extension) && (specificFiles.Count == 0 || !container))
             return [archivePath];
 
         var output = Path.Combine(
@@ -462,7 +491,8 @@ public sealed class NativeGameLaunchService(
                 + Guid.NewGuid().ToString("N")[..8]);
         Directory.CreateDirectory(output);
         var result = new List<string>();
-        if (extension.Equals(".zip", StringComparison.OrdinalIgnoreCase))
+        if (extension.Equals(".zip", StringComparison.OrdinalIgnoreCase)
+            || extension.Equals(".pk3", StringComparison.OrdinalIgnoreCase) || extension.Equals(".ipk3", StringComparison.OrdinalIgnoreCase) || extension.Equals(".pke", StringComparison.OrdinalIgnoreCase))
         {
             using var archive = ZipFile.OpenRead(archivePath);
             foreach (var entry in archive.Entries)
@@ -478,7 +508,7 @@ public sealed class NativeGameLaunchService(
                 result.Add(destination);
             }
         }
-        else if (extension.Equals(".7z", StringComparison.OrdinalIgnoreCase)
+        else if (extension.Equals(".7z", StringComparison.OrdinalIgnoreCase) || extension.Equals(".pk7", StringComparison.OrdinalIgnoreCase)
             || extension.Equals(".rar", StringComparison.OrdinalIgnoreCase))
         {
             using var archive = ArchiveFactory.OpenArchive(archivePath);
@@ -526,7 +556,7 @@ public sealed class NativeGameLaunchService(
             : Path.GetFullPath(Path.Combine(gameDirectory, configuredArchive));
         if (!File.Exists(archivePath))
             throw new FileNotFoundException("Das IWAD-Archiv wurde nicht gefunden.", archivePath);
-        if (Path.GetFileName(archivePath).Equals(
+        if (Path.GetExtension(archivePath).Equals(".wad", StringComparison.OrdinalIgnoreCase) || Path.GetFileName(archivePath).Equals(
                 iwad.InternalFileName,
                 StringComparison.OrdinalIgnoreCase))
         {
@@ -1190,7 +1220,8 @@ public sealed class NativeGameLaunchService(
         IReadOnlySet<string> SaveGameExtensions,
         string StatisticsAdapter,
         bool ImportScreenshots,
-        bool DeleteImportedScreenshots);
+        bool DeleteImportedScreenshots,
+        ManagedSaveContext? ManagedSaves);
 
     private sealed record FileStamp(long Length, DateTime LastWriteTimeUtc);
 }

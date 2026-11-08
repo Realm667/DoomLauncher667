@@ -51,7 +51,8 @@ public sealed partial class MainPage : Page
             _app.NativeLibraryService,
             _app.IdGamesService,
             _app.UserLibraryStateStore,
-            _app.Localization);
+            _app.Localization,
+            _app.LibraryFeatures);
         ViewModel.AchievementUnlocked += ViewModel_AchievementUnlocked;
         InitializeComponent();
         ConfigureKeyboardNavigation();
@@ -83,6 +84,7 @@ public sealed partial class MainPage : Page
             _newBadgeTimer.Stop();
             _tileImageRefreshTimer.Stop();
             _obsidianGenerationCancellation?.Cancel();
+            _multiplayerCancellation?.Cancel();
             DisposeTileImageWatchers();
         };
     }
@@ -655,6 +657,9 @@ public sealed partial class MainPage : Page
                 await ViewModel.EnsureDiscoverLoadedAsync(_loadCancellation.Token);
             else if (section == LibrarySection.Generate)
                 await RefreshObsidianDetectionAsync();
+            else if (section == LibrarySection.Multiplayer)
+                await InitializeMultiplayerAsync();
+            if (section != LibrarySection.Multiplayer) _multiplayerCancellation?.Cancel();
         });
     }
 
@@ -982,6 +987,24 @@ public sealed partial class MainPage : Page
                 MaxHeight = 190,
                 TextWrapping = TextWrapping.Wrap,
             };
+            var gameId = ViewModel.SelectedGame.GameFileId;
+            MetadataSnapshot currentMetadata;
+            await using (var db = await _app.LibraryFeatures.OpenAsync(_loadCancellation.Token))
+                currentMetadata = await LibraryFeatureStore.CaptureMetadataAsync(db, null, gameId, _loadCancellation.Token);
+            var lockedFields = await _app.LibraryFeatures.LoadLocksAsync(gameId, _loadCancellation.Token);
+            var fieldChecks = new Dictionary<string, CheckBox>(); var lockChecks = new Dictionary<string, CheckBox>();
+            var fieldPanel = new StackPanel { Spacing = 8 };
+            foreach (var field in LibraryFeatureStore.MetadataFields)
+            {
+                var apply = new CheckBox { IsChecked = !lockedFields.Contains(field), Tag = field };
+                var protect = new CheckBox { Content = Strings["LockField"], IsChecked = lockedFields.Contains(field) };
+                protect.Checked += (_, _) => { apply.IsChecked = false; apply.IsEnabled = false; };
+                protect.Unchecked += (_, _) => apply.IsEnabled = true;
+                apply.IsEnabled = !lockedFields.Contains(field); fieldChecks[field] = apply; lockChecks[field] = protect;
+                fieldPanel.Children.Add(new StackPanel { Spacing = 2, Children = { apply, protect } });
+            }
+            string ShortValue(object? value)
+            { var text = Convert.ToString(value) ?? "—"; return text.Length > 160 ? text[..160] + "…" : text; }
             void UpdatePreview()
             {
                 if (matchBox.SelectedItem is not IdGamesItem item)
@@ -989,6 +1012,12 @@ public sealed partial class MainPage : Page
                 preview.Text =
                     $"{item.Title}\n{item.Author}\n{item.ReleaseDateText} · " +
                     $"{item.RatingText}\n\n{item.Description}";
+                var before = new Dictionary<string, object?> { ["Title"] = currentMetadata.Title, ["Author"] = currentMetadata.Author,
+                    ["Description"] = currentMetadata.Description, ["ReleaseDate"] = currentMetadata.ReleaseDate, ["Rating"] = currentMetadata.Rating, ["Maps"] = currentMetadata.MapCount };
+                var after = new Dictionary<string, object?> { ["Title"] = item.Title, ["Author"] = item.Author, ["Description"] = item.Description,
+                    ["ReleaseDate"] = item.ReleaseDate?.ToString("d"), ["Rating"] = item.Rating, ["Maps"] = Strings["RecountMaps"] };
+                foreach (var field in LibraryFeatureStore.MetadataFields)
+                    fieldChecks[field].Content = new TextBlock { Text = $"{Strings[field]}: {ShortValue(before[field])}\n→ {ShortValue(after[field])}", TextWrapping = TextWrapping.Wrap, MaxWidth = 510 };
             }
             matchBox.SelectionChanged += (_, _) => UpdatePreview();
             UpdatePreview();
@@ -1005,12 +1034,13 @@ public sealed partial class MainPage : Page
                 MaxHeight = 210,
                 Content = preview,
             });
+            content.Children.Add(fieldPanel);
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,
                 RequestedTheme = EffectiveDialogTheme,
                 Title = Strings["IdGamesMetadataTitle"],
-                Content = content,
+                Content = new ScrollViewer { Content = content, MaxHeight = 620 },
                 PrimaryButtonText = Strings["Apply"],
                 CloseButtonText = Strings["Cancel"],
                 DefaultButton = ContentDialogButton.Primary,
@@ -1026,10 +1056,12 @@ public sealed partial class MainPage : Page
             isBlocking = true;
             var progress = new Progress<double>(value =>
                 SetBlockingMetadataRefresh(true, value));
+            await _app.LibraryFeatures.SetLocksAsync(gameId, lockChecks.Where(pair => pair.Value.IsChecked == true).Select(pair => pair.Key).ToHashSet(), _loadCancellation.Token);
             await ViewModel.ApplySelectedIdGamesMetadataAsync(
                 selected,
                 progress,
-                _loadCancellation.Token);
+                _loadCancellation.Token,
+                fieldChecks.Where(pair => pair.Value.IsChecked == true).Select(pair => pair.Key).ToHashSet());
             SyncSelection();
         }
         catch (OperationCanceledException) when (_loadCancellation.IsCancellationRequested)

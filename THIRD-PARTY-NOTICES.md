@@ -63,3 +63,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+# Skulltag / Zandronum query Huffman tree
+
+The Zandronum server-query adapter uses the wire-format Huffman tree published by
+Timothy Landers (2009), under the MIT license. The C# traversal and packet bounds
+handling are implemented in this project. The complete notice is included in
+`Licenses/Skulltag-Huffman-MIT.txt` and in downloadable packages.
+Source: https://github.com/DoomseekerTeam/Doomseeker/tree/master/src/plugins/zandronum/huffman

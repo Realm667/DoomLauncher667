@@ -100,6 +100,15 @@ public sealed class LibraryItem : INotifyPropertyChanged
     }
 
     public int GameFileId { get; }
+    private PersonalModData? _personal;
+    public int? PersonalRating => _personal?.Rating;
+    public string PersonalRatingText => PersonalRating is { } rating ? new string('★', rating) + new string('☆', 5 - rating) : "—";
+    public void SetPersonalData(PersonalModData data)
+    {
+        if (_personal?.Rating == data.Rating && _personal?.QueuePosition == data.QueuePosition && _personal?.CompletedMaps.SetEquals(data.CompletedMaps) == true)
+        { _personal = data; return; }
+        _personal = data; OnPropertyChanged(nameof(PersonalRating)); OnPropertyChanged(nameof(PersonalRatingText));
+    }
     public string FileName { get; } = string.Empty;
     public string Title { get; }
     public string Subtitle { get; }

@@ -14,6 +14,23 @@ if (args.Length == 2 && args[0] == "--prepare-ui-fixture")
     await ReliabilityTests.PrepareUiAsync(Path.GetFullPath(args[1]));
     return 0;
 }
+if (args.Length == 2 && args[0] == "--prepare-expansion-ui")
+{
+    await ExpansionTests.PrepareUiAsync(Path.GetFullPath(args[1]));
+    return 0;
+}
+if (args.Length == 1 && args[0] == "--probe-zandronum-master")
+{
+    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(55));
+    var servers = await MultiplayerService.BrowseInternetAsync(MultiplayerService.DefaultMaster, null, timeout.Token);
+    Console.WriteLine($"ZANDRONUM MASTER: {servers.Count} responding servers");
+    return servers.Count > 0 ? 0 : 1;
+}
+if (args.Length == 3 && args[0] == "--verify-upgrade-copy")
+{
+    await ExpansionTests.VerifyUpgradeCopyAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]));
+    return 0;
+}
 if (args.Length == 2 && args[0] == "--verify-shared-storage")
 {
     var testRoot = Path.Combine(Path.GetFullPath(args[1]), "DoomLauncher-storage-test-" + Guid.NewGuid().ToString("N"));
@@ -381,8 +398,9 @@ try
 {
     await StabilizationTests.RunAsync();
     await ReliabilityTests.RunAsync();
+    await ExpansionTests.RunAsync();
     Check(
-        AppVersion.Current == "1.0.0-rc.5",
+        AppVersion.Current == "1.0.0-rc.6",
         "Die sichtbare Version stammt aus der zentralen Buildversion");
     VerifyTileImageDefaults();
     Check(

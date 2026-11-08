@@ -216,7 +216,7 @@ internal static partial class MapNameExtractor
         }
     }
 
-    private static string MapSortKey(string map)
+    internal static string MapSortKey(string map)
     {
         if (map.StartsWith("MAP", StringComparison.OrdinalIgnoreCase)
             && int.TryParse(map[3..], out var numeric))

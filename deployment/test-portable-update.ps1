@@ -29,7 +29,8 @@ try {
             'Licenses/SharpCompress-LICENSE.txt', 'Licenses/SQLitePCLRaw-LICENSE.txt',
             'WinUI/Assets/Fonts/OFL.txt', 'Documentation/RELEASE-NOTES.md',
             'Documentation/installation-and-updates.md', 'Documentation/migration.md',
-            'Documentation/reporting-problems.md', 'Documentation/maintenance.md')) {
+            'Documentation/reporting-problems.md', 'Documentation/maintenance.md',
+            'Documentation/personal-library-and-multiplayer.md', 'Licenses/Skulltag-Huffman-MIT.txt')) {
         if (-not (Test-Path -LiteralPath (Join-Path $packageRoot $required) -PathType Leaf)) {
             throw "Required release documentation/license missing: $required"
         }
