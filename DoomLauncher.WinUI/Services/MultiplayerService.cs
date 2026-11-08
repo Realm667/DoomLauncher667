@@ -15,6 +15,10 @@ public sealed record MultiplayerServer(IPEndPoint Endpoint, string Name, string 
     string Version, int Players, int MaximumPlayers, bool PasswordRequired, long Ping, IReadOnlyList<ServerModFile> Files)
 {
     public string Label => $"{Name} · {Players}/{MaximumPlayers} · {GameMode} · {Map} · {Ping} ms";
+    public string PlayersText => $"{Players} / {MaximumPlayers}";
+    public string PingText => $"{Ping} ms";
+    public string AddressText => Endpoint.ToString();
+    public string PasswordMarker => PasswordRequired ? "\uE72E" : string.Empty;
 }
 public sealed record MultiplayerFileMatch(ServerModFile Required, MultiplayerModFile? File, string? Path);
 

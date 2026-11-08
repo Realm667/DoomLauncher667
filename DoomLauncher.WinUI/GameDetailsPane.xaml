@@ -83,13 +83,18 @@
                     </Border>
                 </StackPanel>
 
-                <StackPanel Spacing="4">
-                    <TextBlock Text="{Binding PersonalRating}" Style="{StaticResource MetaTextStyle}" />
-                    <RatingControl MaxRating="5" IsClearEnabled="True" AutomationProperties.Name="{Binding PersonalRating}"
+                <Grid x:Name="PersonalRatingRow" ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="PersonalRatingLabel" Text="{Binding PersonalRating}" Style="{StaticResource MetaTextStyle}" VerticalAlignment="Center" />
+                    <RatingControl x:Name="PersonalRatingStars" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"
+                        MaxRating="5" IsClearEnabled="True" AutomationProperties.Name="{Binding PersonalRating}"
                         IsEnabled="{Binding ViewModel.CanLaunch, ElementName=DetailsRoot}"
                         Value="{Binding ViewModel.PersonalRatingValue, ElementName=DetailsRoot, Mode=OneWay}"
                         ValueChanged="PersonalRating_Changed" />
-                </StackPanel>
+                </Grid>
                 <Grid ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />

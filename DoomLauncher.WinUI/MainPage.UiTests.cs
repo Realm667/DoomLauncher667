@@ -39,6 +39,14 @@ public sealed partial class MainPage
         {
             await Layout();
             Check(GameList.IsLoaded && LibraryDetailsPane.IsLoaded, "Native list and shared details are loaded");
+            var ratingRow = (Grid)LibraryDetailsPane.FindName("PersonalRatingRow");
+            var ratingLabel = (TextBlock)LibraryDetailsPane.FindName("PersonalRatingLabel");
+            var ratingStars = (RatingControl)LibraryDetailsPane.FindName("PersonalRatingStars");
+            var labelTop = ratingLabel.TransformToVisual(ratingRow).TransformPoint(new Windows.Foundation.Point()).Y;
+            var starsTop = ratingStars.TransformToVisual(ratingRow).TransformPoint(new Windows.Foundation.Point()).Y;
+            Check(Grid.GetColumn(ratingLabel) == 0 && Grid.GetColumn(ratingStars) == 1
+                && Math.Abs(labelTop + ratingLabel.ActualHeight / 2 - starsTop - ratingStars.ActualHeight / 2) < 1,
+                "My rating label and stars share one vertically centered native row");
             var actions = (Grid)LibraryDetailsPane.FindName("CollectionActionsRow");
             var queueButton = (Button)LibraryDetailsPane.FindName("PlayLaterButton");
             var collectionButton = (Button)LibraryDetailsPane.FindName("AddToCollectionButton");
@@ -137,6 +145,26 @@ public sealed partial class MainPage
                     $"Home return {index + 1} rotates Featured to another favorite");
                 previousFeatured = ViewModel.HomeHero.GameFileId;
             }
+            await Navigate(LibrarySection.Multiplayer);
+            await InitializeMultiplayerAsync(); await Layout();
+            var table = _multiplayerTable!;
+            var fixtureServers = new[] {
+                new MultiplayerServer(new(System.Net.IPAddress.Loopback, 10666), "Alpha", "MAP01", "Cooperative", "doom2.wad", "3.2", 2, 8, false, 15, []),
+                new MultiplayerServer(new(System.Net.IPAddress.Loopback, 10667), "Beta", "MAP02", "Deathmatch", "doom2.wad", "3.2", 10, 16, true, 100, []) };
+            table.SetServers(fixtureServers); await Layout();
+            Check(table.HeaderButtons.Count == 9 && table.Rows.Items.Count == 2
+                && table.Rows.ContainerFromIndex(0) is not null, "Native multiplayer table renders nine labeled columns and server rows");
+            table.SelectAddress(fixtureServers[0].AddressText); table.SortBy(ServerSortColumn.Ping); await Layout();
+            Check(((MultiplayerServer)table.Rows.Items[0]).Ping == 15 && table.SelectedServer?.Name == "Alpha",
+                "Server table sorts ping numerically and retains selection");
+            table.FilterText = "BETA map02"; await Layout();
+            Check(table.Rows.Items.Count == 1 && table.SelectedServer is null,
+                "Server filter matches multiple terms and clears hidden selection");
+            table.FilterText = ""; table.SelectAddress(fixtureServers[1].AddressText);
+            var tableState = table.CaptureState();
+            table.Configure(Strings, tableState); table.SetServers(fixtureServers, tableState.SelectedAddress); await Layout();
+            Check(table.SelectedServer?.Name == "Beta" && Strings["ServerName"] != "ServerName"
+                && Strings["HostAndDirectConnect"] != "HostAndDirectConnect", "Server selection and translated table settings restore without network requests");
         }
         catch (Exception error) { failure = error.ToString(); }
         var report = Path.Combine(root, "ui-test-report.json");

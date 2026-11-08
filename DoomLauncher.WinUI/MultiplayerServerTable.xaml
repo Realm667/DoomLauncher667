@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="DoomLauncher.WinUI.MultiplayerServerTable"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid RowSpacing="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="Search" PlaceholderText="{Binding ServerFilter}" AutomationProperties.Name="{Binding ServerFilter}" TextChanged="Filter_Changed" />
+            <CheckBox x:Name="PopulatedOnly" Grid.Column="1" Content="{Binding PopulatedServers}" Click="Filter_Changed" />
+            <CheckBox x:Name="HideFull" Grid.Column="2" Content="{Binding HideFullServers}" Click="Filter_Changed" />
+        </Grid>
+        <ScrollViewer x:Name="HorizontalViewport" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" SizeChanged="Viewport_SizeChanged">
+            <Grid x:Name="TableContent" MinWidth="1160">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="340" />
+                </Grid.RowDefinitions>
+                <Border Background="{StaticResource DoomSurfaceElevatedBrush}" CornerRadius="6,6,0,0">
+                    <Grid x:Name="Headers" Padding="10,6,26,6" ColumnSpacing="12" />
+                </Border>
+                <ListView x:Name="ServerList" Grid.Row="1" SelectionMode="Single" SelectionChanged="Selection_Changed"
+                    AutomationProperties.Name="{Binding MultiplayerServers}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="MinHeight" Value="38" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Padding="10,8" ColumnSpacing="12" Loaded="ServerRow_Loaded" DataContextChanged="ServerRow_DataContextChanged" AutomationProperties.Name="{Binding Label}">
+                                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" FontWeight="SemiBold" ToolTipService.ToolTip="{Binding Name}" />
+                                <TextBlock Grid.Column="1" Text="{Binding PlayersText}" TextAlignment="Right" />
+                                <TextBlock Grid.Column="2" Text="{Binding GameMode}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding GameMode}" />
+                                <TextBlock Grid.Column="3" Text="{Binding Map}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Map}" />
+                                <TextBlock Grid.Column="4" Text="{Binding Iwad}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Iwad}" />
+                                <TextBlock Grid.Column="5" Text="{Binding Version}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Version}" />
+                                <TextBlock Grid.Column="6" Text="{Binding PingText}" TextAlignment="Right" />
+                                <FontIcon Grid.Column="7" Glyph="{Binding PasswordMarker}" FontSize="14" />
+                                <TextBlock Grid.Column="8" Text="{Binding AddressText}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding AddressText}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <TextBlock x:Name="EmptyMessage" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="500" IsHitTestVisible="False" />
+            </Grid>
+        </ScrollViewer>
+        <TextBlock x:Name="Summary" Grid.Row="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" AutomationProperties.LiveSetting="Polite" />
+    </Grid>
+</UserControl>

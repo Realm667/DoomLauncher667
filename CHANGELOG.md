@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.0.0-rc.8 - 2026-11-08
+
+- Align My rating and its stars in one vertically centered row in all shared details views.
+- Replace multiplayer server labels with a native, virtualized nine-column table: server, players, mode, map, IWAD, version, ping, password and address.
+- Add numeric column sorting, multi-term filtering, populated/full-server filters and retained selection.
+- Separate discovery, selected-server details, launch configuration and expandable LAN hosting/direct connection settings.
+- Cover rating alignment and multiplayer filtering/sorting with native UI and service regression checks.
+
 ## 1.0.0-rc.7 - 2026-11-08
 
 - Place Play later and Add to collection side by side immediately below favorites/finished in the shared mod details pane.

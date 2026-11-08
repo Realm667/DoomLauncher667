@@ -205,6 +205,20 @@ internal static class ExpansionTests
         var payload = ServerPayload(667); var endpoint = new IPEndPoint(IPAddress.Loopback, 10666);
         var server = MultiplayerService.ParseServerPayload(payload, endpoint, 667, 15);
         Check(server.Name == "Test server" && server.Players == 2 && server.MaximumPlayers == 4 && server.Files.Single().Md5 == new string('a', 32) && server.GameMode == "Cooperative", "Zandronum protocol parses players, IWAD, required files and hashes");
+        var browserServers = new[] {
+            server with { Name = "Alpha", Players = 2, MaximumPlayers = 8, Ping = 20 },
+            server with { Name = "Beta", Endpoint = new(IPAddress.Loopback, 10667), Players = 10, MaximumPlayers = 10, Ping = 100 },
+            server with { Name = "Empty", Endpoint = new(IPAddress.Loopback, 10668), Players = 0, Ping = 5 } };
+        var sorted = MultiplayerBrowserQuery.Apply(browserServers, "", false, false, ServerSortColumn.Players, false);
+        Check(sorted.Select(item => item.Players).SequenceEqual(new[] { 0, 2, 10 }), "Browser player sorting is numeric");
+        sorted = MultiplayerBrowserQuery.Apply(browserServers, "", false, false, ServerSortColumn.Ping, false);
+        Check(sorted.Select(item => item.Ping).SequenceEqual(new long[] { 5, 20, 100 }), "Browser ping sorting is numeric");
+        Check(MultiplayerBrowserQuery.Apply(browserServers, "ALPHA map01 doom2", false, false, ServerSortColumn.Name, false).Single().Name == "Alpha",
+            "Server search matches all terms across independent columns without case sensitivity");
+        Check(MultiplayerBrowserQuery.Apply(browserServers, "", true, true, ServerSortColumn.Name, false).Single().Name == "Alpha",
+            "Server filters exclude empty and full servers independently");
+        Check(MultiplayerBrowserQuery.Apply(browserServers, "missing", false, false, ServerSortColumn.Name, false).Count == 0,
+            "Server search returns an explicit empty result");
         await Reject(() => Task.Run(() => MultiplayerService.ParseServerPayload(payload, endpoint, 1, 0)), "Stale server response is rejected");
         var assembler = new MultiplayerService.ServerReplyAssembler(); var half = payload.Length / 2;
         Check(assembler.Add(Segment(payload, 1, 2, half, payload.Length - half)) is null && assembler.Add(Segment(payload, 0, 2, 0, half))!.SequenceEqual(payload), "Segmented server packets reassemble out of order");

@@ -400,7 +400,7 @@ try
     await ReliabilityTests.RunAsync();
     await ExpansionTests.RunAsync();
     Check(
-        AppVersion.Current == "1.0.0-rc.7",
+        AppVersion.Current == "1.0.0-rc.8",
         "Die sichtbare Version stammt aus der zentralen Buildversion");
     VerifyTileImageDefaults();
     Check(
