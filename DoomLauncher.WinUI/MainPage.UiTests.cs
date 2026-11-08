@@ -39,6 +39,13 @@ public sealed partial class MainPage
         {
             await Layout();
             Check(GameList.IsLoaded && LibraryDetailsPane.IsLoaded, "Native list and shared details are loaded");
+            var actions = (Grid)LibraryDetailsPane.FindName("CollectionActionsRow");
+            var queueButton = (Button)LibraryDetailsPane.FindName("PlayLaterButton");
+            var collectionButton = (Button)LibraryDetailsPane.FindName("AddToCollectionButton");
+            Check(actions.ColumnDefinitions.Count == 2 && actions.ColumnDefinitions.All(column => column.Width.IsStar)
+                && Grid.GetColumn(queueButton) == 0 && Grid.GetColumn(collectionButton) == 1
+                && Math.Abs(queueButton.ActualWidth - collectionButton.ActualWidth) < 1,
+                "Play later and collection actions share an equal-width native row");
             Check(KeyboardAccelerators.Any(item => item.Key == Windows.System.VirtualKey.I)
                 && KeyboardAccelerators.Any(item => item.Key == Windows.System.VirtualKey.Escape), "Import/search/back keyboard navigation is registered");
             ViewModel.Filter("Seed"); SearchBox.Text = "Seed";

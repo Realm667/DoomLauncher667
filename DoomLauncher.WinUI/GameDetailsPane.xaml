@@ -90,8 +90,6 @@
                         Value="{Binding ViewModel.PersonalRatingValue, ElementName=DetailsRoot, Mode=OneWay}"
                         ValueChanged="PersonalRating_Changed" />
                 </StackPanel>
-                <Button Content="{Binding ViewModel.QueueActionText, ElementName=DetailsRoot}" Click="QueueButton_Click"
-                    HorizontalAlignment="Stretch" IsEnabled="{Binding ViewModel.CanLaunch, ElementName=DetailsRoot}" />
                 <Grid ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -126,6 +124,44 @@
                     </Button>
                 </Grid>
 
+                <Grid x:Name="CollectionActionsRow" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        x:Name="PlayLaterButton"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        AutomationProperties.Name="{Binding ViewModel.QueueActionText, ElementName=DetailsRoot}"
+                        Click="QueueButton_Click"
+                        IsEnabled="{Binding ViewModel.CanLaunch, ElementName=DetailsRoot}"
+                        ToolTipService.ToolTip="{Binding ViewModel.QueueActionText, ElementName=DetailsRoot}">
+                        <TextBlock
+                            Text="{Binding ViewModel.QueueActionText, ElementName=DetailsRoot}"
+                            TextAlignment="Center"
+                            TextWrapping="Wrap" />
+                    </Button>
+                    <Button
+                        x:Name="AddToCollectionButton"
+                        Grid.Column="1"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        AutomationProperties.Name="{Binding ManageCollections}"
+                        Click="ManageCollectionsButton_Click"
+                        IsEnabled="{Binding ViewModel.CanLaunch, ElementName=DetailsRoot}"
+                        ToolTipService.ToolTip="{Binding ManageCollections}">
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon FontSize="14" Glyph="&#xE8B7;" />
+                            <TextBlock Grid.Column="1" Text="{Binding ManageCollections}" TextAlignment="Center" TextWrapping="Wrap" />
+                        </Grid>
+                    </Button>
+                </Grid>
+
                 <Button
                     HorizontalAlignment="Stretch"
                     AutomationProperties.Name="{Binding EditEntry}"
@@ -134,17 +170,6 @@
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon FontSize="14" Glyph="&#xE70F;" />
                         <TextBlock Text="{Binding EditEntry}" />
-                    </StackPanel>
-                </Button>
-
-                <Button
-                    HorizontalAlignment="Stretch"
-                    AutomationProperties.Name="{Binding ManageCollections}"
-                    Click="ManageCollectionsButton_Click"
-                    IsEnabled="{Binding ViewModel.CanLaunch, ElementName=DetailsRoot}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon FontSize="14" Glyph="&#xE8B7;" />
-                        <TextBlock Text="{Binding ManageCollections}" />
                     </StackPanel>
                 </Button>
 

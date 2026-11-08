@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.0.0-rc.7 - 2026-11-08
+
+- Place Play later and Add to collection side by side immediately below favorites/finished in the shared mod details pane.
+- Keep both actions equally wide, preserve localized add/remove labels and tooltips, and wrap longer translations.
+- Add a native UI regression check for the equal-width row.
+
 ## 1.0.0-rc.6 - 2026-11-08
 
 - Personal stars, ordered Play later queue, constrained random choice and transactional bulk editing.
