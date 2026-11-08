@@ -945,6 +945,11 @@ public sealed partial class MainPage : Page
     {
         if (_isRescraping || ViewModel.SelectedGame.IsPlaceholder)
             return;
+        if (ViewModel.SelectedGame.Category == "IWAD")
+        {
+            await ShowActionMessageAsync(Strings["IdGamesMetadataTitle"], Strings["IwadMetadataProtected"], Strings["Close"]);
+            return;
+        }
 
         _isRescraping = true;
         var isBlocking = false;
@@ -2677,6 +2682,7 @@ public sealed partial class MainPage : Page
                 HorizontalAlignment = HorizontalAlignment.Right,
                 VerticalAlignment = VerticalAlignment.Center,
                 Content = Strings["RescrapeIdGames"],
+                IsEnabled = ViewModel.CanRefreshModMetadata,
             };
             ToolTipService.SetToolTip(
                 improveMetadataButton,

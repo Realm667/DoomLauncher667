@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.0.0-rc.4 - 2026-11-08
+
+- Prevent /idgames mod metadata updates from modifying registered IWADs.
+- Disable IWAD refresh actions, localize guidance and skip IWADs in bulk refresh.
+- Add backend and native UI regression tests; normal mod refresh remains available.
+
 ## 1.0.0-rc.3 - 2026-11-08
 
 - Coordinate refreshes, batch file imports and reconcile visible entries while

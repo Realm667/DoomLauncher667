@@ -874,12 +874,19 @@ public sealed partial class SqliteNativeLibraryService(
         IdGamesItem item,
         CancellationToken cancellationToken = default)
     {
+        await using var connection = await OpenConnectionAsync(cancellationToken);
+        await using (var guard = connection.CreateCommand())
+        {
+            guard.CommandText = "SELECT EXISTS(SELECT 1 FROM IWads WHERE GameFileID=$id);";
+            guard.Parameters.AddWithValue("$id", gameFileId);
+            if (Convert.ToInt32(await guard.ExecuteScalarAsync(cancellationToken)) != 0)
+                throw new InvalidOperationException("IWADs are excluded from /idgames mod metadata updates.");
+        }
         var archivePath = await ResolveManagedGameFileAsync(gameFileId, cancellationToken);
         var inspection = !string.IsNullOrWhiteSpace(archivePath) && File.Exists(archivePath)
             ? await ArchiveInspection.ReadAsync(archivePath, cancellationToken) : null;
         var inferred = LaunchDefinitionMatcher.Infer(inspection?.Text ?? ArchiveTextMetadata.Empty,
             await LoadLauncherDefinitionsAsync(cancellationToken));
-        await using var connection = await OpenConnectionAsync(cancellationToken);
         await using var transaction =
             (SqliteTransaction)await connection.BeginTransactionAsync(cancellationToken);
         await using (var update = connection.CreateCommand())
@@ -898,7 +905,8 @@ public sealed partial class SqliteNativeLibraryService(
                     SourcePortID = COALESCE(SourcePortID, $port),
                     IWadID = COALESCE(IWadID, $iwad),
                     IsSyncNeeded = 1
-                WHERE GameFileID = $gameFileId;
+                WHERE GameFileID = $gameFileId
+                  AND NOT EXISTS (SELECT 1 FROM IWads WHERE GameFileID = $gameFileId);
                 """;
             update.Parameters.AddWithValue(
                 "$title",
@@ -924,7 +932,7 @@ public sealed partial class SqliteNativeLibraryService(
             if (await update.ExecuteNonQueryAsync(cancellationToken) != 1)
             {
                 throw new InvalidOperationException(
-                    "Der Bibliothekseintrag wurde nicht gefunden.");
+                    "The library entry is missing or protected as an IWAD.");
             }
         }
 

@@ -6,6 +6,7 @@ public sealed partial class UiLocalization
     {
         string[][] rows =
         [
+            ["IwadMetadataProtected", "IWADs use their game metadata and are excluded from /idgames mod metadata updates.", "IWADs verwenden ihre Spielmetadaten und sind vom /idgames-Metadatenabgleich für Mods ausgeschlossen.", "Les IWAD utilisent leurs métadonnées de jeu et sont exclus des mises à jour de mods /idgames.", "Los IWAD utilizan sus metadatos de juego y quedan excluidos de las actualizaciones de mods de /idgames."],
             ["BackupScopeNotice", "Backups and temporary files are excluded. Files referenced outside this installation need a separate backup.", "Sicherungs- und Tempordner werden ausgeschlossen. Außerhalb dieser Installation referenzierte Dateien separat sichern.", "Les anciennes sauvegardes et fichiers temporaires sont exclus. Sauvegardez séparément les fichiers externes.", "Se excluyen las copias anteriores y los temporales. Guarda por separado los archivos externos."],
             ["ImportedOn", "Imported on", "Importiert am", "Importé le", "Importado el"],
             ["OpenFolder", "Open containing folder", "Enthaltenden Ordner öffnen", "Ouvrir le dossier", "Abrir la carpeta"],

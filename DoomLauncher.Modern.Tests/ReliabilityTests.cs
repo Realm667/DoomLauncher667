@@ -50,9 +50,41 @@ internal static class ReliabilityTests
             VerifyCollection();
             await VerifySettingsAsync(root);
             await VerifyLeaseAsync(root);
+            await VerifyIwadMetadataProtectionAsync(root);
             await VerifyBackupsAndDuplicatesAsync(root);
         }
         finally { SqliteConnection.ClearAllPools(); Directory.Delete(root, true); }
+    }
+
+    private static async Task VerifyIwadMetadataProtectionAsync(string root)
+    {
+        var folder = Path.Combine(root, "iwad-protection"); Directory.CreateDirectory(folder);
+        var database = Path.Combine(folder, "DoomLauncher.sqlite");
+        File.Copy(Path.Combine(AppContext.BaseDirectory, "Assets", "DoomLauncher.Empty.sqlite"), database);
+        var locator = new Locator(database); var library = new SqliteNativeLibraryService(locator);
+        await new FirstSetupService(locator, library).EnsureManagedLayoutAsync();
+        await using var connection = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = database, Pooling = false }.ToString());
+        await connection.OpenAsync();
+        await using var command = connection.CreateCommand();
+        command.CommandText = """
+            INSERT INTO GameFiles(GameFileID,FileName,Title,Author,MapCount,MinutesPlayed,IsSyncNeeded)
+            VALUES(50001,'GameWads/doom.zip','Doom (Registered)','id Software',27,42,1),
+                  (50002,'Mods/example.zip','Example','Mapper',1,17,1);
+            INSERT INTO IWads(Name,FileName,GameFileID) VALUES('Doom (Registered)','DOOM.WAD',50001);
+            INSERT INTO WinUI_IdGamesMetadata(GameFileID,IdGamesID,ArchiveDirectory,ScrapedAt)
+            VALUES(50001,16276,'levels/doom/a-c/','2026-07-29');
+            """;
+        await command.ExecuteNonQueryAsync();
+        var metadata = new DoomLauncher.WinUI.Models.IdGamesItem { Id = 999, Title = "Wrong mod", Author = "Modder",
+            Description = "Mod metadata", Directory = "levels/doom/", FileName = "example.zip", Rating = 5 };
+        await RejectAsync(() => library.UpdateGameFromIdGamesAsync(50001, metadata), "Registered IWAD rejects mod metadata even with an existing wrong link");
+        command.CommandText = "SELECT Title || '|' || Author || '|' || MapCount || '|' || MinutesPlayed FROM GameFiles WHERE GameFileID=50001;";
+        Check(Convert.ToString(await command.ExecuteScalarAsync()) == "Doom (Registered)|id Software|27|42", "Rejected IWAD refresh leaves game metadata and playtime unchanged");
+        command.CommandText = "SELECT IdGamesID FROM WinUI_IdGamesMetadata WHERE GameFileID=50001;";
+        Check(Convert.ToInt32(await command.ExecuteScalarAsync()) == 16276, "Rejected IWAD refresh does not write a new metadata link");
+        await library.UpdateGameFromIdGamesAsync(50002, metadata);
+        command.CommandText = "SELECT Title || '|' || MinutesPlayed FROM GameFiles WHERE GameFileID=50002;";
+        Check(Convert.ToString(await command.ExecuteScalarAsync()) == "Wrong mod|17", "Normal mod metadata refresh remains available and preserves playtime");
     }
 
     private static async Task VerifyRefreshAsync()

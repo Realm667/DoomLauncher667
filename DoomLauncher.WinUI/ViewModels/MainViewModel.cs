@@ -127,6 +127,7 @@ public sealed partial class MainViewModel(
             ResetLaunchOptions();
             OnPropertyChanged();
             OnPropertyChanged(nameof(CanLaunch));
+            OnPropertyChanged(nameof(CanRefreshModMetadata));
             OnPropertyChanged(nameof(IsSelectedFavorite));
             OnPropertyChanged(nameof(FavoriteButtonText));
             OnPropertyChanged(nameof(FavoriteGlyph));
@@ -290,6 +291,7 @@ public sealed partial class MainViewModel(
 
     public bool IsEmpty => _isInitialized && !IsLoading && !HasError && _filteredCount == 0;
     public bool CanLaunch => !SelectedGame.IsPlaceholder && !IsLaunching && !IsGameRunning;
+    public bool CanRefreshModMetadata => CanLaunch && SelectedGame.Category != "IWAD";
     public bool IsSelectedFavorite =>
         !SelectedGame.IsPlaceholder && _favoriteGameFileIds.Contains(SelectedGame.GameFileId);
     public string FavoriteButtonText =>
@@ -906,6 +908,8 @@ public sealed partial class MainViewModel(
     {
         if (SelectedGame.IsPlaceholder)
             throw new InvalidOperationException(localization.Get("SelectEntry"));
+        if (SelectedGame.Category == "IWAD")
+            throw new InvalidOperationException(localization.Get("IwadMetadataProtected"));
         return idGamesService.FindMatchesAsync(
             SelectedGame.FileName,
             SelectedGame.Title,
@@ -919,6 +923,8 @@ public sealed partial class MainViewModel(
     {
         if (SelectedGame.IsPlaceholder)
             throw new InvalidOperationException(localization.Get("SelectEntry"));
+        if (SelectedGame.Category == "IWAD")
+            throw new InvalidOperationException(localization.Get("IwadMetadataProtected"));
         var gameFileId = SelectedGame.GameFileId;
         var artworkImported = await ApplyIdGamesMetadataAsync(
             gameFileId,
@@ -940,7 +946,7 @@ public sealed partial class MainViewModel(
         CancellationToken cancellationToken = default)
     {
         var linkedItems = _catalog
-            .Where(item => item.IdGamesId.HasValue)
+            .Where(item => item.IdGamesId.HasValue && item.Category != "IWAD")
             .GroupBy(item => item.GameFileId)
             .Select(group => group.First())
             .OrderBy(item => item.Title, StringComparer.CurrentCultureIgnoreCase)
@@ -1701,6 +1707,7 @@ public sealed partial class MainViewModel(
     private void NotifyLaunchStateChanged()
     {
         OnPropertyChanged(nameof(CanLaunch));
+        OnPropertyChanged(nameof(CanRefreshModMetadata));
         OnPropertyChanged(nameof(CanLaunchWithOptions));
         OnPropertyChanged(nameof(LaunchButtonText));
         OnPropertyChanged(nameof(LaunchingVisibility));

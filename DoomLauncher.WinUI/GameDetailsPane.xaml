@@ -142,9 +142,10 @@
                 <Button
                     HorizontalAlignment="Stretch"
                     AutomationProperties.HelpText="{Binding RescrapeIdGamesToolTip}"
+                    x:Name="RefreshModMetadataButton"
                     AutomationProperties.Name="{Binding RescrapeIdGames}"
                     Click="RescrapeIdGamesButton_Click"
-                    IsEnabled="{Binding ViewModel.CanLaunch, ElementName=DetailsRoot}"
+                    IsEnabled="{Binding ViewModel.CanRefreshModMetadata, ElementName=DetailsRoot}"
                     ToolTipService.ToolTip="{Binding RescrapeIdGamesToolTip}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon FontSize="14" Glyph="&#xE71C;" />

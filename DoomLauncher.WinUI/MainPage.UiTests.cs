@@ -86,6 +86,21 @@ public sealed partial class MainPage
             Check((await _app.NativeLibraryService.LoadGameAsync(chosenGame)).SourcePortId == chosenPort,
                 "Details launch assignment persists without altering mod metadata");
             Check(Strings["ImportBatchTitle"] != "ImportBatchTitle" && Strings["Maintenance"] != "Maintenance", "New workflow labels resolve");
+            await using (var connection = new Microsoft.Data.Sqlite.SqliteConnection(new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder
+                { DataSource = Path.Combine(root, "DoomLauncher.sqlite"), Pooling = false }.ToString()))
+            {
+                await connection.OpenAsync(); await using var command = connection.CreateCommand();
+                command.CommandText = "INSERT INTO IWads(Name,FileName,GameFileID) VALUES('UI IWAD','DOOM.WAD',$game); INSERT INTO WinUI_IdGamesMetadata(GameFileID,IdGamesID,ArchiveDirectory,ScrapedAt) VALUES($game,16276,'levels/doom/','2026-07-29');";
+                command.Parameters.AddWithValue("$game", chosenGame); await command.ExecuteNonQueryAsync();
+            }
+            await ViewModel.RefreshAsync(); await Navigate(LibrarySection.Library);
+            ViewModel.Filter(string.Empty); ViewModel.SelectGame(chosenGame); SyncSelection(); await Layout();
+            Check(!ViewModel.CanRefreshModMetadata && LibraryDetailsPane.FindName("RefreshModMetadataButton") is Button { IsEnabled: false },
+                "IWAD details disable mod metadata refresh");
+            try { await ViewModel.FindSelectedIdGamesMatchesAsync(); throw new Exception("IWAD search was allowed"); }
+            catch (InvalidOperationException error) { Check(error.Message == Strings["IwadMetadataProtected"], "IWAD metadata search is blocked with localized guidance"); }
+            var bulk = await ViewModel.RefreshLinkedIdGamesMetadataAsync();
+            Check(bulk.Total == 0, "Bulk mod refresh excludes linked IWADs before network requests");
         }
         catch (Exception error) { failure = error.ToString(); }
         var report = Path.Combine(root, "ui-test-report.json");
