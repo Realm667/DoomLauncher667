@@ -152,6 +152,10 @@ public sealed partial class MainPage
                 new MultiplayerServer(new(System.Net.IPAddress.Loopback, 10666), "Alpha", "MAP01", "Cooperative", "doom2.wad", "3.2", 2, 8, false, 15, []),
                 new MultiplayerServer(new(System.Net.IPAddress.Loopback, 10667), "Beta", "MAP02", "Deathmatch", "doom2.wad", "3.2", 10, 16, true, 100, []) };
             table.SetServers(fixtureServers); await Layout();
+            Check(((TextBox)table.FindName("Search")).PlaceholderText == Strings["ServerFilter"]
+                && ((CheckBox)table.FindName("PopulatedOnly")).Content?.ToString() == Strings["PopulatedServers"]
+                && ((CheckBox)table.FindName("HideFull")).Content?.ToString() == Strings["HideFullServers"],
+                "Native server search and occupancy filters display translated labels");
             Check(table.HeaderButtons.Count == 9 && table.Rows.Items.Count == 2
                 && table.Rows.ContainerFromIndex(0) is not null, "Native multiplayer table renders nine labeled columns and server rows");
             table.SelectAddress(fixtureServers[0].AddressText); table.SortBy(ServerSortColumn.Ping); await Layout();

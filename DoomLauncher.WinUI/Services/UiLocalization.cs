@@ -1443,6 +1443,10 @@ public sealed class UiText(UiLocalization localization)
     public string SaveGames => this[nameof(SaveGames)];
     public string MetadataHistory => this[nameof(MetadataHistory)];
     public string Multiplayer => this[nameof(Multiplayer)];
+    public string ServerFilter => this[nameof(ServerFilter)];
+    public string PopulatedServers => this[nameof(PopulatedServers)];
+    public string HideFullServers => this[nameof(HideFullServers)];
+    public string MultiplayerServers => this[nameof(MultiplayerServers)];
     public string Downloads => this[nameof(Downloads)]; public string Collections => this[nameof(Collections)];
     public string Achievements => this[nameof(Achievements)]; public string Debug => this[nameof(Debug)];
     public string DebugEnvironment => this[nameof(DebugEnvironment)]; public string DebugTests => this[nameof(DebugTests)];

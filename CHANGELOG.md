@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 1.0.0-rc.9 - 2026-11-08
+
+- Correct missing WinUI binding properties for multiplayer search and occupancy filter labels.
+- Add a native regression check for visible filter text. Includes RC8's multiplayer table and rating alignment, and RC7's action-row layout.
+
 ## 1.0.0-rc.8 - 2026-11-08
 
 - Align My rating and its stars in one vertically centered row in all shared details views.
