@@ -48,12 +48,37 @@ internal static class ReliabilityTests
         {
             await VerifyRefreshAsync();
             VerifyCollection();
+            VerifyFeaturedSelection();
             await VerifySettingsAsync(root);
             await VerifyLeaseAsync(root);
             await VerifyIwadMetadataProtectionAsync(root);
             await VerifyBackupsAndDuplicatesAsync(root);
         }
         finally { SqliteConnection.ClearAllPools(); Directory.Delete(root, true); }
+    }
+
+    private static void VerifyFeaturedSelection()
+    {
+        var favorites = Enumerable.Range(1, 24).ToArray();
+        var mods = favorites.Append(100).ToArray();
+        var random = new Random(667);
+        var seen = new HashSet<int>(); int? previous = null;
+        for (var index = 0; index < 1000; index++)
+        {
+            var next = FeaturedModSelector.Choose(favorites, mods, previous, true, random);
+            if (!next.HasValue || next == previous || !favorites.Contains(next.Value))
+                throw new InvalidOperationException("Featured must rotate within the complete favorite pool.");
+            seen.Add(next.Value); previous = next;
+        }
+        Check(seen.Count == favorites.Length, "Featured uses all favorites, including those outside the visible Home rail, without immediate repeats");
+        Check(FeaturedModSelector.Choose(favorites, mods, previous, false, random) == previous,
+            "Background Home rebuild retains the featured favorite");
+        Check(FeaturedModSelector.Choose([7], mods, 7, true, random) == 7, "Single favorite remains featured");
+        Check(FeaturedModSelector.Choose([], [7, 8], 7, true, random) == 8, "Featured falls back to available mods when there are no favorites");
+        Check(FeaturedModSelector.Choose([], [], null, true, random) is null, "Empty library has no featured selection");
+        Check(FeaturedModSelector.Choose([2], mods, 1, false, random) == 2, "Removing the current featured favorite selects an eligible favorite");
+        var startupSelections = Enumerable.Range(0, 100).Select(_ => FeaturedModSelector.Choose(favorites, mods, null, false, random)).Distinct().Count();
+        Check(startupSelections > 1, "Initial featured selection is randomized");
     }
 
     private static async Task VerifyIwadMetadataProtectionAsync(string root)

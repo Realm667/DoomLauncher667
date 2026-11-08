@@ -382,7 +382,7 @@ try
     await StabilizationTests.RunAsync();
     await ReliabilityTests.RunAsync();
     Check(
-        AppVersion.Current == "1.0.0-rc.4",
+        AppVersion.Current == "1.0.0-rc.5",
         "Die sichtbare Version stammt aus der zentralen Buildversion");
     VerifyTileImageDefaults();
     Check(

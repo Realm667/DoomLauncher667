@@ -101,6 +101,23 @@ public sealed partial class MainPage
             catch (InvalidOperationException error) { Check(error.Message == Strings["IwadMetadataProtected"], "IWAD metadata search is blocked with localized guidance"); }
             var bulk = await ViewModel.RefreshLinkedIdGamesMetadataAsync();
             Check(bulk.Total == 0, "Bulk mod refresh excludes linked IWADs before network requests");
+            var featuredFavorites = ViewModel.CatalogItems.Where(game => game.Category == "Mod").Take(3).ToArray();
+            foreach (var favorite in featuredFavorites)
+            {
+                ViewModel.SelectGame(favorite.GameFileId);
+                if (!favorite.IsFavorite) await ViewModel.ToggleSelectedFavoriteAsync();
+            }
+            await Navigate(LibrarySection.Home);
+            Check(featuredFavorites.Any(game => game.GameFileId == ViewModel.HomeHero.GameFileId), "Home Featured selects a favorite");
+            var previousFeatured = ViewModel.HomeHero.GameFileId;
+            for (var index = 0; index < 6; index++)
+            {
+                await Navigate(LibrarySection.Library); await Navigate(LibrarySection.Home);
+                Check(ViewModel.HomeHero.GameFileId != previousFeatured
+                    && featuredFavorites.Any(game => game.GameFileId == ViewModel.HomeHero.GameFileId),
+                    $"Home return {index + 1} rotates Featured to another favorite");
+                previousFeatured = ViewModel.HomeHero.GameFileId;
+            }
         }
         catch (Exception error) { failure = error.ToString(); }
         var report = Path.Combine(root, "ui-test-report.json");

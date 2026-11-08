@@ -8,6 +8,7 @@
     <UseSystemDrawing>true</UseSystemDrawing>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\DoomLauncher.WinUI\Services\FeaturedModSelector.cs" Link="Services\FeaturedModSelector.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\SqliteNativeLibraryService.*.cs" Link="Services\%(Filename)%(Extension)" />
     <Compile Include="..\DoomLauncher.WinUI\Services\UiLocalization.Ux.cs" Link="Services\UiLocalization.Ux.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\InstallationLease.cs" Link="Services\InstallationLease.cs" />

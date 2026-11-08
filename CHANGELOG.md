@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.0.0-rc.5 - 2026-11-08
+
+- Randomize Home Featured from the complete favorite-mod pool on startup and each
+  return to Home, excluding the immediately previous pick when possible.
+- Keep the featured mod stable during background rebuilds; retain single-favorite,
+  no-favorites and empty-library behavior. Add selector and native navigation tests.
+
 ## 1.0.0-rc.4 - 2026-11-08
 
 - Prevent /idgames mod metadata updates from modifying registered IWADs.

@@ -539,7 +539,7 @@ public sealed partial class MainViewModel(
         OnPropertyChanged(nameof(SearchPlaceholder));
 
         if (section == LibrarySection.Home)
-            RebuildHomeGroups();
+            RebuildHomeGroups(rotateFeatured: true);
         else if (section == LibrarySection.Collections)
             RebuildCollectionGroups();
         else if (section != LibrarySection.Discover)
@@ -1512,7 +1512,7 @@ public sealed partial class MainViewModel(
             _ => Order(matches, game => game.Title, StringComparer.CurrentCultureIgnoreCase),
         };
 
-    private void RebuildHomeGroups()
+    private void RebuildHomeGroups(bool rotateFeatured = false)
     {
         var mods = _catalog.Where(game => game.Category == "Mod").ToArray();
         var randomUnplayed = mods
@@ -1525,18 +1525,18 @@ public sealed partial class MainViewModel(
             .OrderByDescending(game => game.ReleaseDateAt)
             .Take(_homeItemsPerGroup)
             .ToArray();
-        var favorites = mods
+        var allFavorites = mods
             .Where(game => _favoriteGameFileIds.Contains(game.GameFileId))
             .OrderBy(game => game.Title, StringComparer.CurrentCultureIgnoreCase)
+            .ToArray();
+        var favorites = allFavorites
             .Take(_homeItemsPerGroup)
             .ToArray();
-        var showcase = favorites
-            .Concat(newest)
-            .Concat(randomUnplayed)
-            .DistinctBy(game => game.GameFileId)
-            .Take(1)
-            .ToArray();
-        HomeHero = showcase.FirstOrDefault() ?? LibraryItem.Empty;
+        var featuredId = FeaturedModSelector.Choose(
+            allFavorites.Select(game => game.GameFileId).ToArray(),
+            mods.Select(game => game.GameFileId).ToArray(),
+            HomeHero.IsPlaceholder ? null : HomeHero.GameFileId, rotateFeatured);
+        HomeHero = mods.FirstOrDefault(game => game.GameFileId == featuredId) ?? LibraryItem.Empty;
         HomeSpotlights = mods
             .Where(game => game.GameFileId != HomeHero.GameFileId)
             .OrderBy(_ => Random.Shared.Next())
