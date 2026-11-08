@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 1.0.0-rc.14 - 2026-11-08
+
+- Add the missing horizontal divider between Latest and Multiplayer. Multiplayer now has a divider both above and below it.
+- Verify both adjacent navigation separators in the native UI regression suite. Retain the RC13 taskbar-icon correction.
+
 ## 1.0.0-rc.13 - 2026-11-08
 
 - Load the launcher window/taskbar icon using its absolute application asset path, as required by AppWindow.SetIcon, independently of the current working directory.

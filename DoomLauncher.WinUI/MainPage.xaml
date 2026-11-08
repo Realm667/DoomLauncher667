@@ -469,6 +469,7 @@
             <NavigationViewItem Content="{Binding PlayLater}" Icon="Bookmarks" Tag="Queue" />
             <NavigationViewItem Content="{Binding Recent}" Icon="Clock" Tag="Recent" />
             <NavigationViewItem Content="{Binding Downloads}" Icon="Download" Tag="Downloads" />
+            <NavigationViewItemSeparator />
             <NavigationViewItem Content="{Binding Multiplayer}" Icon="People" Tag="Multiplayer" />
             <NavigationViewItemSeparator />
             <NavigationViewItem Content="{Binding Achievements}" Tag="Achievements">

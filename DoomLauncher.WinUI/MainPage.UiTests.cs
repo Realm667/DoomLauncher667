@@ -47,8 +47,9 @@ public sealed partial class MainPage
             var multiplayerIndex = navigationItems.FindIndex(item => item is NavigationViewItem { Tag: "Multiplayer" });
             Check(multiplayerIndex >= 0 && navigationItems[multiplayerIndex + 1] is NavigationViewItemSeparator
                 && navigationItems[multiplayerIndex + 2] is NavigationViewItem { Tag: "Achievements" }
-                && navigationItems[multiplayerIndex - 1] is NavigationViewItem { Tag: "Downloads" },
-                "Multiplayer follows Latest and sits above Achievements with a separator");
+                && navigationItems[multiplayerIndex - 1] is NavigationViewItemSeparator
+                && navigationItems[multiplayerIndex - 2] is NavigationViewItem { Tag: "Downloads" },
+                "Multiplayer is separated from both Latest and Achievements");
             var ratingRow = (Grid)LibraryDetailsPane.FindName("PersonalRatingRow");
             var ratingLabel = (TextBlock)LibraryDetailsPane.FindName("PersonalRatingLabel");
             var ratingStars = (RatingControl)LibraryDetailsPane.FindName("PersonalRatingStars");
