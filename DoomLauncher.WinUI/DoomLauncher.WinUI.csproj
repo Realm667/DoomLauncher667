@@ -23,6 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Assets\Tracking\MapTracker.zs" LogicalName="DoomLauncher667.MapTracker.zs" />
     <Content Remove="Assets\Library\doom.png" />
     <None Remove="Assets\Library\doom.png" />
     <Content Include="Assets\Library\doom.png">

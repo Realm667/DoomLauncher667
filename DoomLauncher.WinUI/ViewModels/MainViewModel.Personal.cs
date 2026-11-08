@@ -17,7 +17,9 @@ public sealed partial class MainViewModel
     public PersonalModData SelectedPersonalData => _personalData.GetValueOrDefault(SelectedGame.GameFileId) ?? PersonalModData.Empty(SelectedGame.GameFileId);
     public double PersonalRatingValue => SelectedPersonalData.Rating ?? -1;
     public string QueueActionText => localization.Get(SelectedPersonalData.QueuePosition.HasValue ? "RemovePlayLater" : "AddPlayLater");
-    public string SelectedMapProgressText => localization.Format("MapProgressSummary", SelectedPersonalData.CompletedMaps.Count, SelectedGame.MapCount);
+    public string SelectedMapProgressText => SelectedGame.MapCount > 0
+        ? localization.Format("MapProgressSummary", SelectedPersonalData.CompletedMaps.Count, SelectedGame.MapCount)
+        : localization.Format("VerifiedMapsCount", SelectedPersonalData.CompletedMaps.Count);
 
     private void NotifyPersonalSelection()
     {

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 1.0.0-rc.10 - 2026-11-08
+
+- Bundle automatic, engine-validated map tracking for compatible GZDoom/UZDoom-based single-player launches; no manual completion controls or guessed completions.
+- Validate genuine engine completion transitions, bind evidence to the session and archive, and exclude warp/loading/death/restart/hub travel and old manual marks.
+- Back up and migrate the progress schema additively, preserving legacy data and all game archives.
+- Remove cross-PC folder synchronization completely: tools menu, dialogs, service, translations and unused option accessors.
+- Stop creating synchronization-only tables in new installations. Existing obsolete tables and external sync files are left untouched for non-destructive upgrades.
+- Add regression coverage for feature removal, retained legacy data and continued personal-rating support.
+
 ## 1.0.0-rc.9 - 2026-11-08
 
 - Correct missing WinUI binding properties for multiplayer search and occupancy filter labels.

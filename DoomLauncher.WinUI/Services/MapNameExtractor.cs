@@ -151,8 +151,8 @@ internal static partial class MapNameExtractor
         }
 
         var name = Path.GetFileNameWithoutExtension(parts[mapsIndex + 1]);
-        if (MapNameRegex().IsMatch(name))
-            maps.Add(MapNameRegex().Match(name).Value.ToUpperInvariant());
+        if (name.Length is > 0 and <= 64 && name.All(c => char.IsAsciiLetterOrDigit(c) || c is '_' or '-' or '.'))
+            maps.Add(name.ToUpperInvariant());
     }
 
     private static void AddWadMaps(byte[] wad, ISet<string> maps)
@@ -175,8 +175,10 @@ internal static partial class MapNameExtractor
         {
             var offset = directoryOffset + (index * 16);
             var name = Encoding.ASCII.GetString(wad, offset + 8, 8).TrimEnd('\0');
-            if (MapNameRegex().IsMatch(name)
-                && MapNameRegex().Match(name).Value.Length == name.Length)
+            var next = index + 1 < count ? Encoding.ASCII.GetString(wad, offset + 16 + 8, 8).TrimEnd('\0') : "";
+            if ((MapNameRegex().IsMatch(name) && MapNameRegex().Match(name).Value.Length == name.Length
+                || next is "THINGS" or "TEXTMAP") && name.Length > 0
+                && name.All(c => char.IsAsciiLetterOrDigit(c) || c is '_' or '-' or '.'))
             {
                 maps.Add(name.ToUpperInvariant());
             }

@@ -558,7 +558,6 @@
                             <MenuFlyoutItem Tag="RandomMod" Click="LibraryTool_Click" />
                             <MenuFlyoutItem Tag="BulkEdit" Click="LibraryTool_Click" />
                             <MenuFlyoutItem Tag="PlayLater" Click="LibraryTool_Click" />
-                            <MenuFlyoutItem Tag="Synchronization" Click="LibraryTool_Click" />
                         </MenuFlyout></DropDownButton.Flyout>
                     </DropDownButton>
                     <Button

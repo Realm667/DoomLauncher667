@@ -8,8 +8,9 @@
     <UseSystemDrawing>true</UseSystemDrawing>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\DoomLauncher.WinUI\Assets\Tracking\MapTracker.zs" LogicalName="DoomLauncher667.MapTracker.zs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\MapTrackingService.cs" Link="Services\MapTrackingService.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\MultiplayerBrowserQuery.cs" Link="Services\MultiplayerBrowserQuery.cs" />
-    <Compile Include="..\DoomLauncher.WinUI\Services\PersonalSyncService.cs" Link="Services\PersonalSyncService.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\MultiplayerDownloadService.cs" Link="Services\MultiplayerDownloadService.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\MultiplayerService.cs" Link="Services\MultiplayerService.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\ZandronumHuffman.cs" Link="Services\ZandronumHuffman.cs" />

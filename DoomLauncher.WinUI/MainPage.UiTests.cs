@@ -105,13 +105,20 @@ public sealed partial class MainPage
                 "Personal stars persist and bind to the native details control");
             await ViewModel.ToggleQueueAsync(); await Navigate(LibrarySection.Queue);
             Check(ViewModel.Games.Any(game => game.GameFileId == chosenGame), "Play later sidebar displays queued entries");
-            await _app.LibraryFeatures.SetMapFinishedAsync(chosenGame, "MAP01", true); await ViewModel.ReloadPersonalDataAsync();
+            await _app.LibraryFeatures.RecordValidatedMapsAsync(chosenGame, new HashSet<string> { "MAP01" }); await ViewModel.ReloadPersonalDataAsync();
             Check(ViewModel.SelectedPersonalData.CompletedMaps.Contains("MAP01"), "Map progress reloads into shared details");
+            Check(CreateMapProgressItem(new MapDocument("MAP01", "Test", "fixture.wad", "UDMF", [], [], 0, 0, null, null, null), true).Content is TextBlock
+                && typeof(LibraryFeatureStore).GetMethod("SetMapFinishedAsync") is null,
+                "Map progress has read-only status rows and no manual completion API");
             await Navigate(LibrarySection.Library); await Layout();
             LibraryToolsButton.Flyout.ShowAt(LibraryToolsButton); await Layout();
             Check(LibraryToolsButton.IsLoaded && ((MenuFlyout)LibraryToolsButton.Flyout).Items.OfType<MenuFlyoutItem>().All(item => !string.IsNullOrWhiteSpace(item.Text)),
                 "Library tools are visible and all feature actions are labeled");
             LibraryToolsButton.Flyout.Hide();
+            Check(((MenuFlyout)LibraryToolsButton.Flyout).Items.OfType<MenuFlyoutItem>().Select(item => item.Tag?.ToString())
+                .SequenceEqual(new[] { "RandomMod", "BulkEdit", "PlayLater" })
+                && typeof(MainPage).Assembly.GetType("DoomLauncher.WinUI.Services.PersonalSyncService") is null,
+                "Retired synchronization is absent from native tools and compiled application");
             Check(Strings["ImportBatchTitle"] != "ImportBatchTitle" && Strings["Maintenance"] != "Maintenance", "New workflow labels resolve");
             await using (var connection = new Microsoft.Data.Sqlite.SqliteConnection(new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder
                 { DataSource = Path.Combine(root, "DoomLauncher.sqlite"), Pooling = false }.ToString()))

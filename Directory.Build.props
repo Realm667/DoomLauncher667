@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <DoomLauncher667VersionPrefix>1.0.0</DoomLauncher667VersionPrefix>
-    <DoomLauncher667VersionSuffix>rc.9</DoomLauncher667VersionSuffix>
+    <DoomLauncher667VersionSuffix>rc.10</DoomLauncher667VersionSuffix>
     <DoomLauncher667Version>$(DoomLauncher667VersionPrefix)</DoomLauncher667Version>
     <DoomLauncher667Version Condition="'$(DoomLauncher667VersionSuffix)' != ''">$(DoomLauncher667VersionPrefix)-$(DoomLauncher667VersionSuffix)</DoomLauncher667Version>
   </PropertyGroup>

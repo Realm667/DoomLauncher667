@@ -17,7 +17,7 @@ internal static class WinUiDatabaseSchema
         if (Convert.ToInt32(await revision.ExecuteScalarAsync(cancellationToken)) != 0)
         {
             revision.CommandText = "SELECT COALESCE(MAX(Revision), 0) FROM WinUI_SchemaRevision;";
-            if (Convert.ToInt32(await revision.ExecuteScalarAsync(cancellationToken)) >= 2 && !force)
+            if (Convert.ToInt32(await revision.ExecuteScalarAsync(cancellationToken)) >= 3 && !force)
                 return;
         }
 
@@ -54,7 +54,7 @@ internal static class WinUiDatabaseSchema
                 }
             }
             await LibraryFeatureStore.CreateTablesAsync(connection, cancellationToken);
-            revision.CommandText = "CREATE TABLE IF NOT EXISTS WinUI_SchemaRevision (Revision INTEGER NOT NULL PRIMARY KEY); INSERT OR IGNORE INTO WinUI_SchemaRevision VALUES (2); RELEASE winui_schema;";
+            revision.CommandText = "CREATE TABLE IF NOT EXISTS WinUI_SchemaRevision (Revision INTEGER NOT NULL PRIMARY KEY); INSERT OR IGNORE INTO WinUI_SchemaRevision VALUES (3); RELEASE winui_schema;";
             await revision.ExecuteNonQueryAsync(cancellationToken);
         }
         catch

@@ -205,6 +205,28 @@ public sealed class NativeGameLaunchService(
                 iwadPath,
                 launchFiles.Distinct(StringComparer.OrdinalIgnoreCase).ToArray(),
                 settings).ToList();
+            MapTrackingContext? mapTracking = null;
+            if (request.Multiplayer is null && !settings.ExtraParametersOnly
+                && !arguments.Any(argument => argument.Equals("+logfile", StringComparison.OrdinalIgnoreCase)
+                    || argument.Equals("-logfile", StringComparison.OrdinalIgnoreCase)))
+            {
+                mapTracking = await MapTrackingService.PrepareAsync(executablePath, sessionDirectory,
+                    Path.Combine(gameDirectory, game.FileName), iwadPath, cancellationToken);
+                if (mapTracking is not null)
+                {
+                    // Append to the existing -file group; adding a second group
+                    // is not handled consistently by all compatible engines.
+                    var fileIndex = arguments.IndexOf("-file");
+                    if (fileIndex < 0) arguments.InsertRange(2, ["-file", mapTracking.HelperPath]);
+                    else
+                    {
+                        var end = fileIndex + 1;
+                        while (end < arguments.Count && !arguments[end].StartsWith('-') && !arguments[end].StartsWith('+')) end++;
+                        arguments.Insert(end, mapTracking.HelperPath);
+                    }
+                    arguments.AddRange(["+logfile", mapTracking.LogPath, "+set", "dl667_track_session", mapTracking.SessionToken]);
+                }
+            }
             ManagedSaveContext? managedSaves = null;
             if (SaveGameService.SupportsManagedSaves(sourcePort.Executable)
                 && File.Exists(Path.Combine(gameDirectory, game.FileName)) && launchFiles.All(File.Exists))
@@ -273,7 +295,7 @@ public sealed class NativeGameLaunchService(
                     && !sourcePort.ScreenshotSupport.Equals(
                         "None",
                         StringComparison.OrdinalIgnoreCase),
-                ParseBool(configuration.GetValueOrDefault("DeleteScreenshotsAfterImport"), false), managedSaves);
+                ParseBool(configuration.GetValueOrDefault("DeleteScreenshotsAfterImport"), false), managedSaves, mapTracking);
         }
         catch
         {
@@ -368,6 +390,8 @@ public sealed class NativeGameLaunchService(
             plan.SaveGameExtensions,
             beforeSaveGames);
         if (plan.ManagedSaves is not null) await SaveGameService.RecordSessionAsync(plan.ManagedSaves);
+        if (plan.MapTracking is not null)
+            await MapTrackingService.ImportAsync(plan.MapTracking, new LibraryFeatureStore(databaseLocator), gameFileId);
         if (plan.StatisticsAdapter.Equals(
                 "ZDoomSave",
                 StringComparison.OrdinalIgnoreCase))
@@ -1221,7 +1245,8 @@ public sealed class NativeGameLaunchService(
         string StatisticsAdapter,
         bool ImportScreenshots,
         bool DeleteImportedScreenshots,
-        ManagedSaveContext? ManagedSaves);
+        ManagedSaveContext? ManagedSaves,
+        MapTrackingContext? MapTracking);
 
     private sealed record FileStamp(long Length, DateTime LastWriteTimeUtc);
 }

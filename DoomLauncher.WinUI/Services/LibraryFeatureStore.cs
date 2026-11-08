@@ -33,6 +33,7 @@ public sealed class LibraryFeatureStore(IDoomLauncherDatabaseLocator locator)
             CREATE TABLE IF NOT EXISTS WinUI_MapProgress (
               GameFileID INTEGER NOT NULL REFERENCES GameFiles(GameFileID) ON DELETE CASCADE,
               MapName TEXT NOT NULL COLLATE NOCASE, Finished INTEGER NOT NULL DEFAULT 0,
+              ValidationOrigin TEXT NOT NULL DEFAULT '',
               UpdatedUtc TEXT NOT NULL, PRIMARY KEY(GameFileID,MapName));
             CREATE TABLE IF NOT EXISTS WinUI_MetadataLocks (
               GameFileID INTEGER NOT NULL REFERENCES GameFiles(GameFileID) ON DELETE CASCADE,
@@ -42,14 +43,18 @@ public sealed class LibraryFeatureStore(IDoomLauncherDatabaseLocator locator)
               GameFileID INTEGER NOT NULL REFERENCES GameFiles(GameFileID) ON DELETE CASCADE,
               AtUtc TEXT NOT NULL, Source TEXT NOT NULL, BeforeJson TEXT NOT NULL, AfterJson TEXT NOT NULL,
               UndoneAt TEXT NULL);
-            CREATE TABLE IF NOT EXISTS WinUI_SyncBaseline (
-              Target TEXT NOT NULL, ContentID TEXT NOT NULL, Payload TEXT NOT NULL,
-              PRIMARY KEY(Target,ContentID));
-            CREATE TABLE IF NOT EXISTS WinUI_FeatureOptions (Key TEXT NOT NULL PRIMARY KEY, Value TEXT NOT NULL);
-            CREATE TABLE IF NOT EXISTS WinUI_ContentHashes (FileName TEXT NOT NULL PRIMARY KEY, Length INTEGER NOT NULL, ModifiedTicks INTEGER NOT NULL, Sha256 TEXT NOT NULL);
             CREATE INDEX IF NOT EXISTS IX_WinUI_MetadataHistory_Game ON WinUI_MetadataHistory(GameFileID,HistoryID DESC);
             """;
         await command.ExecuteNonQueryAsync(token);
+        command.CommandText = "PRAGMA table_info(WinUI_MapProgress);";
+        var hasOrigin = false;
+        await using (var columns = await command.ExecuteReaderAsync(token))
+            while (await columns.ReadAsync(token)) hasOrigin |= columns.GetString(1) == "ValidationOrigin";
+        if (!hasOrigin)
+        {
+            command.CommandText = "ALTER TABLE WinUI_MapProgress ADD COLUMN ValidationOrigin TEXT NOT NULL DEFAULT '';";
+            await command.ExecuteNonQueryAsync(token);
+        }
     }
 
     internal async Task<SqliteConnection> OpenAsync(CancellationToken token = default)
@@ -65,7 +70,7 @@ public sealed class LibraryFeatureStore(IDoomLauncherDatabaseLocator locator)
         await using var db = await OpenAsync(token);
         var progress = new Dictionary<int, HashSet<string>>();
         await using var command = db.CreateCommand();
-        command.CommandText = "SELECT GameFileID,MapName FROM WinUI_MapProgress WHERE Finished=1;";
+        command.CommandText = "SELECT GameFileID,MapName FROM WinUI_MapProgress WHERE Finished=1 AND ValidationOrigin='gzdoom-visited-transition-v1';";
         await using (var reader = await command.ExecuteReaderAsync(token))
             while (await reader.ReadAsync(token))
             {
@@ -82,19 +87,6 @@ public sealed class LibraryFeatureStore(IDoomLauncherDatabaseLocator locator)
                 rows.GetInt32(3) != 0, progress.GetValueOrDefault(id) ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase));
         }
         return result;
-    }
-
-    public async Task<string?> GetOptionAsync(string key, CancellationToken token = default)
-    {
-        await using var db = await OpenAsync(token); await using var command = db.CreateCommand();
-        command.CommandText = "SELECT Value FROM WinUI_FeatureOptions WHERE Key=$key;"; command.Parameters.AddWithValue("$key", key);
-        return await command.ExecuteScalarAsync(token) as string;
-    }
-    public async Task SetOptionAsync(string key, string value, CancellationToken token = default)
-    {
-        await using var db = await OpenAsync(token); await using var command = db.CreateCommand();
-        command.CommandText = "INSERT INTO WinUI_FeatureOptions(Key,Value) VALUES($key,$value) ON CONFLICT(Key) DO UPDATE SET Value=$value;";
-        command.Parameters.AddWithValue("$key", key); command.Parameters.AddWithValue("$value", value); await command.ExecuteNonQueryAsync(token);
     }
 
     public async Task SetRatingAsync(int id, int? rating, CancellationToken token = default)
@@ -135,14 +127,18 @@ public sealed class LibraryFeatureStore(IDoomLauncherDatabaseLocator locator)
         await tx.CommitAsync(token);
     }
 
-    public async Task SetMapFinishedAsync(int id, string map, bool finished, CancellationToken token = default)
+    internal async Task RecordValidatedMapsAsync(int id, IReadOnlySet<string> maps, CancellationToken token = default)
     {
-        map = map.Trim().ToUpperInvariant();
-        if (map.Length is 0 or > 64 || map.Any(char.IsControl)) throw new ArgumentException("Invalid map name.");
-        await using var db = await OpenAsync(token); await using var command = db.CreateCommand();
-        command.CommandText = "INSERT INTO WinUI_MapProgress(GameFileID,MapName,Finished,UpdatedUtc) VALUES($id,$map,$done,$at) ON CONFLICT(GameFileID,MapName) DO UPDATE SET Finished=$done,UpdatedUtc=$at;";
-        command.Parameters.AddWithValue("$id", id); command.Parameters.AddWithValue("$map", map); command.Parameters.AddWithValue("$done", finished ? 1 : 0);
-        command.Parameters.AddWithValue("$at", DateTimeOffset.UtcNow.ToString("O")); await command.ExecuteNonQueryAsync(token);
+        if (maps.Count == 0) return;
+        if (maps.Any(map => map.Length is 0 or > 64 || !map.All(c => char.IsAsciiLetterOrDigit(c) || c is '_' or '-' or '.')))
+            throw new ArgumentException("Invalid validated map name.");
+        await using var db = await OpenAsync(token); await using var tx = (SqliteTransaction)await db.BeginTransactionAsync(token);
+        await using var command = db.CreateCommand(); command.Transaction = tx;
+        command.CommandText = "INSERT INTO WinUI_MapProgress(GameFileID,MapName,Finished,ValidationOrigin,UpdatedUtc) VALUES($id,$map,1,'gzdoom-visited-transition-v1',$at) ON CONFLICT(GameFileID,MapName) DO UPDATE SET Finished=1,ValidationOrigin=excluded.ValidationOrigin,UpdatedUtc=excluded.UpdatedUtc;";
+        command.Parameters.AddWithValue("$id", id); command.Parameters.AddWithValue("$map", "");
+        command.Parameters.AddWithValue("$at", DateTimeOffset.UtcNow.ToString("O"));
+        foreach (var map in maps) { command.Parameters["$map"].Value = map.ToUpperInvariant(); await command.ExecuteNonQueryAsync(token); }
+        await tx.CommitAsync(token);
     }
 
     public async Task<IReadOnlySet<string>> LoadLocksAsync(int id, CancellationToken token = default)

@@ -29,7 +29,7 @@ public sealed partial class MainPage
     private void LibraryTools_Opening(object sender, object args)
     { foreach (var item in ((MenuFlyout)sender).Items.OfType<MenuFlyoutItem>()) item.Text = Strings[item.Tag.ToString()!]; }
     private async void LibraryTool_Click(object sender, RoutedEventArgs args) => await FeatureActionAsync(() => ((FrameworkElement)sender).Tag?.ToString() switch
-    { "RandomMod" => ShowRandomModAsync(), "BulkEdit" => ShowBulkEditAsync(), "PlayLater" => ShowQueueAsync(), "Synchronization" => ShowSynchronizationAsync(), _ => Task.CompletedTask });
+    { "RandomMod" => ShowRandomModAsync(), "BulkEdit" => ShowBulkEditAsync(), "PlayLater" => ShowQueueAsync(), _ => Task.CompletedTask });
     private async void PersonalQueue_Click(object sender, RoutedEventArgs args) => await FeatureActionAsync(() => ViewModel.ToggleQueueAsync(_loadCancellation.Token));
     private async void MetadataHistory_Click(object sender, RoutedEventArgs args) => await FeatureActionAsync(ShowMetadataHistoryAsync);
     private async void MapsProgress_Click(object sender, RoutedEventArgs args) => await FeatureActionAsync(ShowMapsAsync);

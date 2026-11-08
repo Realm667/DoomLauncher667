@@ -2,6 +2,11 @@ using DoomLauncher.Modern.Core.Launch;
 using DoomLauncher.WinUI.Services;
 using Microsoft.Data.Sqlite;
 
+if (args.Length == 3 && args[0] == "--verify-map-tracker-engine")
+{
+    await MapTrackingEngineTests.RunAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]));
+    return 0;
+}
 if (args.Length == 3 && args[0] == "--hold-installation-lease")
 {
     using var lease = InstallationLease.Acquire(args[1]);
@@ -400,7 +405,7 @@ try
     await ReliabilityTests.RunAsync();
     await ExpansionTests.RunAsync();
     Check(
-        AppVersion.Current == "1.0.0-rc.9",
+        AppVersion.Current == "1.0.0-rc.10",
         "Die sichtbare Version stammt aus der zentralen Buildversion");
     VerifyTileImageDefaults();
     Check(

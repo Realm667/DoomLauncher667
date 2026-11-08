@@ -9,6 +9,10 @@ namespace DoomLauncher.WinUI;
 
 public sealed partial class MainPage
 {
+    private static ListViewItem CreateMapProgressItem(MapDocument map, bool completed) => new()
+    {
+        Content = new TextBlock { Text = (completed ? "✓ " : "○ ") + map.Label, TextWrapping = TextWrapping.Wrap, MaxWidth = 250 }, Tag = map,
+    };
     private async Task ShowMapsAsync()
     {
         var game = ViewModel.SelectedGame; if (game.IsPlaceholder) return;
@@ -28,25 +32,10 @@ public sealed partial class MainPage
         var imageScroll = new ScrollViewer { Content = preview, Width = 670, Height = 400, ZoomMode = ZoomMode.Enabled,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto, VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             MinZoomFactor = .25f, MaxZoomFactor = 5, Visibility = Visibility.Collapsed };
-        CancellationTokenSource? rendering = null; var temporaryFiles = new List<string>(); var pending = new HashSet<Task>();
-        async Task SaveProgress(string name, bool done, CheckBox check)
-        {
-            check.IsEnabled = false;
-            try
-            {
-                await _app.LibraryFeatures.SetMapFinishedAsync(game.GameFileId, name, done, _loadCancellation.Token);
-                if (done) completed.Add(name); else completed.Remove(name);
-                status.Text = _app.Localization.Format("MapProgressSummary", completed.Count, maps.Select(map => map.Name).Distinct().Count());
-                await ViewModel.ReloadPersonalDataAsync(_loadCancellation.Token);
-            }
-            catch (Exception error) { check.IsChecked = !done; status.Text = error.Message; }
-            finally { check.IsEnabled = true; }
-        }
+        CancellationTokenSource? rendering = null; var temporaryFiles = new List<string>();
         foreach (var map in maps)
         {
-            var check = new CheckBox { IsChecked = completed.Contains(map.Name), Content = map.Label, MaxWidth = 250 };
-            check.Click += (_, _) => { var task = SaveProgress(map.Name, check.IsChecked == true, check); pending.Add(task); _ = task.ContinueWith(_ => DispatcherQueue.TryEnqueue(() => pending.Remove(task))); };
-            list.Items.Add(new ListViewItem { Content = check, Tag = map });
+            list.Items.Add(CreateMapProgressItem(map, completed.Contains(map.Name)));
         }
         async Task ShowSelection()
         {
@@ -71,7 +60,6 @@ public sealed partial class MainPage
         var content = new StackPanel { Spacing = 10, Children = { new TextBlock { Text = Strings["MapProgressNotice"], TextWrapping = TextWrapping.Wrap, MaxWidth = 950 }, columns, status } };
         var dialog = FeatureDialog(Strings["MapsAndProgress"], new ScrollViewer { Content = content, MaxHeight = 720 }, Strings["LaunchSelectedMap"]);
         dialog.SecondaryButtonText = Strings["LaunchNextMap"];
-        dialog.Closing += (_, args) => { if (pending.Count > 0) args.Cancel = true; };
         list.SelectedIndex = 0; var result = await dialog.ShowAsync(); rendering?.Cancel();
         var selected = result == ContentDialogResult.Primary ? (list.SelectedItem as ListViewItem)?.Tag as MapDocument
             : result == ContentDialogResult.Secondary ? maps.FirstOrDefault(map => !completed.Contains(map.Name)) : null;

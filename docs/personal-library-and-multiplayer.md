@@ -1,4 +1,4 @@
-# Personal library, maps, saves, multiplayer and synchronization
+# Personal library, maps, saves and multiplayer
 
 ## Ratings, queue, random choice and bulk editing
 
@@ -29,8 +29,31 @@ Read WAD maps directly or inside supported archives, including classic Doom,
 Hexen-format and UDMF geometry. Opt in to automap previews if you accept spoilers.
 Counts describe standard placements/sector secrets; scripts, custom actors,
 difficulty and multiplayer filters change runtime totals. Non-Doom actor counts
-remain unknown. Tick maps manually, launch selected or the next unfinished map.
-Visited-map statistics do not prove completion and never silently finish a map.
+remain unknown. Launch a selected map or the next unconfirmed map. There are no
+manual completion controls. Only automatically validated engine completions count.
+
+The launcher embeds an open-source ZScript helper and mounts a temporary PK3 on
+compatible GZDoom/UZDoom-based single-player launches. The adjacent engine PK3 is
+checked for the required event/level API; an engine label alone does not enable it.
+The helper requires a genuine transition followed by the engine setting its
+completion/visited flag from clear to set. A transition or save-game statistic
+alone is not evidence. Normal/secret exits, finales and no-intermission transitions
+are supported. Quit, death, restart, loading and console map/changemap do not count.
+Hub travel is deliberately unconfirmed, not interpreted as completing a hub map.
+Already-set flags in older saves cannot prove a new completion and are not imported.
+This is conservative progress tracking, not an anti-cheat system.
+
+After the engine exits, session-token-matched evidence is restricted to maps in
+the launched archive (or its IWAD for gameplay-only mods), then stored transactionally.
+The archive hash must still match. Manual marks from older versions remain stored
+but are excluded from validated progress. No mod or IWAD archive is modified.
+The passive helper is not serialized into saves and has a stable versioned name.
+Older saves may still show the engine's changed-resource confirmation; keep backups.
+Multiplayer, extra-parameters-only launches, explicit custom logfile arguments,
+directory-only entries, missing API support and ambiguous cases remain untracked.
+Other engines can be supported by future adapters; no approximate/manual fallback
+is used. Nonstandard mods that replace the helper or completion semantics can
+remain unconfirmed. The launcher must remain running to import the session.
 Duplicate map names in alternative embedded WADs share progress identity; normal
 engine load-order rules still determine the geometry played.
 
@@ -69,27 +92,3 @@ All players need the same IWAD, mods and compatible engine. Host/direct mod orde
 follows the displayed library order. Password entry happens in the engine; nothing
 is stored here. No firewall/router/UPnP changes and no internet host advertising
 occur. Internet reachability remains user-managed.
-
-## Cross-PC synchronization
-
-Library tools → Synchronization on both PCs: choose the same shared parent folder.
-DoomLauncher667-Sync stores a versioned manifest and optional immutable save objects.
-Never share the active SQLite database through a cloud client. Close games first.
-Appearance and saves are optional, off by default. Initial archive hashing can take
-time; later runs cache identity by size/mtime. Recalculate checksums if external tools
-changed contents while retaining timestamps.
-
-Preview compares local, remote and last-synced fields. Unilateral changes merge;
-simultaneous edits require explicit decisions. Ratings, favorites, finished state,
-individual maps, queue, collections and metadata locks sync by archive SHA-256, not
-numeric database IDs. Byte-identical duplicate entries are rejected as ambiguous.
-Missing mods are reported and retained remotely. Archives, IWADs and engine paths
-are never copied. Saves are verified and backed up before replacement; deletions
-are not propagated. Optional theme names/language/density/columns synchronize, not
-theme files, device paths or window geometry. Restart to apply appearance changes.
-
-Manifests are atomically replaced, with previous revisions retained in Versions.
-For recovery, close both launchers, back up the sync folder, copy a chosen Versions
-JSON to state.json, reopen and review the preview. Immutable save objects are retained
-for recovery; do not remove referenced objects. Missing/unavailable targets cause an
-error, not an empty-library reset. Resolve external cloud-client conflict copies first.

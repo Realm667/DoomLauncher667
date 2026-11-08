@@ -7,7 +7,7 @@ using System.Text.Json;
 namespace DoomLauncher.WinUI.Services;
 
 public sealed record SaveGameMetadata(int Format, string LibraryFile, string GameHash, string EngineName,
-    string EngineVersion, string EngineHash, string LaunchFingerprint, string SavedUtc, bool Imported, string? SyncPath = null);
+    string EngineVersion, string EngineHash, string LaunchFingerprint, string SavedUtc, bool Imported);
 public sealed record ManagedSaveContext(string Directory, string SaveRoot, SaveGameMetadata Metadata, IReadOnlyDictionary<string, string> Before);
 public sealed record SaveGameEntry(string Path, string Title, string Map, string Engine, DateTime Modified,
     SaveGameMetadata? Metadata, byte[]? Preview)

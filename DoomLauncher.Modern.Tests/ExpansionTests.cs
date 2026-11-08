@@ -13,13 +13,7 @@ using Microsoft.Data.Sqlite;
 internal static class ExpansionTests
 {
     private sealed class Locator(string path) : IDoomLauncherDatabaseLocator { public string FindDatabase() => path; }
-    private sealed class State : IUserLibraryStateStore
-    {
-        public UserLibraryState Value = UserLibraryState.Empty;
-        public Task<UserLibraryState> LoadAsync(CancellationToken cancellationToken = default) => Task.FromResult(Value);
-        public Task SaveAsync(UserLibraryState value, CancellationToken cancellationToken = default) { cancellationToken.ThrowIfCancellationRequested(); Value = value; return Task.CompletedTask; }
-    }
-    private sealed record Fixture(string Root, SqliteNativeLibraryService Library, LibraryFeatureStore Store, State State, NativeImportResult Mod);
+    private sealed record Fixture(string Root, SqliteNativeLibraryService Library, LibraryFeatureStore Store, NativeImportResult Mod);
     private static void Check(bool condition, string name)
     { if (!condition) throw new InvalidOperationException(name); Console.WriteLine("PASS " + name); }
     private static async Task Reject(Func<Task> action, string name)
@@ -29,9 +23,9 @@ internal static class ExpansionTests
         var root = Path.Combine(Path.GetTempPath(), "DoomLauncher expansion " + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(root);
         try
         {
-            var a = await Create(Path.Combine(root, "PC-A")); var b = await Create(Path.Combine(root, "PC-B"));
+            var a = await Create(Path.Combine(root, "Installation"));
             await Personal(a); await Metadata(a); await Maps(root); await Saves(a); await Network(root); await NativeLaunch(a);
-            await Synchronization(a, b, Path.Combine(root, "Shared"));
+            await RemovedSynchronization(a);
         }
         finally { SqliteConnection.ClearAllPools(); Directory.Delete(root, true); }
     }
@@ -72,7 +66,7 @@ internal static class ExpansionTests
         var locator = new Locator(path); var library = new SqliteNativeLibraryService(locator); await new FirstSetupService(locator, library).EnsureManagedLayoutAsync();
         var source = Path.Combine(root, "input.zip"); using (var zip = ZipFile.Open(source, ZipArchiveMode.Create))
         { using var writer = new StreamWriter(zip.CreateEntry("map.wad").Open()); writer.BaseStream.Write(Wad(("MAP01", []), ("TEXTMAP", Encoding.UTF8.GetBytes("namespace=\"zdoom\"; vertex { x=0; y=0; } vertex { x=128; y=128; } linedef { v1=0; v2=1; } thing { type=3001; } sector { special=9; }")), ("ENDMAP", []))); }
-        var mod = await library.ImportAsync(source); return new(root, library, new(locator), new(), mod);
+        var mod = await library.ImportAsync(source); return new(root, library, new(locator), mod);
     }
     private static async Task<MetadataSnapshot> Snapshot(Fixture fixture)
     { await using var db = await fixture.Store.OpenAsync(); return await LibraryFeatureStore.CaptureMetadataAsync(db, null, fixture.Mod.GameFileId, default); }
@@ -86,9 +80,9 @@ internal static class ExpansionTests
         Check((await a.Store.LoadAsync())[id].QueuePosition == 0, "Re-adding queued mod preserves its position");
         await a.Store.ReorderQueueAsync([id]); await Reject(() => a.Store.ReorderQueueAsync([]), "Stale queue reorder is rejected");
         await a.Library.SetGameFinishedAsync(id, true); Check((await a.Store.LoadAsync())[id].QueuePosition is null, "Finishing a mod optionally removes it from Play later");
-        await a.Library.SetGameFinishedAsync(id, false); await a.Store.SetMapFinishedAsync(id, "map01", true);
+        await a.Library.SetGameFinishedAsync(id, false); await a.Store.RecordValidatedMapsAsync(id, new HashSet<string> { "map01" });
         Check((await a.Store.LoadAsync())[id].CompletedMaps.Contains("MAP01"), "Per-map progress is case-insensitive and persistent");
-        await a.Store.SetMapFinishedAsync(id, "MAP01", false); Check((await a.Store.LoadAsync())[id].CompletedMaps.Count == 0, "Map progress can be undone");
+        await a.Store.RecordValidatedMapsAsync(id, new HashSet<string> { "MAP01" }); Check((await a.Store.LoadAsync())[id].CompletedMaps.Count == 1, "Repeated engine validation is idempotent");
         var before = await a.Library.LoadGameAsync(id);
         await Reject(() => a.Store.ApplyBulkEditAsync(new HashSet<int> { id, int.MaxValue }, new(null, false, null, false, true, new HashSet<int>(), new HashSet<int>())), "Bulk edit is all-or-nothing when an entry disappears");
         await using (var db = await a.Store.OpenAsync()) { await using var command = db.CreateCommand(); command.CommandText = "SELECT Finished FROM WinUI_GameState WHERE GameFileID=$id"; command.Parameters.AddWithValue("$id", id); Check(Convert.ToInt32(await command.ExecuteScalarAsync()) == 0, "Failed bulk edit rolls back earlier finished changes"); }
@@ -188,12 +182,39 @@ internal static class ExpansionTests
         await a.Library.SaveSourcePortAsync(new(null, "Fixture GZDoom", portDirectory, "gzdoom.exe", ".wad,.pk3", "-file", "+exec unwanted.cfg", ScreenshotSupport: "None"));
         var definitions = await a.Library.LoadLauncherDefinitionsAsync(); var sp = definitions.SourcePorts.Single(); var iw = definitions.Iwads.Single();
         var starter = new Starter(); var launcher = new NativeGameLaunchService(new Locator(a.Store.DatabasePath), starter);
+        using (var zip = ZipFile.Open(Path.Combine(portDirectory, "gzdoom.pk3"), ZipArchiveMode.Create))
+        {
+            using (var writer = new StreamWriter(zip.CreateEntry("zscript/doombase.zs").Open())) writer.Write("native readonly LevelInfo info; native readonly int clusterflags;");
+            using (var writer = new StreamWriter(zip.CreateEntry("zscript/events.zs").Open())) writer.Write("UiTick() NextMap");
+        }
+        await using (var db = await a.Store.OpenAsync())
+        {
+            await using var command = db.CreateCommand(); command.CommandText = "DELETE FROM WinUI_MapProgress; INSERT INTO WinUI_MapProgress(GameFileID,MapName,Finished,UpdatedUtc) VALUES($id,'MAP02',1,'legacy');";
+            command.Parameters.AddWithValue("$id", a.Mod.GameFileId); await command.ExecuteNonQueryAsync();
+        }
+        Check((await a.Store.LoadAsync())[a.Mod.GameFileId].CompletedMaps.Count == 0, "Legacy manual map flags are retained but never counted as automatically validated");
         var launched = await launcher.LaunchAsync(new(a.Mod.GameFileId, "Fixture", SourcePortId: sp.SourcePortId, IwadId: iw.IwadId, Map: "MAP01"));
         Check(starter.Info!.ArgumentList.Contains("-savedir") && starter.Info.ArgumentList.Contains("-warp"), "Native launch applies managed saves and explicit map selection");
+        var arguments = starter.Info.ArgumentList.ToList(); var logPath = arguments[arguments.IndexOf("+logfile") + 1];
+        var sessionToken = arguments[arguments.IndexOf("dl667_track_session") + 1];
+        Check(arguments.Count(argument => argument == "-file") == 1 && arguments.Any(argument => argument.EndsWith("dl667-map-tracker-v1.pk3")),
+            "Compatible single-player launch loads built-in tracker without replacing the mod stack");
+        await File.WriteAllLinesAsync(logPath, new[] { $"DL667_TRACK_V1|{sessionToken}|ready", $"DL667_TRACK_V1|{sessionToken}|complete|MAP01", $"DL667_TRACK_V1|{sessionToken}|complete|MAP02" });
         await launched.Session.WaitForExitAsync();
+        Check((await a.Store.LoadAsync())[a.Mod.GameFileId].CompletedMaps.SetEquals(new[] { "MAP01" }),
+            "Native session imports only verified, session-matched maps belonging to the launched archive");
+        var parsed = MapTrackingService.ParseCompletions(new[] { "DL667_TRACK_V1|other|ready", "DL667_TRACK_V1|session|complete|MAP01", "DL667_TRACK_V1|session|ready", "DL667_TRACK_V1|other|complete|MAP01", "prefix DL667_TRACK_V1|session|complete|MAP01", "DL667_TRACK_V1|session|complete|../evil" }, "session", new HashSet<string> { "MAP01" });
+        Check(parsed.Count == 0, "Tracker rejects stale sessions, missing handshake, embedded markers and invalid map names");
+        var changedArchive = Path.Combine(a.Root, "changed-tracker-input.wad"); await File.WriteAllTextAsync(changedArchive, "original");
+        var changedContext = new MapTrackingContext("unused", Path.Combine(a.Root, "changed-tracker.log"), "session", changedArchive,
+            await SaveGameService.HashAsync(changedArchive), new HashSet<string> { "MAP03" });
+        await File.WriteAllLinesAsync(changedContext.LogPath, new[] { "DL667_TRACK_V1|session|ready", "DL667_TRACK_V1|session|complete|MAP03" });
+        await File.WriteAllTextAsync(changedArchive, "replaced archive"); await MapTrackingService.ImportAsync(changedContext, a.Store, a.Mod.GameFileId);
+        Check(!(await a.Store.LoadAsync())[a.Mod.GameFileId].CompletedMaps.Contains("MAP03"), "Tracker never credits a replaced archive using evidence from the previous file");
         launched = await launcher.LaunchAsync(new(iwad.GameFileId, "Network fixture", SourcePortId: sp.SourcePortId, IwadId: iw.IwadId,
             Multiplayer: new("join", "127.0.0.1", Mods: [new(a.Mod.GameFileId, "map.wad")])));
         Check(starter.Info!.ArgumentList.Contains("-join") && !starter.Info.ArgumentList.Contains("+exec") && starter.Info.ArgumentList.Any(value => value.EndsWith("map.wad")), "Multiplayer uses ordered explicit archive entries and excludes saved extra arguments");
+        Check(!starter.Info.ArgumentList.Any(value => value.EndsWith("dl667-map-tracker-v1.pk3")), "Multiplayer never injects a single-player completion tracker");
         await launched.Session.WaitForExitAsync();
     }
     private static byte[] Reply(byte[] payload)
@@ -243,33 +264,29 @@ internal static class ExpansionTests
         var zip = Path.Combine(root, "wrapped.zip"); using (var archive = ZipFile.Open(zip, ZipArchiveMode.Create)) archive.CreateEntryFromFile(wad, "test.wad");
         Check((await MultiplayerDownloadService.VerifyAndPrepareAsync(zip, new("test.wad", md5), default)).EndsWith(".zip"), "Required WAD inside a downloaded archive is verified");
     }
-    private static async Task Synchronization(Fixture a, Fixture b, string folder)
+    private static async Task RemovedSynchronization(Fixture fixture)
     {
-        var one = new PersonalSyncService(a.Store, a.State); var two = new PersonalSyncService(b.Store, b.State);
-        await a.Store.SetRatingAsync(a.Mod.GameFileId, 4); await a.Store.SetQueuedAsync(a.Mod.GameFileId, true, false); await a.Store.SetMapFinishedAsync(a.Mod.GameFileId, "MAP01", true);
-        a.State.Value = a.State.Value with { FavoriteGameFileIds = new HashSet<int> { a.Mod.GameFileId }, Language = "de-DE", ListDensity = "UltraCompact" };
-        var first = await one.PreviewAsync(a.Root, folder, true, true, true, null, default); await one.ApplyAsync(first, null, default);
-        var incoming = await two.PreviewAsync(b.Root, folder, true, true, true, null, default);
-        foreach (var change in incoming.Differences) if (change.Resolution == SyncResolution.Unresolved) change.Resolution = SyncResolution.Remote;
-        await two.ApplyAsync(incoming, null, default);
-        var personal = (await b.Store.LoadAsync())[b.Mod.GameFileId];
-        Check(personal.Rating == 4 && personal.QueuePosition.HasValue && personal.CompletedMaps.Contains("MAP01") && b.State.Value.FavoriteGameFileIds.Contains(b.Mod.GameFileId), "Sync transfers personal data using content identity rather than database IDs");
-        Check(b.State.Value.Language == "de-DE" && b.State.Value.ListDensity == "UltraCompact", "Optional appearance settings synchronize without machine-specific paths");
-        Check((await SaveGameService.LoadAsync(b.Root, b.Mod.FileName, await SaveGameService.HashAsync(b.Mod.DestinationPath))).Count >= 1, "Optional managed saves synchronize through verified immutable objects");
-        Check((await two.PreviewAsync(b.Root, folder, true, true, false, null, default)).Differences.Count == 0, "Repeated synchronization is idempotent including save metadata");
-        Check(!Directory.EnumerateFiles(folder, "*.sqlite", SearchOption.AllDirectories).Any(), "Synchronization never copies an active SQLite database");
-        await a.Store.SetRatingAsync(a.Mod.GameFileId, 5); await b.Store.SetRatingAsync(b.Mod.GameFileId, 2);
-        await one.ApplyAsync(await one.PreviewAsync(a.Root, folder, false, false, false, null, default), null, default);
-        var conflict = await two.PreviewAsync(b.Root, folder, false, false, false, null, default);
-        Check(conflict.Differences.Any(change => change.Field == "rating" && change.Conflict), "Concurrent changes create explicit per-field conflicts");
-        await Reject(() => two.ApplyAsync(conflict, null, default), "Unresolved sync conflicts block application");
-        foreach (var change in conflict.Differences) change.Resolution = SyncResolution.Remote;
-        await b.Store.SetQueuedAsync(b.Mod.GameFileId, false, false); await Reject(() => two.ApplyAsync(conflict, null, default), "Sync rejects a stale local preview");
-        var fresh = await two.PreviewAsync(b.Root, folder, false, false, false, null, default); foreach (var change in fresh.Differences) if (change.Conflict) change.Resolution = SyncResolution.Remote;
-        await two.ApplyAsync(fresh, null, default); Check((await b.Store.LoadAsync())[b.Mod.GameFileId].Rating == 5, "Conflict resolution applies the explicitly selected peer value");
-        Check(Directory.EnumerateFiles(Path.Combine(folder, "DoomLauncher667-Sync", "Versions"), "*.json").Any(), "Sync retains previous manifest revisions");
-        await Reject(() => one.PreviewAsync(a.Root, a.Root, false, false, false, null, default), "Sync target cannot overlap the installation");
-        var manifest = Path.Combine(folder, "DoomLauncher667-Sync", "state.json"); await File.WriteAllTextAsync(manifest, "{\"Format\":999}");
-        await Reject(() => one.PreviewAsync(a.Root, folder, false, false, false, null, default), "Unsupported sync formats never reset the local library");
+        await using var db = await fixture.Store.OpenAsync(); await using var command = db.CreateCommand();
+        command.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE name IN ('WinUI_SyncBaseline','WinUI_FeatureOptions','WinUI_ContentHashes');";
+        Check(Convert.ToInt32(await command.ExecuteScalarAsync()) == 0, "Fresh installations do not create retired synchronization tables");
+        // Preserve inert data from older versions; removing a feature must not destroy user history.
+        command.CommandText = """
+            CREATE TABLE WinUI_SyncBaseline(Target TEXT, ContentID TEXT, Payload TEXT, PRIMARY KEY(Target,ContentID));
+            CREATE TABLE WinUI_FeatureOptions(Key TEXT PRIMARY KEY, Value TEXT);
+            CREATE TABLE WinUI_ContentHashes(FileName TEXT PRIMARY KEY, Length INTEGER, ModifiedTicks INTEGER, Sha256 TEXT);
+            INSERT INTO WinUI_SyncBaseline VALUES('fixture','content','retained payload');
+            INSERT INTO WinUI_FeatureOptions VALUES('SyncFolder','retained folder');
+            INSERT INTO WinUI_ContentHashes VALUES('fixture.zip',1,1,'retained hash');
+            """;
+        await command.ExecuteNonQueryAsync();
+        await WinUiDatabaseSchema.EnsureAsync(db, default);
+        command.CommandText = "SELECT Payload FROM WinUI_SyncBaseline;"; var baseline = await command.ExecuteScalarAsync();
+        command.CommandText = "SELECT Value FROM WinUI_FeatureOptions;"; var folder = await command.ExecuteScalarAsync();
+        command.CommandText = "SELECT Sha256 FROM WinUI_ContentHashes;"; var hash = await command.ExecuteScalarAsync();
+        Check((string?)baseline == "retained payload" && (string?)folder == "retained folder" && (string?)hash == "retained hash",
+            "Upgrade leaves obsolete sync data untouched without using or recreating the feature");
+        await fixture.Store.SetRatingAsync(fixture.Mod.GameFileId, 3);
+        Check((await fixture.Store.LoadAsync())[fixture.Mod.GameFileId].Rating == 3,
+            "Personal ratings remain functional after synchronization removal");
     }
 }

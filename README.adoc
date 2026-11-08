@@ -16,9 +16,9 @@ remains its inspiration and the source of the migration compatibility work.
 
 == Download
 
-The current testing release is *1.0.0-rc.9* (Release Candidate, not final 1.0).
+The current testing release is *1.0.0-rc.10* (Release Candidate, not final 1.0).
 Download its Windows x64 ZIP from the
-https://github.com/Realm667/DoomLauncher667/releases/tag/v1.0.0-rc.9[RC download page]
+https://github.com/Realm667/DoomLauncher667/releases/tag/v1.0.0-rc.10[RC download page]
 or browse https://github.com/Realm667/DoomLauncher667/releases[all releases].
 Extract the complete archive into a writable folder and launch
 `DoomLauncher667.exe`.
@@ -90,12 +90,11 @@ These familiar workflows were rebuilt natively for Doom Launcher 667:
 
 * personal 1–5-star ratings, an ordered Play later queue and a filtered random picker;
 * previewed bulk editing and per-field metadata protection, history and safe undo;
-* per-map completion tracking, classic/Hexen/UDMF map geometry previews and counts;
+* automatically validated per-map completion for compatible GZDoom/UZDoom-based
+  single-player launches, plus classic/Hexen/UDMF map geometry previews and counts;
 * managed ZDoom-family save browsing, explicit resume and pre-session backups;
 * Zandronum internet/LAN server discovery, required-file checks and confirmed downloads,
-  LAN hosting and ZDoom-family direct connections;
-* cross-PC folder synchronization with content identities, field-level conflicts,
-  optional settings/saves and no shared live database.
+  LAN hosting and ZDoom-family direct connections.
 
 See link:docs/personal-library-and-multiplayer.md[the feature guide] for operation
 details, supported formats and compatibility limits.
@@ -177,7 +176,7 @@ for the 1.0 preparation work.
 
 Doom Launcher 667 is preparing its first stable 1.0 release. The RC is a
 prerelease intended for feedback, not a claim that final acceptance is complete.
-See link:docs/releases/1.0.0-rc.9.md[RC changes and known limitations].
+See link:docs/releases/1.0.0-rc.10.md[RC changes and known limitations].
 Please report reproducible problems through
 https://github.com/Realm667/DoomLauncher667/issues[GitHub Issues], following
 link:docs/reporting-problems.md[the reporting checklist].
