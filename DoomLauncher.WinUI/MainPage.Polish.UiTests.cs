@@ -85,6 +85,9 @@ public sealed partial class MainPage
                 if (theme.Id is "Dark" or "Light") await CapturePolishAsync(Path.Combine(screenshots,"theme-"+theme.Id+".png"),1);
             }
             ThemeManager.Apply(this,"Dark");
+            // Release the fixed inline workflow surface before exercising real
+            // window resizing and the responsive/compact layouts below.
+            Width=double.NaN;Height=double.NaN;await layout();
             var mapInput=Path.Combine(root,"UIInputs","dialog-map.zip");
             using(var archive=System.IO.Compression.ZipFile.Open(mapInput,System.IO.Compression.ZipArchiveMode.Create))
             using(var writer=new BinaryWriter(archive.CreateEntry("dialog.wad").Open()))

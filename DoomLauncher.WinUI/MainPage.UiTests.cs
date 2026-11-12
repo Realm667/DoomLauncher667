@@ -41,6 +41,11 @@ public sealed partial class MainPage
             _app.MainWindow!.AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(1440*nativeTestScale),(int)(950*nativeTestScale)));
             await Layout();
             ApplyResponsiveLayout(); await Layout();
+            // The workflow checks below exercise the shared inline details pane.
+            // Hosted runners can constrain the native window below the requested
+            // width; use an explicit fixture surface until the responsive matrix.
+            Width = 1440; Height = 900;
+            await Layout(); ApplyResponsiveLayout(); await Layout();
             Check(GameList.IsLoaded && LibraryDetailsPane.IsLoaded, "Native list and shared details are loaded");
             ((Expander)LibraryDetailsPane.FindName("EntryToolsExpander")).IsExpanded = true;
             await Layout();
@@ -124,10 +129,13 @@ public sealed partial class MainPage
             await _app.LibraryFeatures.RecordValidatedMapsAsync(chosenGame, new HashSet<string> { "MAP01" }); await ViewModel.ReloadPersonalDataAsync();
             // PropertyChanged queues native binding work; await the dispatcher before inspecting controls.
             await Layout();
+            ((Expander)LibraryDetailsPane.FindName("EntryToolsExpander")).IsExpanded = true;
+            ((Button)LibraryDetailsPane.FindName("MapsProgressButton")).StartBringIntoView();
+            await Layout();
             Check(ViewModel.SelectedPersonalData.CompletedMaps.Contains("MAP01"), "Map progress reloads into shared details");
             Check(!ViewModel.CanTrackSelectedGame && LibraryDetailsPane.FindName("MapProgressSummary") is TextBlock { Visibility: Visibility.Collapsed }
                 && LibraryDetailsPane.FindName("MapsProgressButton") is Button { Content: var mapLabel } && (string?)mapLabel == Strings["Maps"],
-                $"Unsupported source port hides progress and retains a plain Maps button (tracking={ViewModel.CanTrackSelectedGame}, visibility={((TextBlock)LibraryDetailsPane.FindName("MapProgressSummary")).Visibility}, label={((Button)LibraryDetailsPane.FindName("MapsProgressButton")).Content})");
+                $"Unsupported source port hides progress and retains a plain Maps button (tracking={ViewModel.CanTrackSelectedGame}, visibility={((TextBlock)LibraryDetailsPane.FindName("MapProgressSummary")).Visibility}, label={((Button)LibraryDetailsPane.FindName("MapsProgressButton")).Content}, loaded={((Button)LibraryDetailsPane.FindName("MapsProgressButton")).IsLoaded}, pane={LibraryDetailsPane.Visibility}, viewport={ActualWidth}x{ActualHeight})");
             var apiPath = Path.Combine(portDirectory, "ui-test.pk3");
             using (var zip = System.IO.Compression.ZipFile.Open(apiPath, System.IO.Compression.ZipArchiveMode.Create))
             {
