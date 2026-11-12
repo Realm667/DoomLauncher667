@@ -85,6 +85,17 @@ jobs:
           path: |
             ${{ steps.ui.outputs.report }}
             ${{ steps.ui.outputs.visualqa }}
+          if-no-files-found: ignore
+          retention-days: 14
+
+      # TEMP can live on C: while RUNNER_TEMP lives on D:. One artifact cannot
+      # use a common relative root across those Windows volumes.
+      - name: Retain upgrade and migration acceptance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: upgrade-acceptance-${{ github.ref_name }}
+          path: |
             ${{ runner.temp }}/release-acceptance/matrix.json
             ${{ runner.temp }}/release-acceptance/**/release-test-report.json
             ${{ runner.temp }}/release-acceptance/**/runtime-evidence.json
