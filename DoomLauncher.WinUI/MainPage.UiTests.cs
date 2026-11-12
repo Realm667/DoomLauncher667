@@ -122,10 +122,12 @@ public sealed partial class MainPage
             await ViewModel.ToggleQueueAsync(); await Navigate(LibrarySection.Queue);
             Check(ViewModel.Games.Any(game => game.GameFileId == chosenGame), "Play later sidebar displays queued entries");
             await _app.LibraryFeatures.RecordValidatedMapsAsync(chosenGame, new HashSet<string> { "MAP01" }); await ViewModel.ReloadPersonalDataAsync();
+            // PropertyChanged queues native binding work; await the dispatcher before inspecting controls.
+            await Layout();
             Check(ViewModel.SelectedPersonalData.CompletedMaps.Contains("MAP01"), "Map progress reloads into shared details");
             Check(!ViewModel.CanTrackSelectedGame && LibraryDetailsPane.FindName("MapProgressSummary") is TextBlock { Visibility: Visibility.Collapsed }
                 && LibraryDetailsPane.FindName("MapsProgressButton") is Button { Content: var mapLabel } && (string?)mapLabel == Strings["Maps"],
-                "Unsupported source port hides progress and retains a plain Maps button");
+                $"Unsupported source port hides progress and retains a plain Maps button (tracking={ViewModel.CanTrackSelectedGame}, visibility={((TextBlock)LibraryDetailsPane.FindName("MapProgressSummary")).Visibility}, label={((Button)LibraryDetailsPane.FindName("MapsProgressButton")).Content})");
             var apiPath = Path.Combine(portDirectory, "ui-test.pk3");
             using (var zip = System.IO.Compression.ZipFile.Open(apiPath, System.IO.Compression.ZipArchiveMode.Create))
             {
