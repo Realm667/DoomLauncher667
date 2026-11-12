@@ -151,6 +151,19 @@ public sealed partial class MainPage
             }
             _app.Localization.SetLanguage("en-US"); ViewModel.NotifyLocalizationChanged(); DataContext=null;DataContext=Strings;
             window.AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(1440*XamlRoot.RasterizationScale),(int)(900*XamlRoot.RasterizationScale)));await layout();ApplyResponsiveLayout();
+            // Populate the documentation view from synthetic fixture entries,
+            // never from a private user library or downloaded game data.
+            await using(var demo=new Microsoft.Data.Sqlite.SqliteConnection(new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder{DataSource=Path.Combine(root,"DoomLauncher.sqlite"),Pooling=false}.ToString()))
+            {
+                await demo.OpenAsync();
+                foreach(var title in new[]{"Classic campaigns","Community maps","Weekend picks"})
+                {
+                    await using var insert=demo.CreateCommand();
+                    insert.CommandText="INSERT INTO Tags(Name,HasTab) VALUES($name,0); INSERT INTO TagMapping(FileID,TagID) SELECT GameFileID,(SELECT TagID FROM Tags WHERE Name=$name LIMIT 1) FROM GameFiles WHERE GameFileID NOT IN (SELECT GameFileID FROM IWads) ORDER BY GameFileID LIMIT 18;";
+                    insert.Parameters.AddWithValue("$name",title);await insert.ExecuteNonQueryAsync();
+                }
+            }
+            await ViewModel.RefreshAsync();_showCollectionList=false;UpdateCollectionsViewControls();
             foreach(var section in new[] { LibrarySection.Home,LibrarySection.Collections,LibrarySection.Generate,LibrarySection.Achievements })
             {
                 ShellNavigation.SelectedItem=ShellNavigation.MenuItems.OfType<NavigationViewItem>().First(item=>item.Tag?.ToString()==section.ToString());
@@ -161,7 +174,7 @@ public sealed partial class MainPage
             ViewModel.SetSection(LibrarySection.Library);await layout();
             foreach(var scale in new[] { 1d,1.25,1.5,2d })
             {
-                var file=Path.Combine(screenshots,$"raster-{scale:0.00}.png");await CapturePolishAsync(file,scale);
+                var file=Path.Combine(screenshots,$"raster-{scale:0.00}.png");await CapturePolishAsync(file,scale,preserveNativePixels:false);
                 check(File.Exists(file) && new FileInfo(file).Length>1000,"Native XAML raster output at "+scale.ToString("P0"));
             }
             check(KeyboardAccelerators.Any(a=>a.Key==Windows.System.VirtualKey.D)
@@ -201,19 +214,22 @@ public sealed partial class MainPage
         double L(Color c) { double F(byte v) { var n=v/255d;return n<=.04045?n/12.92:Math.Pow((n+.055)/1.055,2.4); } return .2126*F(c.R)+.7152*F(c.G)+.0722*F(c.B); }
         var x=L(a);var y=L(b);return (Math.Max(x,y)+.05)/(Math.Min(x,y)+.05);
     }
-    private async Task CapturePolishAsync(string file,double scale,FrameworkElement? target=null)
+    private async Task CapturePolishAsync(string file,double scale,FrameworkElement? target=null,bool preserveNativePixels=true)
     {
         target??=this;
         // Let theme/font and visual-state animations reach the compositor before
         // reading pixels; UpdateLayout alone does not wait for rendered frames.
-        await Task.Delay(150);
+        _app.MainWindow?.Activate();
+        await Task.Delay(500);
         var bitmap=new RenderTargetBitmap();
-        await bitmap.RenderAsync(target,(int)Math.Round(target.ActualWidth*scale),(int)Math.Round(target.ActualHeight*scale));
+        if(preserveNativePixels)await bitmap.RenderAsync(target);
+        else await bitmap.RenderAsync(target,(int)Math.Round(target.ActualWidth*scale),(int)Math.Round(target.ActualHeight*scale));
         var buffer=await bitmap.GetPixelsAsync();var bytes=new byte[buffer.Length];
         using(var reader=DataReader.FromBuffer(buffer))reader.ReadBytes(bytes);
         using var stream=new InMemoryRandomAccessStream();
         var encoder=await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId,stream);
-        encoder.SetPixelData(BitmapPixelFormat.Bgra8,BitmapAlphaMode.Premultiplied,(uint)bitmap.PixelWidth,(uint)bitmap.PixelHeight,96*scale,96*scale,bytes);
+        var dpi=96*(preserveNativePixels?XamlRoot.RasterizationScale:scale);
+        encoder.SetPixelData(BitmapPixelFormat.Bgra8,BitmapAlphaMode.Premultiplied,(uint)bitmap.PixelWidth,(uint)bitmap.PixelHeight,dpi,dpi,bytes);
         await encoder.FlushAsync();stream.Seek(0);var encoded=new byte[stream.Size];
         using(var reader=new DataReader(stream.GetInputStreamAt(0))){await reader.LoadAsync((uint)encoded.Length);reader.ReadBytes(encoded);}
         await File.WriteAllBytesAsync(file,encoded);

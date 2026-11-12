@@ -41,6 +41,7 @@ public sealed partial class MainPage
                 ShellNavigation.IsPaneOpen = !profile.CompactNavigation;
             }
             CurrentLayoutProfile = profile;
+            ((DoomLauncher.WinUI.Models.AccordionDensityLayout)Resources["AccordionDensityLayout"]).FitViewport(testHeight ?? ActualHeight);
             NavigationBrand.Visibility = ShellNavigation.IsPaneOpen ? Visibility.Visible : Visibility.Collapsed;
             SidebarStatistics.Visibility = NavigationBrand.Visibility;
             ShellNavigation.IsPaneToggleButtonVisible = profile.CompactNavigation;

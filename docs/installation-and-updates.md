@@ -43,5 +43,7 @@ Move/copy the complete installation to preserve portable data. Definitions
 pointing at external files still depend on those files; keep IWADs, source ports
 and mods within the corresponding `Data` folders for an independent installation.
 
-The RC package checks update preservation, but does not certify every historical
-beta database or a clean Windows/device compatibility matrix. See its release notes.
+The 1.0 acceptance matrix checks representative historical packages, portable
+updates and rollback; it does not certify every user's database. A clean Windows
+10/11 test was not performed because no separate machine or clean VM was available.
+See [acceptance scope and known limitations](release-acceptance.md).

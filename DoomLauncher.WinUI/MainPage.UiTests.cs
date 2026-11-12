@@ -221,6 +221,7 @@ public sealed partial class MainPage
             table.Configure(Strings, tableState); table.SetServers(fixtureServers, tableState.SelectedAddress); await Layout();
             Check(table.SelectedServer?.Name == "Beta" && Strings["ServerName"] != "ServerName"
                 && Strings["HostAndDirectConnect"] != "HostAndDirectConnect", "Server selection and translated table settings restore without network requests");
+            await CheckExternalDefinitionSaveAsync(root, Check, Layout);
             await RunPolishUiChecksAsync(root, Check, Layout);
         }
         catch (Exception error) { failure = error.ToString(); }

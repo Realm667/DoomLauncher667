@@ -28,6 +28,9 @@ as part of an update. To roll back, restore the complete backup, not just an
 older executable over an upgraded database. See Documentation for details.
 LICENSE, THIRD-PARTY-NOTICES.md and Licenses contain redistribution notices.
 Source code for this exact release is linked in VERSION.txt.
+Validation scope and known gaps are in Documentation/release-acceptance.md.
+In particular, clean Windows 10/11 testing was not performed; the executables
+are currently unsigned.
 
 This distribution intentionally contains no user database, IWADs, source
 ports, mods or personal settings. The first start opens the setup and migration
@@ -43,6 +46,10 @@ directory and restores the initial empty folder structure.
 
 Deutsch
 -------
+
+Testumfang und bekannte Luecken: Documentation/release-acceptance.md.
+Ein Test auf frisch installiertem Windows 10/11 war nicht moeglich;
+die Programmdateien sind derzeit nicht digital signiert.
 
 Start:
   DoomLauncher667.exe

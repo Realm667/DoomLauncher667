@@ -27,6 +27,7 @@ public sealed partial class MainPage
             StringComparer.OrdinalIgnoreCase);
         var portableWarning = new InfoBar
         {
+            Name = "DefinitionPortableWarning",
             IsClosable = true,
             IsOpen = false,
             Severity = InfoBarSeverity.Warning,
@@ -43,6 +44,7 @@ public sealed partial class MainPage
             string.Empty);
         var sourcePortChoice = new ListView
         {
+            Name = "DefinitionSourcePortChoice",
             HorizontalAlignment = HorizontalAlignment.Stretch,
             ItemTemplate = CreateSourcePortDefinitionTemplate(),
             ItemsSource = new[] { newSourcePort }.Concat(data.SourcePorts).ToArray(),
@@ -55,9 +57,13 @@ public sealed partial class MainPage
         sourcePortDeleteButton.IsEnabled = false;
         AutomationProperties.SetName(sourcePortChoice, Strings.SourcePort);
         var sourcePortName = CreateDefinitionTextBox(Strings["Name"]);
+        sourcePortName.Name = "DefinitionSourcePortName";
         var sourcePortVersion = CreateDefinitionTextBox(Strings["Version"]);
+        sourcePortVersion.Name = "DefinitionSourcePortVersion";
         var sourcePortDirectory = CreateDefinitionTextBox(Strings["Directory"]);
+        sourcePortDirectory.Name = "DefinitionSourcePortDirectory";
         var sourcePortExecutable = CreateDefinitionTextBox(Strings["Executable"]);
+        sourcePortExecutable.Name = "DefinitionSourcePortExecutable";
         var sourcePortExtensions = CreateDefinitionTextBox(Strings["Extensions"]);
         var sourcePortExtra = CreateDefinitionTextBox(Strings["ExtraParameters"]);
         var screenshotSupportOptions = new[]
@@ -518,6 +524,7 @@ public sealed partial class MainPage
 
         var saveStatus = new InfoBar
         {
+            Name = "DefinitionSaveStatus",
             IsClosable = true,
             IsOpen = false,
             Severity = InfoBarSeverity.Success,
@@ -695,6 +702,7 @@ public sealed partial class MainPage
         };
         var saveButton = new Button
         {
+            Name = "DefinitionSaveButton",
             Content = Strings["Save"],
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Style = (Style)Application.Current.Resources["AccentButtonStyle"],
@@ -736,22 +744,25 @@ public sealed partial class MainPage
         dialog.Resources["ContentDialogMaxHeight"] = 900d;
         saveButton.Click += async (_, _) =>
         {
+            if (!saveButton.IsEnabled) return;
+            saveButton.IsEnabled = cancelButton.IsEnabled = closeButton.IsEnabled = false;
+            definitionHost.IsEnabled = false;
             try
             {
                 if (ReferenceEquals(definitionHost.Content, sourceContent))
                 {
-                    await WarnIfExternalReferenceAsync(
+                    WarnIfExternalReference(
                         sourcePortDirectory.Text,
-                        acknowledgedExternalPaths);
-                    await WarnIfExternalReferenceAsync(
+                        acknowledgedExternalPaths, portableWarning);
+                    WarnIfExternalReference(
                         sourcePortExecutable.Text,
-                        acknowledgedExternalPaths);
-                    await WarnIfExternalReferencesAsync(
+                        acknowledgedExternalPaths, portableWarning);
+                    WarnIfExternalReferences(
                         screenshotDirectories.Text,
-                        acknowledgedExternalPaths);
-                    await WarnIfExternalReferencesAsync(
+                        acknowledgedExternalPaths, portableWarning);
+                    WarnIfExternalReferences(
                         statisticsDirectories.Text,
-                        acknowledgedExternalPaths);
+                        acknowledgedExternalPaths, portableWarning);
                     var selected =
                         (NativeSourcePortDefinition)sourcePortChoice.SelectedItem;
                     await _app.NativeLibraryService.SaveSourcePortAsync(
@@ -790,9 +801,9 @@ public sealed partial class MainPage
                 }
                 else
                 {
-                    await WarnIfExternalReferenceAsync(
+                    WarnIfExternalReference(
                         iwadArchive.Text,
-                        acknowledgedExternalPaths);
+                        acknowledgedExternalPaths, portableWarning);
                     var selected = (NativeIwadDefinition)iwadChoice.SelectedItem;
                     await _app.NativeLibraryService.SaveIwadAsync(
                         selected with
@@ -830,6 +841,11 @@ public sealed partial class MainPage
                 saveStatus.Message = exception.Message;
                 saveStatus.Severity = InfoBarSeverity.Error;
                 saveStatus.IsOpen = true;
+            }
+            finally
+            {
+                saveButton.IsEnabled = cancelButton.IsEnabled = closeButton.IsEnabled = true;
+                definitionHost.IsEnabled = true;
             }
         };
         cancelButton.Click += (_, _) =>

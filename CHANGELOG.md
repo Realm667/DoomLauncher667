@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 1.0.0 - 2026-11-12
+
+- First stable release of the portable Doom Launcher 667 WinUI client.
+- Fix source-port saving with external paths: display portability warnings inline instead of nesting ContentDialogs; prevent concurrent saves while preserving edits on failure.
+- Bound and recycle collection accordion/detail-table rows and virtualize the collection overview to avoid realizing thousands of migrated mods at once.
+- Honor explicitly injected migration destinations instead of silently falling back to LocalAppData when not started through the bootstrap.
+- Add actual historical-package/schema upgrade, full-folder rollback and 11,000-archive migration acceptance tests, plus native external-source-port create/rename checks.
+- Update current UI screenshots, stable download links, release documentation and portable acceptance notes.
+- Explicitly disclose that clean Windows 10/11 testing was not performed; existing-machine and CI tests are not clean-OS certification.
+
 ## 1.0.0-rc.15 - 2026-11-12
 
 - Complete the 14-point UI/UX polish: responsive navigation/header/toolbars, compact detail flyout, sticky Play footer and grouped detail actions.

@@ -16,9 +16,9 @@ remains its inspiration and the source of the migration compatibility work.
 
 == Download
 
-The current testing release is *1.0.0-rc.15* (Release Candidate, not final 1.0).
+The current stable release is *1.0.0*.
 Download its Windows x64 ZIP from the
-https://github.com/Realm667/DoomLauncher667/releases/tag/v1.0.0-rc.15[RC download page]
+https://github.com/Realm667/DoomLauncher667/releases/tag/v1.0.0[Download Doom Launcher 667 1.0]
 or browse https://github.com/Realm667/DoomLauncher667/releases[all releases].
 Extract the complete archive into a writable folder and launch
 `DoomLauncher667.exe`.
@@ -43,34 +43,24 @@ with Doom Launcher 667. Supply your legally obtained files during setup.
 
 == Screenshots
 
-The RC screenshots below use an isolated demonstration library, not bundled games.
-
-=== Release Candidate library
-
-image::docs/screenshots/rc1-library.jpg[Library in Doom Launcher 667 1.0.0-rc.1,link=docs/screenshots/rc1-library.jpg]
-
-=== Release Candidate achievements
-
-image::docs/screenshots/rc1-achievements.jpg[Achievements in Doom Launcher 667 1.0.0-rc.1,link=docs/screenshots/rc1-achievements.jpg]
-
-The following larger-library examples show earlier Doom Launcher 667 beta builds;
-they are not screenshots of the original Doom Launcher.
-
-=== Collections
-
-image::docs/screenshots/collections.png[Collection overview in Doom Launcher 667,link=docs/screenshots/collections.png]
+The screenshots below show the current 1.0 interface using an isolated
+demonstration library, not bundled games.
 
 === Library
 
-image::docs/screenshots/library.png[Modern library list in Doom Launcher 667,link=docs/screenshots/library.png]
+image::docs/screenshots/1.0-library.png[Library in Doom Launcher 667 1.0,link=docs/screenshots/1.0-library.png]
+
+=== Collections
+
+image::docs/screenshots/1.0-collections.png[Collections in Doom Launcher 667 1.0,link=docs/screenshots/1.0-collections.png]
 
 === Achievements and statistics
 
-image::docs/screenshots/achievements.png[Achievements dashboard in Doom Launcher 667,link=docs/screenshots/achievements.png]
+image::docs/screenshots/1.0-achievements.png[Achievements in Doom Launcher 667 1.0,link=docs/screenshots/1.0-achievements.png]
 
-=== Portable setup
+=== Generate
 
-image::docs/screenshots/setup.png[Source-port and IWAD setup in Doom Launcher 667,link=docs/screenshots/setup.png]
+image::docs/screenshots/1.0-generate.png[Native Obsidian configuration in Doom Launcher 667 1.0,link=docs/screenshots/1.0-generate.png]
 
 == Features
 
@@ -169,14 +159,16 @@ replace the requested batch seed internally. The generated description records
 the reported effective seed and any discrepancy; an unreported seed is marked
 as unverified. Failed generation logs remain in `Data/Temp/Obsidian`.
 
-See link:docs/stabilization-0.9.3.md[stabilization checks and known limitations]
-for the 1.0 preparation work.
+See link:docs/release-acceptance.md[release validation and known limitations].
 
 == Project status and feedback
 
-Doom Launcher 667 is preparing its first stable 1.0 release. The RC is a
-prerelease intended for feedback, not a claim that final acceptance is complete.
-See link:docs/releases/1.0.0-rc.15.md[RC changes and known limitations].
+Doom Launcher 667 1.0 is the first stable release of the new WinUI client.
+See link:docs/releases/1.0.0.md[release notes] and
+link:docs/release-acceptance.md[validation scope and known limitations].
+IMPORTANT: A clean Windows 10/11 installation test was not performed because
+no clean test machine or VM was available. Development-machine and CI results
+do not replace that test. The Windows x64 executables are currently unsigned.
 Please report reproducible problems through
 https://github.com/Realm667/DoomLauncher667/issues[GitHub Issues], following
 link:docs/reporting-problems.md[the reporting checklist].

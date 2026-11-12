@@ -169,6 +169,7 @@ public sealed partial class MainPage : Page
         RebuildCollectionFilterButtons();
         SyncColumnMenu();
         SyncCollectionColumnMenu();
+        StartFirstSetupAcceptance();
         if (!_app.MigrationService.DatabaseExists())
             await ShowMigrationDialogAsync(firstStart: true);
         if (!_app.MigrationService.DatabaseExists())
@@ -208,6 +209,8 @@ public sealed partial class MainPage : Page
         if (_app.UserLibraryStateStore is JsonUserLibraryStateStore { RecoveryNoticeKey: { } notice })
             await ShowActionMessageAsync(Strings["Settings"], Strings[notice], Strings["Close"]);
         await RunNativeUiChecksAsync();
+        if(_firstSetupAcceptance is not null)await _firstSetupAcceptance;
+        await RunReleaseAcceptanceAsync();
         if (_app.IsDebugMode)
         {
             DebugEnvironmentText.Text = string.Join(
@@ -3276,9 +3279,10 @@ public sealed partial class MainPage : Page
         return fullPath;
     }
 
-    private async Task WarnIfExternalReferenceAsync(
+    private void WarnIfExternalReference(
         string reference,
-        ISet<string> acknowledgedExternalPaths)
+        ISet<string> acknowledgedExternalPaths,
+        InfoBar warning)
     {
         if (string.IsNullOrWhiteSpace(reference))
             return;
@@ -3293,47 +3297,30 @@ public sealed partial class MainPage : Page
             return;
         }
 
-        await ShowExternalPathWarningAsync(fullPath, root);
+        // Definitions are already edited inside a ContentDialog. WinUI cannot
+        // open a second modal here; show the portable-path notice inline just
+        // as the Browse action does, without preventing the save.
+        warning.Title = Strings["ExternalPathTitle"];
+        warning.Message = _app.Localization.Format("ExternalPathWarning", fullPath, root);
+        warning.IsOpen = true;
         acknowledgedExternalPaths.Add(fullPath);
     }
 
-    private async Task WarnIfExternalReferencesAsync(
+    private void WarnIfExternalReferences(
         string references,
-        ISet<string> acknowledgedExternalPaths)
+        ISet<string> acknowledgedExternalPaths,
+        InfoBar warning)
     {
         foreach (var reference in references.Split(
                      [';', ','],
                      StringSplitOptions.RemoveEmptyEntries
                      | StringSplitOptions.TrimEntries))
         {
-            await WarnIfExternalReferenceAsync(
+            WarnIfExternalReference(
                 reference,
-                acknowledgedExternalPaths);
+                acknowledgedExternalPaths,
+                warning);
         }
-    }
-
-    private async Task ShowExternalPathWarningAsync(
-        string path,
-        string portableRoot)
-    {
-        var dialog = new ContentDialog
-        {
-            XamlRoot = XamlRoot,
-            RequestedTheme = EffectiveDialogTheme,
-            Title = Strings["ExternalPathTitle"],
-            Content = new TextBlock
-            {
-                MaxWidth = 560,
-                Text = _app.Localization.Format(
-                    "ExternalPathWarning",
-                    path,
-                    portableRoot),
-                TextWrapping = TextWrapping.Wrap,
-            },
-            CloseButtonText = Strings["Continue"],
-        };
-        ApplyDialogTheme(dialog);
-        await dialog.ShowAsync();
     }
 
     private static string GetPortableRoot()

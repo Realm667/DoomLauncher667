@@ -1589,13 +1589,14 @@
                                     </Grid>
                                     <ListView
                                         x:Name="CollectionDetailGameList"
+                                        MaxHeight="{Binding RowViewportHeight, Source={StaticResource AccordionDensityLayout}}"
                                         HorizontalContentAlignment="Left"
                                         ItemTemplate="{StaticResource CollectionListRowTemplate}"
                                         SelectionChanged="CollectionDetailGameList_SelectionChanged"
                                         ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                                         ScrollViewer.HorizontalScrollMode="Disabled"
-                                        ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                        ScrollViewer.VerticalScrollMode="Disabled"
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        ScrollViewer.VerticalScrollMode="Enabled"
                                         SelectionMode="Single">
                                         <ListView.ItemContainerStyle>
                                             <Style TargetType="ListViewItem">
@@ -1649,14 +1650,21 @@
                     </Grid>
                 </Grid>
 
-                <ScrollViewer
+                <ListView
                     x:Name="CollectionListHost"
-                    HorizontalScrollBarVisibility="Disabled"
-                    VerticalScrollBarVisibility="Auto">
-                    <ItemsControl
-                        Margin="0,0,18,0"
-                        ItemsSource="{x:Bind ViewModel.CollectionGroups, Mode=OneWay}">
-                        <ItemsControl.ItemTemplate>
+                    Margin="0,0,18,0"
+                    SelectionMode="None"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    ItemsSource="{x:Bind ViewModel.CollectionGroups, Mode=OneWay}">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
                             <DataTemplate x:DataType="models:LibraryGroup">
                                 <Border
                                     Margin="{Binding CardMargin, Source={StaticResource AccordionDensityLayout}}"
@@ -1751,14 +1759,15 @@
                                                         <TextBlock Grid.Column="10" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding DataContext.Favorites, ElementName=RootPage}" />
                                                     </Grid>
                                                     <ListView
+                                                        MaxHeight="{Binding RowViewportHeight, Source={StaticResource AccordionDensityLayout}}"
                                                         HorizontalContentAlignment="Left"
                                                         IsItemClickEnabled="True"
                                                         ItemClick="CollectionOverviewGame_ItemClick"
                                                         ItemsSource="{x:Bind Items}"
                                                         ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                                                         ScrollViewer.HorizontalScrollMode="Disabled"
-                                                        ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                                        ScrollViewer.VerticalScrollMode="Disabled"
+                                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                        ScrollViewer.VerticalScrollMode="Enabled"
                                                         SelectionMode="None">
                                                         <ListView.ItemContainerStyle>
                                                             <Style TargetType="ListViewItem">
@@ -1849,9 +1858,8 @@
                                     </Grid>
                                 </Border>
                             </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
+                        </ListView.ItemTemplate>
+                </ListView>
             </Grid>
 
             <ScrollViewer

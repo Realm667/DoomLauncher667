@@ -564,13 +564,18 @@ public sealed class LegacyInstallationMigrationService(
             throw new InvalidDataException($"Die importierte Datenbank ist beschädigt: {result}");
     }
 
-    private static string GetDestinationDatabasePath()
+    private string GetDestinationDatabasePath()
     {
         var configured = Environment.GetEnvironmentVariable(
             DoomLauncherDatabaseLocator.DatabaseEnvironmentVariable);
         if (!string.IsNullOrWhiteSpace(configured))
             return Path.GetFullPath(
                 Environment.ExpandEnvironmentVariables(configured.Trim().Trim('"')));
+        // Respect an explicitly supplied database destination even before its
+        // file exists. Otherwise non-bootstrap callers silently migrate into
+        // LocalAppData instead of their requested portable installation.
+        try { return Path.GetFullPath(databaseLocator.FindDatabase()); }
+        catch (FileNotFoundException) { }
         return Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "DoomLauncher667",

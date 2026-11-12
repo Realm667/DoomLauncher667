@@ -10,6 +10,17 @@ public sealed class AccordionDensityLayout : INotifyPropertyChanged
     private Thickness _headerPadding = new(16, 11, 16, 11);
     private double _headerMinHeight = 46;
     private double _titleFontSize = 18;
+    private double _rowViewportHeight = 480;
+
+    // A finite viewport is essential for ItemsStackPanel recycling. An unbounded
+    // list inside the accordion's outer scroller realizes every migrated mod.
+    public double RowViewportHeight
+    {
+        get => _rowViewportHeight;
+        private set => Set(ref _rowViewportHeight, value);
+    }
+
+    public void FitViewport(double height) => RowViewportHeight = Math.Clamp(height - 300, 160, 560);
 
     public Thickness CardMargin
     {

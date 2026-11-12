@@ -69,6 +69,14 @@ jobs:
         shell: pwsh
         run: ./deployment/test-native-ui.ps1 -PackageDirectory "${{ steps.package.outputs.package }}"
 
+      - name: Test historical upgrades, rollback and large collections
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ./deployment/get-test-releases.ps1 -OutputDirectory "$env:RUNNER_TEMP/historical-releases"
+          ./deployment/test-release-acceptance.ps1 -PackageDirectory "${{ steps.package.outputs.package }}" -HistoricalDirectory "$env:RUNNER_TEMP/historical-releases" -OutputDirectory "$env:RUNNER_TEMP/release-acceptance"
+
       - name: Retain native UI reports and visual QA
         if: always()
         uses: actions/upload-artifact@v4
@@ -77,6 +85,9 @@ jobs:
           path: |
             ${{ steps.ui.outputs.report }}
             ${{ steps.ui.outputs.visualqa }}
+            ${{ runner.temp }}/release-acceptance/matrix.json
+            ${{ runner.temp }}/release-acceptance/**/release-test-report.json
+            ${{ runner.temp }}/release-acceptance/**/runtime-evidence.json
           if-no-files-found: ignore
           retention-days: 14
 
