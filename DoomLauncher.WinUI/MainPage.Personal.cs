@@ -23,8 +23,7 @@ public sealed partial class MainPage
     {
         var dialog = new ContentDialog { XamlRoot = XamlRoot, Title = title, Content = content,
             CloseButtonText = Strings["Close"], PrimaryButtonText = primary ?? string.Empty, DefaultButton = ContentDialogButton.Close };
-        ApplyDialogTheme(dialog); dialog.Resources["ContentDialogMinWidth"] = 650d;
-        dialog.Resources["ContentDialogMaxWidth"] = 1100d; return dialog;
+        ApplyDialogTheme(dialog); FitDialogToViewport(dialog); return dialog;
     }
     private void LibraryTools_Opening(object sender, object args)
     { foreach (var item in ((MenuFlyout)sender).Items.OfType<MenuFlyoutItem>()) item.Text = Strings[item.Tag.ToString()!]; }

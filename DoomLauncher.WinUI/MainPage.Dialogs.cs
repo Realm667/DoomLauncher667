@@ -31,7 +31,7 @@ public sealed partial class MainPage
             Minimum = 0,
             Maximum = 100,
             Value = 0,
-            MinWidth = 440,
+            MinWidth = 0,
             Foreground = (Brush)Application.Current.Resources[
                 "DoomControlAccentBrush"],
         };
@@ -43,7 +43,7 @@ public sealed partial class MainPage
         var statusText = new TextBlock { Text = status, TextWrapping = TextWrapping.Wrap };
         var content = new StackPanel
         {
-            Width = 480,
+            Width = UiLayoutPolicy.DialogWidth(XamlRoot.Size.Width, 480),
             Spacing = 12,
             Children =
             {
@@ -62,7 +62,7 @@ public sealed partial class MainPage
         };
         dialog.CloseButtonClick += (_, _) => cancellation?.Cancel();
         ApplyDialogTheme(dialog);
-        dialog.Resources["ContentDialogMinWidth"] = 540d;
+        FitDialogToViewport(dialog);
 
         var completion = new TaskCompletionSource<T>(
             TaskCreationOptions.RunContinuationsAsynchronously);
@@ -139,6 +139,13 @@ public sealed partial class MainPage
         string message,
         string action)
     {
+        // Setup/wizard Next and Finish remain explicit. Routine acknowledgments
+        // no longer interrupt selection, keyboard focus or navigation.
+        if (action == Strings["Close"] || action == Strings["Ok"])
+        {
+            ShowFeedback(title, message);
+            return;
+        }
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
@@ -163,8 +170,12 @@ public sealed partial class MainPage
             XamlRoot = XamlRoot,
             RequestedTheme = EffectiveDialogTheme,
             Title = title,
-            Content = message,
-            CloseButtonText = Strings["Cancel"],
+            Content = new StackPanel { Spacing = 12, Children = {
+                new TextBlock { Text = Strings["ActionFailedGuidance"], TextWrapping = TextWrapping.Wrap },
+                new Expander { Header = Strings["TechnicalDetails"], HorizontalContentAlignment = HorizontalAlignment.Stretch,
+                    Content = new ScrollViewer { MaxHeight = 300, Content = new TextBlock { Text = message, IsTextSelectionEnabled = true, TextWrapping = TextWrapping.Wrap } } }
+            } },
+            CloseButtonText = Strings["Close"],
         };
         ApplyDialogTheme(dialog);
         await dialog.ShowAsync();

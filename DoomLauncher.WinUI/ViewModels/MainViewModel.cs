@@ -193,6 +193,7 @@ public sealed partial class MainViewModel(
             OnPropertyChanged(nameof(HasError));
             OnPropertyChanged(nameof(IsEmpty));
             OnPropertyChanged(nameof(EmptyStateVisibility));
+            NotifyStatisticsChanged();
         }
     }
 
@@ -391,13 +392,13 @@ public sealed partial class MainViewModel(
     public bool HasIdGamesStatus => !string.IsNullOrWhiteSpace(IdGamesStatus);
     public Visibility HomeIwadGroupsVisibility =>
         HomeIwadGroups.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-    public string TotalEntriesValue => _catalog.Count.ToString("N0");
-    public string TotalMapsValue => _catalog.Sum(game => game.MapCount).ToString("N0");
+    public string TotalEntriesValue => !_isInitialized ? "…" : _catalog.Count.ToString("N0");
+    public string TotalMapsValue => !_isInitialized ? "…" : _catalog.Sum(game => game.MapCount).ToString("N0");
     public string TotalPlayedHoursValue =>
-        (_catalog.Sum(game => game.MinutesPlayed) / 60d).ToString("N1");
-    public string PlayedEntriesValue => _statistics.Played.ToString("N0");
-    public string UnplayedEntriesValue => _statistics.Unplayed.ToString("N0");
-    public string FinishedEntriesValue => _statistics.Finished.ToString("N0");
+        !_isInitialized ? "…" : (_catalog.Sum(game => game.MinutesPlayed) / 60d).ToString("N1");
+    public string PlayedEntriesValue => !_isInitialized ? "…" : _statistics.Played.ToString("N0");
+    public string UnplayedEntriesValue => !_isInitialized ? "…" : _statistics.Unplayed.ToString("N0");
+    public string FinishedEntriesValue => !_isInitialized ? "…" : _statistics.Finished.ToString("N0");
     public int UnseenAchievementCount => _unseenAchievementKeys.Count;
     public Visibility AchievementBadgeVisibility =>
         UnseenAchievementCount > 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -459,8 +460,8 @@ public sealed partial class MainViewModel(
         LibrarySection.Debug => localization.Get("Debug"),
         _ => localization.Get("MyLibrary"),
     };
-    public string EmptyStateMessage => !string.IsNullOrWhiteSpace(_searchText)
-        ? localization.Get("AdjustSearch")
+    public string EmptyStateMessage => !string.IsNullOrWhiteSpace(_searchText) || _categoryFilter != LibraryCategoryFilter.All || _collectionFilterTag is not null
+        ? localization.Get("FilterNoMatches")
         : _activeSection switch
         {
             LibrarySection.Favorites => localization.Get("FavoritesEmpty"),
@@ -472,6 +473,7 @@ public sealed partial class MainViewModel(
         };
     public bool CanLaunchWithOptions =>
         CanLaunch && !IsLaunchOptionsLoading;
+    public string EmptyStateActionText => localization.Get(_catalog.Count == 0 ? "ImportAction" : "ClearFilters");
     public string LaunchSetupHint => localization.Get("LaunchSetupHint");
     public Visibility LaunchSetupHintVisibility => !SelectedGame.IsPlaceholder
         && (SelectedGame.NeedsSourcePort || SelectedGame.NeedsIwad) ? Visibility.Visible : Visibility.Collapsed;
@@ -1412,6 +1414,7 @@ public sealed partial class MainViewModel(
             RebuildAchievements();
             NotifyStatisticsChanged();
             _isInitialized = true;
+            NotifyStatisticsChanged();
             loadSucceeded = true;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

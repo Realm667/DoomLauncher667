@@ -172,8 +172,7 @@ public sealed class LibraryItem : INotifyPropertyChanged
     public BitmapImage Artwork => _artwork ??= GetArtwork(_artworkPath);
     public BitmapImage DetailArtwork => _detailArtwork ??=
         GetArtwork(_detailArtworkPath, 1600);
-    public Stretch ArtworkStretch =>
-        _usesDoomPixelAspect ? Stretch.Fill : Stretch.UniformToFill;
+    public Stretch ArtworkStretch => Stretch.Uniform;
     public IReadOnlyList<BitmapImage> Images => _images ??=
         new[] { _detailArtworkPath }
             .Concat(ScreenshotPaths)
@@ -181,10 +180,7 @@ public sealed class LibraryItem : INotifyPropertyChanged
             .Select(path => GetArtwork(path, 1600))
             .ToArray();
     public BitmapImage CurrentImage => Images[_currentImageIndex];
-    public Stretch CurrentImageStretch =>
-        _currentImageIndex == 0 && _usesDoomPixelAspect
-            ? Stretch.Fill
-            : Stretch.UniformToFill;
+    public Stretch CurrentImageStretch => Stretch.Uniform;
     public bool HasMultipleImages => Images.Count > 1;
     public Visibility SliderVisibility =>
         HasMultipleImages ? Visibility.Visible : Visibility.Collapsed;
@@ -207,7 +203,7 @@ public sealed class LibraryItem : INotifyPropertyChanged
         ?? (IsFinished ? "Yes" : "No");
     public Visibility FinishedBadgeVisibility =>
         IsFinished ? Visibility.Visible : Visibility.Collapsed;
-    public double FinishedOpacity => IsFinished ? 0.5 : 1.0;
+    public double FinishedOpacity => IsFinished ? 0.85 : 1.0;
     public bool IsFavorite
     {
         get => _isFavorite;

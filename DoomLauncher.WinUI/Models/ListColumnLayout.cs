@@ -14,7 +14,16 @@ public sealed class ListColumnLayout : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public GridLength ArtworkWidth => Width("Artwork", 72);
-    public GridLength TitleWidth => Width("Title", 240);
+    private double _availableWidth;
+    public GridLength TitleWidth => Width("Title", Math.Max(280, _availableWidth - OtherColumnsWidth));
+    private double OtherColumnsWidth => new[] { ArtworkWidth, AuthorWidth, ReleaseDateWidth, MapsWidth,
+        RatingWidth, DownloadedWidth, SourcePortWidth, PlaytimeWidth, FinishedWidth, FavoritesWidth }.Sum(value => value.Value);
+    public void SetAvailableWidth(double width)
+    {
+        if (Math.Abs(_availableWidth - width) < 1) return;
+        _availableWidth = width;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TitleWidth)));
+    }
     public GridLength AuthorWidth => Width("Author", 160);
     public GridLength ReleaseDateWidth => Width("ReleaseDate", 132);
     public GridLength MapsWidth => Width("Maps", 80);

@@ -37,8 +37,13 @@ public sealed partial class MainPage
         }
         try
         {
+            var nativeTestScale = XamlRoot.RasterizationScale;
+            _app.MainWindow!.AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(1440*nativeTestScale),(int)(950*nativeTestScale)));
             await Layout();
+            ApplyResponsiveLayout(); await Layout();
             Check(GameList.IsLoaded && LibraryDetailsPane.IsLoaded, "Native list and shared details are loaded");
+            ((Expander)LibraryDetailsPane.FindName("EntryToolsExpander")).IsExpanded = true;
+            await Layout();
             var iconWindow = WinRT.Interop.WindowNative.GetWindowHandle(_app.MainWindow!);
             var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "DoomLauncher.ico");
             Check(WindowIconMatchesAsset(iconWindow, 0, iconPath) && WindowIconMatchesAsset(iconWindow, 1, iconPath),
@@ -206,6 +211,7 @@ public sealed partial class MainPage
             table.Configure(Strings, tableState); table.SetServers(fixtureServers, tableState.SelectedAddress); await Layout();
             Check(table.SelectedServer?.Name == "Beta" && Strings["ServerName"] != "ServerName"
                 && Strings["HostAndDirectConnect"] != "HostAndDirectConnect", "Server selection and translated table settings restore without network requests");
+            await RunPolishUiChecksAsync(root, Check, Layout);
         }
         catch (Exception error) { failure = error.ToString(); }
         var report = Path.Combine(root, "ui-test-report.json");

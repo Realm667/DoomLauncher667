@@ -74,8 +74,10 @@ public sealed class SqliteLibraryCatalog(
                     JOIN Tags tag ON tag.TagID = mapping.TagID
                     WHERE mapping.FileID = game.GameFileID
                 ) AS TagNames,
-                NULLIF(TRIM(sourcePort.Name), '') AS SourcePort,
+                CASE WHEN game.SourcePortID IS NULL AND sourcePort.Name IS NOT NULL
+                    THEN sourcePort.Name || $defaultSuffix ELSE NULLIF(TRIM(sourcePort.Name), '') END AS SourcePort,
                 NULLIF(TRIM(baseIwad.FileName), '') AS BaseIwadFileName,
+                CASE WHEN game.IWadID IS NULL THEN 1 ELSE 0 END AS UsesDefaultIwad,
                 NULLIF(TRIM(ownIwad.FileName), '') AS OwnIwadFileName,
                 COALESCE((
                     SELECT titlePic.FileName
@@ -142,9 +144,12 @@ public sealed class SqliteLibraryCatalog(
                 ) AS ScreenshotFileNames
             FROM GameFiles game
             LEFT JOIN SourcePorts sourcePort
-                ON sourcePort.SourcePortID = game.SourcePortID
+                ON sourcePort.SourcePortID = COALESCE(game.SourcePortID,
+                    (SELECT CAST(Value AS INTEGER) FROM Configuration WHERE Name='DefaultSourcePort' LIMIT 1))
+                AND COALESCE(sourcePort.Archived,0)=0
             LEFT JOIN IWads baseIwad
-                ON baseIwad.IWadID = game.IWadID
+                ON baseIwad.IWadID = COALESCE(game.IWadID,
+                    (SELECT CAST(Value AS INTEGER) FROM Configuration WHERE Name='DefaultIWad' LIMIT 1))
             LEFT JOIN IWads ownIwad
                 ON ownIwad.GameFileID = game.GameFileID
             LEFT JOIN WinUI_GameState winState
@@ -156,6 +161,7 @@ public sealed class SqliteLibraryCatalog(
             ORDER BY COALESCE(NULLIF(TRIM(game.Title), ''), game.FileName) COLLATE NOCASE;
             """;
         command.Parameters.AddWithValue("$thumbnailFileType", ThumbnailFileType);
+        command.Parameters.AddWithValue("$defaultSuffix", localization.Format("DefaultLaunchChoice", "").TrimEnd());
         command.Parameters.AddWithValue("$screenshotFileType", ScreenshotFileType);
 
         var entries = new List<LibraryCatalogEntry>();
@@ -170,7 +176,9 @@ public sealed class SqliteLibraryCatalog(
                 GetNullableString(reader, "BaseIwadFileName"));
             ownIwad = ownIwad.Length == 0 ? null : ownIwad;
             baseIwad = baseIwad.Length == 0 ? null : baseIwad;
-            var iwad = ownIwad ?? baseIwad ?? localization.Get("NotSet");
+            var iwad = ownIwad ?? (baseIwad is not null
+                ? GetInt32(reader, "UsesDefaultIwad") == 1 ? localization.Format("DefaultLaunchChoice", baseIwad) : baseIwad
+                : localization.Get("NotSet"));
             var title = DatabaseTextSanitizer.SingleLine(
                 GetNullableString(reader, "Title"));
             if (title.Length == 0)

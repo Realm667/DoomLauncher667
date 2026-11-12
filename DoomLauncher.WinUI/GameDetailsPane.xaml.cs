@@ -17,12 +17,26 @@ public sealed partial class GameDetailsPane : UserControl
     public GameDetailsPane()
     {
         InitializeComponent();
+        SizeChanged += (_, _) =>
+        {
+            ArtworkFrame.Height = Math.Clamp(ActualHeight * .25, 100, 200);
+            LaunchOptionsContent.Width = Math.Max(220, Math.Min(300, (XamlRoot?.Size.Width ?? 420) - 100));
+        };
     }
 
     public MainViewModel? ViewModel
     {
         get => (MainViewModel?)GetValue(ViewModelProperty);
         set => SetValue(ViewModelProperty, value);
+    }
+
+    private void Artwork_ImageFailed(object sender, ExceptionRoutedEventArgs args)
+    {
+        if (sender is not Image image) return;
+        const string fallback = "ms-appx:///Assets/Library/grayscale/doom2.png";
+        if (image.Source is Microsoft.UI.Xaml.Media.Imaging.BitmapImage bitmap && bitmap.UriSource?.ToString() == fallback) return;
+        image.Source = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(new Uri(fallback));
+        ToolTipService.SetToolTip(image, DataContext is UiText text ? text["ArtworkUnavailable"] : "Artwork unavailable");
     }
 
     public event RoutedEventHandler? PlayRequested;

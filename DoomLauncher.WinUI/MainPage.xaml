@@ -27,6 +27,7 @@
         <models:ListDensityLayout x:Key="ListDensityLayout" />
         <models:AccordionDensityLayout x:Key="AccordionDensityLayout" />
         <models:TileLayout x:Key="TileLayout" />
+        <models:ShowcaseLayout x:Key="ShowcaseLayout" />
         <MenuFlyout
             x:Key="LibraryItemContextMenu"
             Opening="LibraryItemContextMenu_Opening">
@@ -131,7 +132,7 @@
         </Style>
         <DataTemplate x:Key="HomeSpotlightTemplate" x:DataType="models:LibraryItem">
             <Button
-                Height="173"
+                Height="{Binding SpotlightHeight, Source={StaticResource ShowcaseLayout}}"
                 Click="OverviewButton_Click"
                 ContextFlyout="{StaticResource LibraryItemContextMenu}"
                 Style="{StaticResource ShowcaseButtonStyle}"
@@ -330,14 +331,14 @@
                     <ContentControl Content="{x:Bind Self}" ContentTemplate="{StaticResource NewImportBadgeTemplate}"
                                     HorizontalAlignment="Left" VerticalAlignment="Top" IsTabStop="False" />
                 </Border>
-                <TextBlock Grid.Column="1" Margin="7,0" VerticalAlignment="Center" FontFamily="{StaticResource DoomHeadlineFontFamily}" FontSize="12" FontWeight="SemiBold" Text="{x:Bind Title}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="2" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind Author}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="1" Margin="7,0" VerticalAlignment="Center" FontFamily="{StaticResource DoomHeadlineFontFamily}" FontSize="13" FontWeight="SemiBold" ToolTipService.ToolTip="{x:Bind Title}" Text="{x:Bind Title}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" ToolTipService.ToolTip="{x:Bind Author}" Text="{x:Bind Author}" TextTrimming="CharacterEllipsis" />
                 <TextBlock Grid.Column="3" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding ReleaseDate, Mode=OneWay}" />
-                <TextBlock Grid.Column="4" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind Maps}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="5" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind Rating}" />
+                <TextBlock Grid.Column="4" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Maps}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="5" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Rating}" />
                 <TextBlock Grid.Column="6" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding Downloaded, Mode=OneWay}" />
-                <TextBlock Grid.Column="7" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind SourcePort}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="8" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind Playtime}" />
+                <TextBlock Grid.Column="7" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" ToolTipService.ToolTip="{x:Bind SourcePort}" Text="{x:Bind SourcePort}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="8" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Playtime}" />
                 <CheckBox
                     Grid.Column="9"
                     HorizontalAlignment="Center"
@@ -385,17 +386,17 @@
         IsPaneOpen="True"
         IsPaneToggleButtonVisible="False"
         IsSettingsVisible="False"
-        OpenPaneLength="224"
+        OpenPaneLength="250"
         PaneDisplayMode="Left"
         FontFamily="{StaticResource DoomBodyFontFamily}"
-        FontWeight="Light"
+        FontWeight="Normal"
         SelectionChanged="ShellNavigation_SelectionChanged">
 
         <NavigationView.PaneHeader>
-            <StackPanel Margin="8,16,8,18" Orientation="Horizontal" Spacing="12">
+            <StackPanel x:Name="NavigationBrand" Margin="8,16,8,18" Orientation="Horizontal" Spacing="10">
                 <Image
-                    Width="52"
-                    Height="52"
+                    Width="40"
+                    Height="40"
                     Source="Assets/logo_alpha_small_cropped.png"
                     Stretch="Uniform" />
                 <StackPanel VerticalAlignment="Center">
@@ -409,7 +410,7 @@
         </NavigationView.PaneHeader>
 
         <NavigationView.PaneFooter>
-            <Border
+            <Border x:Name="SidebarStatistics"
                 Margin="8,8,8,4"
                 Padding="12"
                 Background="{StaticResource DoomSurfaceBrush}"
@@ -503,7 +504,7 @@
             </NavigationViewItem>
         </NavigationView.FooterMenuItems>
 
-        <Grid Padding="28,18,28,24" RowSpacing="18">
+        <Grid x:Name="ContentLayout" Padding="28,18,28,24" RowSpacing="14" SizeChanged="ResponsiveLayout_SizeChanged">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -511,14 +512,15 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Grid ColumnSpacing="20">
+            <Grid x:Name="PageHeader" ColumnSpacing="16" RowSpacing="10">
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="380" />
+                    <ColumnDefinition x:Name="SearchColumn" Width="320" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <StackPanel>
+                <StackPanel x:Name="PageHeading">
                     <TextBlock
                         Style="{StaticResource SectionTitleStyle}"
                         Text="{x:Bind ViewModel.SectionTitle, Mode=OneWay}" />
@@ -547,7 +549,7 @@
                     </AutoSuggestBox.KeyboardAccelerators>
                 </AutoSuggestBox>
 
-                <StackPanel
+                <StackPanel x:Name="PageTools"
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     Orientation="Horizontal"
@@ -608,9 +610,10 @@
             </Grid>
 
             <Grid
-                Grid.Row="1"
+                x:Name="LibraryToolbar" Grid.Row="1"
                 ColumnSpacing="16"
                 Visibility="{x:Bind ViewModel.LibraryVisibility, Mode=OneWay}">
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -650,10 +653,11 @@
                             Content="{Binding Unplayed}" />
                     </StackPanel>
                 </ScrollViewer>
-                <StackPanel
+                <StackPanel x:Name="LibraryViewTools"
                     Grid.Column="1"
                     Orientation="Horizontal"
                     Spacing="8">
+                    <Button x:Name="CompactDetailsButton" Content="{Binding Details}" Click="CompactDetails_Click" Visibility="Collapsed" />
                     <ComboBox
                         x:Name="SortOrderBox"
                         Width="170"
@@ -729,7 +733,7 @@
                 Grid.Row="1"
                 HorizontalAlignment="Right"
                 Visibility="{x:Bind ViewModel.CollectionsVisibility, Mode=OneWay}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
+                <local:WrapPanel x:Name="CollectionsViewTools" Spacing="8">
                     <Button
                         x:Name="NewCollectionButton"
                         Height="40"
@@ -821,16 +825,16 @@
                         ToolTipService.ToolTip="{Binding TileSize}"
                         Value="{Binding CardWidth, Source={StaticResource TileLayout}, Mode=OneWay}"
                         ValueChanged="TileSizeSlider_ValueChanged" />
-                </StackPanel>
+                </local:WrapPanel>
             </Grid>
 
-            <Grid
+            <Grid x:Name="LibraryBody"
                 Grid.Row="2"
                 ColumnSpacing="20"
                 Visibility="{x:Bind ViewModel.LibraryVisibility, Mode=OneWay}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="350" />
+                    <ColumnDefinition x:Name="LibraryDetailsColumn" Width="350" />
                 </Grid.ColumnDefinitions>
 
                 <Grid>
@@ -892,7 +896,7 @@
                                 <Button x:Name="SourcePortHeader" Grid.Column="7" Click="ColumnHeader_Click" Content="{Binding SourcePort}" Style="{StaticResource TableHeaderButtonStyle}" Tag="SourcePort" />
                                 <Button x:Name="PlaytimeHeader" Grid.Column="8" Click="ColumnHeader_Click" Content="{Binding Playtime}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Playtime" />
                                 <Button x:Name="FinishedHeader" Grid.Column="9" Click="ColumnHeader_Click" Content="{Binding Finished}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Finished" />
-                                <TextBlock Grid.Column="10" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding Favorites}" />
+                                <TextBlock Grid.Column="10" Margin="7,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="{Binding Favorites}" />
                             </Grid>
                         </ScrollViewer>
                         <ListView
@@ -980,17 +984,18 @@
                                             Margin="7,0"
                                             VerticalAlignment="Center"
                                             FontFamily="{StaticResource DoomHeadlineFontFamily}"
-                                            FontSize="12"
+                                            FontSize="13"
                                             FontWeight="SemiBold"
+                                            ToolTipService.ToolTip="{x:Bind Title}"
                                             Text="{x:Bind Title}"
                                             TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Grid.Column="2" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind Author}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="2" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" ToolTipService.ToolTip="{x:Bind Author}" Text="{x:Bind Author}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Grid.Column="3" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding ReleaseDate, Mode=OneWay}" />
-                                        <TextBlock Grid.Column="4" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind Maps}" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Grid.Column="5" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind Rating}" />
+                                        <TextBlock Grid.Column="4" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Maps}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="5" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Rating}" />
                                         <TextBlock Grid.Column="6" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding Downloaded, Mode=OneWay}" />
-                                        <TextBlock Grid.Column="7" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind SourcePort}" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Grid.Column="8" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind Playtime}" />
+                                        <TextBlock Grid.Column="7" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" ToolTipService.ToolTip="{x:Bind SourcePort}" Text="{x:Bind SourcePort}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="8" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Playtime}" />
                                         <CheckBox
                                             Grid.Column="9"
                                             HorizontalAlignment="Center"
@@ -1054,6 +1059,7 @@
                             Text="{x:Bind ViewModel.EmptyStateMessage, Mode=OneWay}"
                             TextAlignment="Center"
                             TextWrapping="Wrap" />
+                        <Button Content="{Binding ViewModel.EmptyStateActionText, ElementName=RootPage}" Click="EmptyStateAction_Click" HorizontalAlignment="Center" />
                     </StackPanel>
                 </Grid>
 
@@ -1102,7 +1108,7 @@
                             ValueChanged="TileSizeSlider_ValueChanged" />
                     </StackPanel>
 
-                    <Grid Height="360" ColumnSpacing="14">
+                    <Grid x:Name="HomeShowcase" Height="320" ColumnSpacing="14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1.65*" />
                             <ColumnDefinition Width="*" />
@@ -1135,7 +1141,7 @@
                                     CornerRadius="13">
                                     <TextBlock
                                         FontFamily="{StaticResource DoomHeadlineFontFamily}"
-                                        FontSize="12"
+                                        FontSize="13"
                                         FontWeight="SemiBold"
                                         Text="{Binding Featured}" />
                                 </Border>
@@ -1417,7 +1423,8 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <Grid Margin="0,0,18,14" ColumnSpacing="12">
+                        <Grid x:Name="CollectionEntryHeader" Margin="0,0,0,14" ColumnSpacing="12" RowSpacing="8">
+                            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
@@ -1442,10 +1449,10 @@
                                     x:Name="CollectionDetailProgress"
                                     Style="{StaticResource MetaTextStyle}" />
                             </StackPanel>
-                            <StackPanel
+                            <local:WrapPanel x:Name="CollectionActionToolbar"
                                 Grid.Column="2"
-                                Orientation="Horizontal"
                                 Spacing="8">
+<Button x:Name="CompactCollectionDetailsButton" Content="{Binding Details}" Click="CompactDetails_Click" Visibility="Collapsed" />
                                 <Button
                                     Height="40"
                                     Padding="12,6"
@@ -1492,7 +1499,7 @@
                                         <TextBlock Text="{Binding DeleteCollection}" />
                                     </StackPanel>
                                 </Button>
-                            </StackPanel>
+                            </local:WrapPanel>
                         </Grid>
 
                         <Grid Grid.Row="1">
@@ -1501,7 +1508,7 @@
                                 ColumnSpacing="20">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="350" />
+                                    <ColumnDefinition x:Name="CollectionGridDetailsColumn" Width="350" />
                                 </Grid.ColumnDefinitions>
                                 <GridView
                                     x:Name="CollectionDetailGameGrid"
@@ -1541,7 +1548,7 @@
                                 Visibility="Collapsed">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="350" />
+                                    <ColumnDefinition x:Name="CollectionListDetailsColumn" Width="350" />
                                 </Grid.ColumnDefinitions>
                                 <ScrollViewer
                                     HorizontalScrollBarVisibility="Auto"
@@ -1569,16 +1576,16 @@
                                             <ColumnDefinition Width="{Binding FavoritesWidth, Source={StaticResource CollectionListColumnLayout}}" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding DataContext.Artwork, ElementName=RootPage}" />
-                                        <TextBlock Grid.Column="1" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.Title, ElementName=RootPage}" />
-                                        <TextBlock Grid.Column="2" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.Author, ElementName=RootPage}" />
-                                        <TextBlock Grid.Column="3" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.ReleaseDate, ElementName=RootPage}" />
-                                        <TextBlock Grid.Column="4" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.Maps, ElementName=RootPage}" />
-                                        <TextBlock Grid.Column="5" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.Rating, ElementName=RootPage}" />
-                                        <TextBlock Grid.Column="6" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.Downloaded, ElementName=RootPage}" />
-                                        <TextBlock Grid.Column="7" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.SourcePort, ElementName=RootPage}" />
-                                        <TextBlock Grid.Column="8" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.Playtime, ElementName=RootPage}" />
-                                        <TextBlock Grid.Column="9" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.Finished, ElementName=RootPage}" />
-                                        <TextBlock Grid.Column="10" Margin="7,0" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="{Binding DataContext.Favorites, ElementName=RootPage}" />
+                                        <TextBlock Grid.Column="1" Margin="7,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="{Binding DataContext.Title, ElementName=RootPage}" />
+                                        <TextBlock Grid.Column="2" Margin="7,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="{Binding DataContext.Author, ElementName=RootPage}" />
+                                        <TextBlock Grid.Column="3" Margin="7,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="{Binding DataContext.ReleaseDate, ElementName=RootPage}" />
+                                        <TextBlock Grid.Column="4" Margin="7,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="{Binding DataContext.Maps, ElementName=RootPage}" />
+                                        <TextBlock Grid.Column="5" Margin="7,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="{Binding DataContext.Rating, ElementName=RootPage}" />
+                                        <TextBlock Grid.Column="6" Margin="7,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="{Binding DataContext.Downloaded, ElementName=RootPage}" />
+                                        <TextBlock Grid.Column="7" Margin="7,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="{Binding DataContext.SourcePort, ElementName=RootPage}" />
+                                        <TextBlock Grid.Column="8" Margin="7,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="{Binding DataContext.Playtime, ElementName=RootPage}" />
+                                        <TextBlock Grid.Column="9" Margin="7,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="{Binding DataContext.Finished, ElementName=RootPage}" />
+                                        <TextBlock Grid.Column="10" Margin="7,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="{Binding DataContext.Favorites, ElementName=RootPage}" />
                                     </Grid>
                                     <ListView
                                         x:Name="CollectionDetailGameList"
@@ -1798,14 +1805,14 @@
                                                                                 Stretch="{x:Bind ArtworkStretch}" />
                                                                         </Border.Background>
                                                                     </Border>
-                                                                    <TextBlock Grid.Column="1" Margin="7,0" VerticalAlignment="Center" FontFamily="{StaticResource DoomHeadlineFontFamily}" FontSize="12" FontWeight="SemiBold" Text="{x:Bind Title}" TextTrimming="CharacterEllipsis" />
-                                                                    <TextBlock Grid.Column="2" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind Author}" TextTrimming="CharacterEllipsis" />
+                                                                    <TextBlock Grid.Column="1" Margin="7,0" VerticalAlignment="Center" FontFamily="{StaticResource DoomHeadlineFontFamily}" FontSize="13" FontWeight="SemiBold" ToolTipService.ToolTip="{x:Bind Title}" Text="{x:Bind Title}" TextTrimming="CharacterEllipsis" />
+                                                                    <TextBlock Grid.Column="2" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" ToolTipService.ToolTip="{x:Bind Author}" Text="{x:Bind Author}" TextTrimming="CharacterEllipsis" />
                                                                     <TextBlock Grid.Column="3" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding ReleaseDate, Mode=OneWay}" />
-                                                                    <TextBlock Grid.Column="4" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind Maps}" TextTrimming="CharacterEllipsis" />
-                                                                    <TextBlock Grid.Column="5" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind Rating}" />
+                                                                    <TextBlock Grid.Column="4" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Maps}" TextTrimming="CharacterEllipsis" />
+                                                                    <TextBlock Grid.Column="5" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Rating}" />
                                                                     <TextBlock Grid.Column="6" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding Downloaded, Mode=OneWay}" />
-                                                                    <TextBlock Grid.Column="7" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind SourcePort}" TextTrimming="CharacterEllipsis" />
-                                                                    <TextBlock Grid.Column="8" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind Playtime}" />
+                                                                    <TextBlock Grid.Column="7" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" ToolTipService.ToolTip="{x:Bind SourcePort}" Text="{x:Bind SourcePort}" TextTrimming="CharacterEllipsis" />
+                                                                    <TextBlock Grid.Column="8" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Playtime}" />
                                                                     <CheckBox
                                                                         Grid.Column="9"
                                                                         HorizontalAlignment="Center"
@@ -2103,12 +2110,12 @@
                                             Opacity="0.42" />
                                         <StackPanel Orientation="Horizontal" Spacing="14">
                                             <StackPanel Orientation="Horizontal" Spacing="5">
-                                                <FontIcon FontSize="12" Glyph="&#xE787;" />
+                                                <FontIcon FontSize="13" Glyph="&#xE787;" />
                                                 <TextBlock Style="{StaticResource MetaTextStyle}" Text="{Binding DataContext.Date, ElementName=RootPage}" />
                                                 <TextBlock Style="{StaticResource MetaTextStyle}" Text="{x:Bind ReleaseDateText}" />
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" Spacing="5">
-                                                <FontIcon FontSize="12" Glyph="&#xE734;" />
+                                                <FontIcon FontSize="13" Glyph="&#xE734;" />
                                                 <TextBlock Style="{StaticResource MetaTextStyle}" Text="{Binding DataContext.Rating, ElementName=RootPage}" />
                                                 <TextBlock Style="{StaticResource MetaTextStyle}" Text="{x:Bind RatingText}" />
                                             </StackPanel>
@@ -2396,6 +2403,7 @@
             </ScrollViewer>
 
             <StackPanel Grid.Row="3" Spacing="8">
+                <InfoBar x:Name="FeedbackBar" IsOpen="False" IsClosable="True" Severity="Success" AutomationProperties.LiveSetting="Polite" />
                 <InfoBar
                     x:Name="AchievementNotificationBar"
                     AutomationProperties.LiveSetting="Assertive"
@@ -2408,7 +2416,9 @@
                     IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
                     Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
                     Severity="Error"
-                    Title="{Binding LibraryLoadFailed}" />
+                    Title="{Binding LibraryLoadFailed}">
+                    <InfoBar.ActionButton><Button Content="{Binding Details}" Click="LibraryErrorDetails_Click" /></InfoBar.ActionButton>
+                </InfoBar>
                 <InfoBar
                     AutomationProperties.LiveSetting="Assertive"
                     IsClosable="False"
@@ -2433,8 +2443,9 @@
             IsHitTestVisible="True"
             Visibility="Collapsed">
             <Border
-                Width="440"
-                Padding="28"
+                MaxWidth="440"
+                Margin="16"
+                Padding="24"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Background="{StaticResource DoomSurfaceElevatedBrush}"
@@ -2442,6 +2453,7 @@
                 <StackPanel Spacing="16">
                     <TextBlock
                         x:Name="BlockingOperationTitle"
+                        TextWrapping="Wrap" TextAlignment="Center"
                         HorizontalAlignment="Center"
                         FontFamily="{StaticResource DoomHeadlineFontFamily}"
                         FontSize="22"

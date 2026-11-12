@@ -73,6 +73,7 @@ public sealed partial class MainPage : Page
             ? Visibility.Visible
             : Visibility.Collapsed;
         DataContext = Strings;
+        ConfigurePolish();
         ApplyGeneratorLocalization();
 
         Loaded += MainPage_Loaded;
@@ -223,6 +224,16 @@ public sealed partial class MainPage : Page
         object? sender,
         PropertyChangedEventArgs args)
     {
+        if (args.PropertyName == nameof(MainViewModel.SelectedGame))
+        {
+            CompactDetailsButton.IsEnabled = !ViewModel.SelectedGame.IsPlaceholder;
+            CompactCollectionDetailsButton.IsEnabled = CompactDetailsButton.IsEnabled;
+        }
+        if (args.PropertyName == nameof(MainViewModel.SectionTitle))
+        {
+            UpdateSortDescription();
+            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low,()=>ApplyResponsiveLayout());
+        }
         if (args.PropertyName != nameof(MainViewModel.LaunchStatus))
             return;
 
@@ -1181,6 +1192,7 @@ public sealed partial class MainPage : Page
         object sender,
         SelectionChangedEventArgs args)
     {
+        if(_restoringViewControls) return;
         if (CollectionSortOrderBox.SelectedItem is not ComboBoxItem item
             || item.Tag is not string tag
             || !Enum.TryParse<LibrarySortOrder>(
@@ -1194,6 +1206,7 @@ public sealed partial class MainPage : Page
         QueueViewUpdate(() =>
         {
             ViewModel.SetCollectionSortOrder(sortOrder);
+            UpdateSortDescription();
             RefreshSelectedCollectionGroup();
         });
     }
@@ -1845,6 +1858,7 @@ public sealed partial class MainPage : Page
 
     private void UpdateSortHeaders()
     {
+        UpdateSortDescription();
         foreach (var button in new[]
                  {
                      TitleHeader, AuthorHeader, ReleaseDateHeader, MapsHeader,
@@ -3594,6 +3608,8 @@ public sealed partial class MainPage : Page
 
     private void ApplyDialogTheme(ContentDialog dialog)
     {
+        dialog.Opened += (_, _) => { _activeThemedDialog=dialog; FitDialogToViewport(dialog); };
+        dialog.Closed += (_, _) => { if(ReferenceEquals(_activeThemedDialog,dialog)) _activeThemedDialog=null; };
         if (dialog.Title is string title)
             dialog.Title = CreateDraggableDialogTitle(title);
         dialog.RequestedTheme = EffectiveDialogTheme;

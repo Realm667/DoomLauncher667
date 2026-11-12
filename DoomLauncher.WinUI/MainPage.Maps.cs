@@ -26,12 +26,13 @@ public sealed partial class MainPage
         if (maps.Count == 0) { await ShowActionMessageAsync(title, Strings["NoMaps"], Strings["Close"]); return; }
         var personal = (await _app.LibraryFeatures.LoadAsync(_loadCancellation.Token)).GetValueOrDefault(game.GameFileId) ?? PersonalModData.Empty(game.GameFileId);
         var completed = personal.CompletedMaps.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var list = new ListView { Width = 275, Height = 440, SelectionMode = ListViewSelectionMode.Single };
-        var preview = new Image { Stretch = Stretch.Uniform, Width = 1400, Height = 1000 };
+        var narrow = XamlRoot.Size.Width < 960;
+        var list = new ListView { Height = narrow ? 160 : Math.Min(440, UiLayoutPolicy.DialogHeight(XamlRoot.Size.Height) - 100), SelectionMode = ListViewSelectionMode.Single };
+        var preview = new Image { Stretch = Stretch.Uniform };
         var showPreview = new CheckBox { Content = Strings["ShowMapPreview"] };
         var stats = new TextBlock { TextWrapping = TextWrapping.Wrap };
         var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
-        var imageScroll = new ScrollViewer { Content = preview, Width = 670, Height = 400, ZoomMode = ZoomMode.Enabled,
+        var imageScroll = new ScrollViewer { Content = preview, Height = Math.Min(360, XamlRoot.Size.Height * .35), ZoomMode = ZoomMode.Enabled,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto, VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             MinZoomFactor = .25f, MaxZoomFactor = 5, Visibility = Visibility.Collapsed };
         CancellationTokenSource? rendering = null; var temporaryFiles = new List<string>();
@@ -57,13 +58,19 @@ public sealed partial class MainPage
             catch (Exception error) { status.Text = error.Message; }
         }
         list.SelectionChanged += async (_, _) => await ShowSelection(); showPreview.Click += async (_, _) => await ShowSelection();
-        var right = new StackPanel { Width = 670, Spacing = 8, Children = { stats, showPreview, imageScroll } };
-        var columns = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 16, Children = { list, right } };
+        var right = new StackPanel { Spacing = 8, Children = { stats, showPreview, imageScroll } };
+        var columns = new Grid { Width = UiLayoutPolicy.DialogWidth(XamlRoot.Size.Width, 1000), ColumnSpacing = 16, RowSpacing = 12 };
+        columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(narrow ? 1 : .3, GridUnitType.Star) });
+        columns.ColumnDefinitions.Add(new ColumnDefinition { Width = narrow ? new GridLength(0) : new GridLength(.7, GridUnitType.Star) });
+        columns.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        columns.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        Grid.SetColumn(right, narrow ? 0 : 1); Grid.SetRow(right, narrow ? 1 : 0);
+        columns.Children.Add(list); columns.Children.Add(right);
         var content = new StackPanel { Spacing = 10 };
         if (trackingAvailable) content.Children.Add(new TextBlock { Text = Strings["MapProgressNotice"], TextWrapping = TextWrapping.Wrap, MaxWidth = 950 });
         content.Children.Add(columns); content.Children.Add(status);
         var dialog = FeatureDialog(title, new ScrollViewer { Content = content, MaxHeight = 720 }, Strings["LaunchSelectedMap"]);
-        if (trackingAvailable) dialog.SecondaryButtonText = Strings["LaunchNextMap"];
+        if (trackingAvailable) { dialog.SecondaryButtonText = Strings["LaunchNextMap"]; dialog.IsSecondaryButtonEnabled = maps.Any(map => !completed.Contains(map.Name)); }
         list.SelectedIndex = 0; var result = await dialog.ShowAsync(); rendering?.Cancel();
         var selected = result == ContentDialogResult.Primary ? (list.SelectedItem as ListViewItem)?.Tag as MapDocument
             : result == ContentDialogResult.Secondary ? maps.FirstOrDefault(map => !completed.Contains(map.Name)) : null;

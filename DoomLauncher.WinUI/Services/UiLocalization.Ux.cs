@@ -6,6 +6,14 @@ public sealed partial class UiLocalization
     {
         string[][] rows =
         [
+            ["EntryTools", "Entry tools", "Eintrag verwalten", "Outils de l’entrée", "Herramientas de la entrada"],
+            ["ArtworkUnavailable", "Artwork unavailable – showing the placeholder", "Titelbild nicht verfügbar – Platzhalter wird angezeigt", "Illustration indisponible – image de remplacement", "Ilustración no disponible – se muestra el marcador"],
+            ["Details", "Details", "Details", "Détails", "Detalles"],
+            ["ClearFilters", "Clear search and filters", "Suche und Filter zurücksetzen", "Effacer recherche et filtres", "Borrar búsqueda y filtros"],
+            ["DefaultLaunchChoice", "{0} · Default", "{0} · Standard", "{0} · Par défaut", "{0} · Predeterminado"],
+            ["TechnicalDetails", "Technical details", "Technische Details", "Détails techniques", "Detalles técnicos"],
+            ["ActionFailedGuidance", "The action could not be completed. Check that the selected files and folders are available, then try again. Technical details can be expanded below.", "Die Aktion konnte nicht abgeschlossen werden. Prüfe, ob die ausgewählten Dateien und Ordner erreichbar sind, und versuche es erneut. Technische Details lassen sich unten einblenden.", "L’action n’a pas pu aboutir. Vérifiez l’accès aux fichiers et dossiers, puis réessayez. Les détails techniques sont disponibles ci-dessous.", "No se pudo completar la acción. Comprueba el acceso a los archivos y carpetas e inténtalo de nuevo. Los detalles técnicos están disponibles abajo."],
+            ["FilterNoMatches", "No entries match the current search or filters. Clear the search or select All.", "Keine Einträge passen zur Suche oder den Filtern. Leere die Suche oder wähle Alle.", "Aucun résultat pour cette recherche ou ces filtres. Effacez la recherche ou choisissez Tous.", "Ninguna entrada coincide con la búsqueda o los filtros. Borra la búsqueda o elige Todos."],
             ["ServerBrowserIntro", "Choose a server, verify its required files and join with your configured engine and IWAD.", "Server auswählen, benötigte Dateien prüfen und mit eingerichteter Engine und IWAD beitreten.", "Choisissez un serveur, vérifiez ses fichiers et rejoignez avec votre moteur et IWAD.", "Elige un servidor, verifica sus archivos y únete con tu motor e IWAD."],
             ["ConnectionSettings", "Discovery & connection settings", "Such- und Verbindungseinstellungen", "Paramètres de recherche et connexion", "Ajustes de búsqueda y conexión"],
             ["LanScanPort", "LAN scan UDP port", "UDP-Port für LAN-Suche", "Port UDP de recherche LAN", "Puerto UDP de búsqueda LAN"],

@@ -39,7 +39,7 @@
                 <Setter Property="Foreground" Value="{ThemeResource AccentFillColorDefaultBrush}" />
             </Style>
 
-            <FontFamily x:Key="DoomBodyFontFamily">ms-appx:///Assets/Fonts/TitilliumWeb-Light.ttf#Titillium Web</FontFamily>
+            <FontFamily x:Key="DoomBodyFontFamily">Segoe UI Variable Text, Segoe UI</FontFamily>
             <FontFamily x:Key="DoomHeadlineFontFamily">ms-appx:///Assets/Fonts/TitilliumWeb-SemiBold.ttf#Titillium Web</FontFamily>
 
             <SolidColorBrush x:Key="DoomPageBackgroundBrush" Color="#FF111114" />
@@ -100,14 +100,15 @@
 
             <Style x:Key="MetaTextStyle" TargetType="TextBlock">
                 <Setter Property="FontFamily" Value="{StaticResource DoomBodyFontFamily}" />
-                <Setter Property="FontWeight" Value="Light" />
-                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="Normal" />
+                <Setter Property="FontSize" Value="13" />
                 <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
             </Style>
 
             <Style TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14" />
                 <Setter Property="FontFamily" Value="{StaticResource DoomBodyFontFamily}" />
-                <Setter Property="FontWeight" Value="Light" />
+                <Setter Property="FontWeight" Value="Normal" />
             </Style>
 
             <Style x:Key="PillToggleStyle" TargetType="ToggleButton">

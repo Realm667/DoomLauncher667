@@ -26,6 +26,7 @@ internal static class ExpansionTests
             var a = await Create(Path.Combine(root, "Installation"));
             await Personal(a); await Metadata(a); await Maps(root); await Saves(a); await Network(root); await NativeLaunch(a);
             await RemovedSynchronization(a);
+            LayoutPolicy();
         }
         finally { SqliteConnection.ClearAllPools(); Directory.Delete(root, true); }
     }
@@ -37,6 +38,27 @@ internal static class ExpansionTests
         await fixture.Store.SetQueuedAsync(fixture.Mod.GameFileId, true, true);
         await fixture.Library.CreateCollectionAsync("Test collection");
         await File.WriteAllTextAsync(Path.Combine(root, ".ui-test-instance"), "isolated-rc6-fixture");
+    }
+
+    private static void LayoutPolicy()
+    {
+        foreach (var scale in new[] { 1d, 1.25, 1.5, 2d })
+            foreach (var pixels in new[] { (1280d,720d), (1920d,1080d), (2560d,1440d), (3840d,2160d) })
+            {
+                var width = pixels.Item1 / scale; var height = pixels.Item2 / scale;
+                var layout = UiLayoutPolicy.ForViewport(width,height);
+                Check(layout.InlineDetails == (width >= 1280) && layout.CompactNavigation == (width < 1280),
+                    $"DIP layout {pixels.Item1}x{pixels.Item2} at {scale:P0} uses the correct detail/navigation mode");
+                Check(UiLayoutPolicy.DialogWidth(width,1000) <= width - 32
+                    && UiLayoutPolicy.DialogHeight(height) < height && layout.HeroHeight <= 340,
+                    "Dialog and Home sizing remain bounded in the scaling matrix");
+            }
+        foreach (var culture in new[] { "en-US", "de-DE", "fr-FR", "es-ES" })
+        {
+            var text = new UiLocalization(); text.SetLanguage(culture);
+            Check(new[] { "EntryTools", "ClearFilters", "TechnicalDetails", "ActionFailedGuidance", "FilterNoMatches", "ArtworkUnavailable" }
+                .All(key => text.Get(key) != key), "Polish workflow labels localized: " + culture);
+        }
     }
     public static async Task VerifyUpgradeCopyAsync(string source, string destination)
     {
@@ -200,6 +222,9 @@ internal static class ExpansionTests
             "Tracking UI includes a compatible assigned engine");
         await a.Library.UpdateGameAsync((await a.Library.LoadGameAsync(a.Mod.GameFileId)) with { SourcePortId = null });
         await a.Library.UpdateSettingsAsync((await a.Library.LoadSettingsAsync()) with { DefaultSourcePortId = sp.SourcePortId });
+        var catalog = await new SqliteLibraryCatalog(new Locator(a.Store.DatabasePath), new UiLocalization()).LoadAsync();
+        Check(catalog.Entries.Single(entry => entry.GameFileId == a.Mod.GameFileId).SourcePort.Contains("Default"),
+            "Catalog distinguishes an effective default source port from a missing assignment");
         Check((await MapTrackingService.LoadCompatibleGameIdsAsync(a.Store.DatabasePath)).Contains(a.Mod.GameFileId),
             "Tracking UI resolves Automatic through the configured default engine");
         await a.Library.SaveSourcePortAsync(sp with { Directory = "Data/Sourceports/missing" });

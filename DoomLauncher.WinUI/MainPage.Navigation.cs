@@ -9,6 +9,7 @@ namespace DoomLauncher.WinUI;
 
 public sealed partial class MainPage
 {
+    private bool CanUseLibraryShortcuts => !_isImporting && !_isRescraping && !ViewModel.IsLoading && !HasOpenPopup();
     private readonly Stack<LibrarySection> _navigationHistory = new();
     private bool _navigatingBack;
     private bool _restoringViewControls;
@@ -43,6 +44,7 @@ public sealed partial class MainPage
                 button.IsChecked = string.Equals(button.Tag?.ToString(), collection, StringComparison.OrdinalIgnoreCase);
         }
         finally { _restoringViewControls = false; }
+        UpdateSortDescription();
     }
 
     private void ConfigureKeyboardNavigation()
@@ -50,18 +52,18 @@ public sealed partial class MainPage
         var import = new KeyboardAccelerator { Key = VirtualKey.I, Modifiers = VirtualKeyModifiers.Control };
         import.Invoked += (_, args) =>
         {
-            if (_isImporting || ViewModel.IsLoading || HasOpenPopup()) return;
+            if (!CanUseLibraryShortcuts) return;
             args.Handled = true;
             ImportButton_Click(this, new RoutedEventArgs());
         };
         KeyboardAccelerators.Add(import);
         var back = new KeyboardAccelerator { Key = VirtualKey.Left, Modifiers = VirtualKeyModifiers.Menu };
-        back.Invoked += (_, args) => { if (!HasOpenPopup()) args.Handled = GoBack(); };
+        back.Invoked += (_, args) => { if (CanUseLibraryShortcuts) args.Handled = GoBack(); };
         KeyboardAccelerators.Add(back);
         var escape = new KeyboardAccelerator { Key = VirtualKey.Escape };
         escape.Invoked += async (_, args) =>
         {
-            if (HasOpenPopup()) return;
+            if (!CanUseLibraryShortcuts) return;
             if (SearchBox.Text.Length > 0)
             {
                 _searchCancellation?.Cancel(); SearchBox.Text = string.Empty;
@@ -79,7 +81,7 @@ public sealed partial class MainPage
             var play = new KeyboardAccelerator { Key = VirtualKey.Enter };
             play.Invoked += async (_, args) =>
             {
-                if (HasOpenPopup() || _isImporting || ViewModel.IsLoading) return;
+                if (!CanUseLibraryShortcuts) return;
                 var focused = FocusManager.GetFocusedElement(XamlRoot);
                 if (focused is not ListViewItem and not GridViewItem && !ReferenceEquals(focused, GameList) && !ReferenceEquals(focused, GameGrid)) return;
                 args.Handled = true;

@@ -167,6 +167,7 @@ public sealed partial class MainPage
         CollectionDetailGameGrid.SelectedItem = ViewModel.SelectedGame;
         CollectionDetailGameList.SelectedItem = ViewModel.SelectedGame;
         UpdateCollectionsViewControls();
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low,()=>ApplyResponsiveLayout());
     }
 
     private void RefreshSelectedCollectionGroup()

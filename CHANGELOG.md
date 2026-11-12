@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 1.0.0-rc.15 - 2026-11-12
+
+- Complete the 14-point UI/UX polish: responsive navigation/header/toolbars, compact detail flyout, sticky Play footer and grouped detail actions.
+- Improve typography, flexible title columns, numeric alignment, full-value tooltips, image aspect ratio/fallback, readable finished entries and bounded Home artwork.
+- Display effective automatic source-port/IWAD defaults without changing saved assignments. Keep initial statistics unknown until loaded and distinguish filtered-empty results.
+- Use non-modal routine acknowledgements, bounded adaptive dialogs, expandable technical errors and a responsive Maps browser. Keep setup Next/Finish and metadata-refresh locking; keyboard shortcuts now respect the lock too.
+- Keep sort descriptions/direction synchronized after localization and restore, including WinUI's cached selection-box content.
+- Add native viewport/locale/theme/keyboard/dialog/raster QA and retain synthetic visual reports as CI artifacts. Preserve all databases, archives, media, settings and custom theme files on update.
+
 ## 1.0.0-rc.14 - 2026-11-08
 
 - Add the missing horizontal divider between Latest and Multiplayer. Multiplayer now has a divider both above and below it.

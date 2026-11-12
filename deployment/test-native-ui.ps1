@@ -11,8 +11,12 @@ $env:DOOMLAUNCHER_UI_TEST_ROOT = $root
 try { Start-Process -FilePath (Join-Path $root 'DoomLauncher667.exe') -ArgumentList '--ui-smoke-test' -WindowStyle Hidden }
 finally { $env:DOOMLAUNCHER_UI_TEST_ROOT = $before }
 $report = Join-Path $root 'ui-test-report.json'
+if ($env:GITHUB_OUTPUT) {
+    "report=$report" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+    "visualqa=$(Join-Path $root 'visual-qa')" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+}
 $timeout = [Diagnostics.Stopwatch]::StartNew()
-while (-not (Test-Path -LiteralPath $report) -and $timeout.Elapsed.TotalSeconds -lt 120) { Start-Sleep -Milliseconds 200 }
+while (-not (Test-Path -LiteralPath $report) -and $timeout.Elapsed.TotalSeconds -lt 360) { Start-Sleep -Milliseconds 200 }
 if (-not (Test-Path -LiteralPath $report)) { throw "Native UI tests timed out. Fixture: $root" }
 $result = Get-Content -LiteralPath $report -Raw | ConvertFrom-Json
 foreach ($check in $result.Checks) { Write-Output "PASS $check" }

@@ -1429,6 +1429,8 @@ public sealed partial class UiLocalization
 
 public sealed class UiText(UiLocalization localization)
 {
+    public string Details => this[nameof(Details)];
+    public string EntryTools => this[nameof(EntryTools)];
     public string Theme => this[nameof(Theme)];
     public string this[string key] => localization.Get(key);
 

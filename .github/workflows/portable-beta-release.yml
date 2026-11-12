@@ -65,8 +65,20 @@ jobs:
         run: ./deployment/test-portable-update.ps1 -PackageDirectory "${{ steps.package.outputs.package }}"
 
       - name: Test native UI workflows
+        id: ui
         shell: pwsh
         run: ./deployment/test-native-ui.ps1 -PackageDirectory "${{ steps.package.outputs.package }}"
+
+      - name: Retain native UI reports and visual QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-ui-${{ github.ref_name }}
+          path: |
+            ${{ steps.ui.outputs.report }}
+            ${{ steps.ui.outputs.visualqa }}
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Publish GitHub release
         shell: pwsh

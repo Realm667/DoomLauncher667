@@ -205,6 +205,11 @@ public static class ThemeManager
 
     private static void ApplyPalette(Palette palette)
     {
+        // Improve readability at runtime only; never rewrite user theme XMLs.
+        palette = palette with {
+            PrimaryText = ContrastForeground(palette.Background, palette.PrimaryText),
+            SecondaryText = ContrastForeground(palette.Surface, palette.SecondaryText),
+        };
         var accentForeground = ContrastForeground(
             palette.Accent,
             palette.PrimaryText);
@@ -229,6 +234,10 @@ public static class ThemeManager
         SetBrush("DoomSuccessBrush", palette.Success);
         SetBrush("DoomWarningBrush", palette.Warning);
         SetBrush("DoomStrokeBrush", palette.Border);
+        SetBrush("FocusVisualPrimaryBrush", ContrastForeground(palette.Background, palette.ControlAccent));
+        SetBrush("FocusVisualSecondaryBrush", palette.Background);
+        Application.Current.Resources["FocusVisualPrimaryThickness"] = new Thickness(2);
+        Application.Current.Resources["FocusVisualSecondaryThickness"] = new Thickness(1);
         SetBrush("DoomSubtleStrokeBrush", WithAlpha(palette.Border, 32));
         SetBrush("DoomControlAccentLowBrush", WithAlpha(palette.ControlAccent, 51));
         SetBrush("DoomControlAccentMediumBrush", WithAlpha(palette.ControlAccent, 68));
