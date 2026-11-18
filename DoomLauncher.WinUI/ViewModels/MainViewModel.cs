@@ -550,7 +550,7 @@ public sealed partial class MainViewModel(
         if (section == LibrarySection.Home)
             RebuildHomeGroups(rotateFeatured: true);
         else if (section == LibrarySection.Collections)
-            RebuildCollectionGroups();
+            UpdateSectionSummary();
         else if (section != LibrarySection.Discover)
             ApplyFilter(state.SelectedId);
         else
