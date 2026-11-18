@@ -15,7 +15,7 @@ internal static class ReliabilityTests
     private static async Task RejectAsync(Func<Task> action, string name)
     { try { await action(); } catch (Exception error) when (error is IOException or InvalidDataException or InvalidOperationException or OperationCanceledException) { Check(true, name); return; } throw new InvalidOperationException(name); }
 
-    public static async Task PrepareUiAsync(string root)
+    public static async Task PrepareUiAsync(string root, int count = 65)
     {
         if (Directory.Exists(root) && Directory.EnumerateFileSystemEntries(root).Any())
             throw new InvalidOperationException("UI fixture target must be empty.");
@@ -27,13 +27,16 @@ internal static class ReliabilityTests
         await setup.EnsureManagedLayoutAsync(); await setup.CompleteWizardAsync();
         await using var connection = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = database, Pooling = false }.ToString());
         await connection.OpenAsync();
-        for (var index = 0; index < 65; index++)
+        using var transaction = connection.BeginTransaction();
+        for (var index = 0; index < count; index++)
         {
             await using var insert = connection.CreateCommand();
+            insert.Transaction = transaction;
             insert.CommandText = "INSERT INTO GameFiles(FileName,Title,Author,Downloaded,MinutesPlayed,IsSyncNeeded) VALUES($file,$title,'UI test','2020-01-01',0,1);";
             insert.Parameters.AddWithValue("$file", $"Mods/seed-{index}.zip"); insert.Parameters.AddWithValue("$title", $"Seed {index:000}");
             await insert.ExecuteNonQueryAsync();
         }
+        transaction.Commit();
         var inputs = Path.Combine(root, "UIInputs"); Directory.CreateDirectory(inputs);
         MakeArchive(inputs, "ui-alpha", "UI Alpha"); MakeArchive(inputs, "ui-beta", "UI Beta");
         await File.WriteAllTextAsync(Path.Combine(root, ".ui-test-instance"), "isolated-ui-fixture");

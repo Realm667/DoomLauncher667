@@ -9,6 +9,22 @@ if(args.Length==2 && args[0]=="--verify-historical-release-test")
 if(args.Length==3 && args[0]=="--prepare-large-migration-test")
 {await ReleaseAcceptanceTests.PrepareLargeMigrationAsync(Path.GetFullPath(args[1]),int.Parse(args[2]));return 0;}
 
+if (args.Length == 1 && args[0] == "--verify-library-reconciliation")
+{
+    PerformanceTests.VerifyReconciliation();
+    return 0;
+}
+if (args.Length == 2 && args[0] == "--benchmark-services")
+{
+    await PerformanceTests.RunAsync(Path.GetFullPath(args[1]));
+    return 0;
+}
+if (args.Length == 3 && args[0] == "--prepare-performance-ui")
+{
+    await ReliabilityTests.PrepareUiAsync(Path.GetFullPath(args[1]), int.Parse(args[2]));
+    await PerformanceTests.PrepareCollectionsAndArchiveAsync(Path.GetFullPath(args[1]), int.Parse(args[2]));
+    return 0;
+}
 if (args.Length == 3 && args[0] == "--verify-map-tracker-regression")
 {
     await MapTrackingRegressionTests.RunAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]));
@@ -415,6 +431,7 @@ try
 {
     await StabilizationTests.RunAsync();
     await ReliabilityTests.RunAsync();
+    PerformanceTests.VerifyReconciliation();
     await ExpansionTests.RunAsync();
     Check(
         AppVersion.Current == "1.0.0",

@@ -103,7 +103,7 @@ public sealed partial class MainViewModel(
         ImportsRevealed?.Invoke();
     }
 
-    public ObservableCollection<LibraryItem> Games { get; private set; } = [];
+    public ObservableCollection<LibraryItem> Games { get; } = new ReconciledCollection<LibraryItem>();
     public ObservableCollection<LaunchOptionChoice> SourcePortOptions { get; } = [];
     public ObservableCollection<LaunchOptionChoice> IwadOptions { get; } = [];
     public ObservableCollection<LaunchValueChoice> MapOptions { get; } = [];
@@ -1433,8 +1433,7 @@ public sealed partial class MainViewModel(
             else
             {
                 _catalog = [];
-                Games = [];
-                OnPropertyChanged(nameof(Games));
+                Games.Clear();
                 SelectedGame = LibraryItem.Empty;
                 ErrorMessage = exception.Message;
                 LibrarySummary = localization.Get("NotAvailable");

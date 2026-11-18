@@ -55,6 +55,7 @@ public sealed partial class MainPage : Page
             _app.LibraryFeatures);
         ViewModel.AchievementUnlocked += ViewModel_AchievementUnlocked;
         InitializeComponent();
+        ConfigureLibraryReconciliation();
         ConfigureKeyboardNavigation();
         _statusDismissTimer.Interval = TimeSpan.FromSeconds(5);
         _statusDismissTimer.Tick += StatusDismissTimer_Tick;
@@ -206,6 +207,7 @@ public sealed partial class MainPage : Page
         SyncSelection();
         UpdateSortHeaders();
         InitializeListScrollSynchronization();
+        await RunPerformanceChecksAsync();
         if (_app.UserLibraryStateStore is JsonUserLibraryStateStore { RecoveryNoticeKey: { } notice })
             await ShowActionMessageAsync(Strings["Settings"], Strings[notice], Strings["Close"]);
         await RunNativeUiChecksAsync();
@@ -229,6 +231,7 @@ public sealed partial class MainPage : Page
     {
         if (args.PropertyName == nameof(MainViewModel.SelectedGame))
         {
+            SyncSelection();
             CompactDetailsButton.IsEnabled = !ViewModel.SelectedGame.IsPlaceholder;
             CompactCollectionDetailsButton.IsEnabled = CompactDetailsButton.IsEnabled;
         }

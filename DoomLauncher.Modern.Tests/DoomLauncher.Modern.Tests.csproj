@@ -22,6 +22,7 @@
     <Compile Include="..\DoomLauncher.WinUI\Services\UiLocalization.Ux.cs" Link="Services\UiLocalization.Ux.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\InstallationLease.cs" Link="Services\InstallationLease.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\CollectionReconciler.cs" Link="Services\CollectionReconciler.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\ReconciledCollection.cs" Link="Services\ReconciledCollection.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\RefreshCoordinator.cs" Link="Services\RefreshCoordinator.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\ModImportBatch.cs" Link="Services\ModImportBatch.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\InstallationBackupService.cs" Link="Services\InstallationBackupService.cs" />
