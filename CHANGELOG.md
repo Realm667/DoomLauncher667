@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Publish large Library changes in one notification, retaining incremental updates for small edits and unchanged item instances on reload.
+- Synchronize visible selection after catalog refreshes and game sessions; restore the viewport and keyboard context when publishing large list changes.
+- Keep existing Collection groups when navigating back to them; rebuild them when their data or sort order changes.
+- Add opt-in synthetic native performance checks covering startup, filtering, sorting, collection navigation, import, metadata/artwork refresh and view-state retention.
+
 ## 1.0.0 - 2026-11-12
 
 - First stable release of the portable Doom Launcher 667 WinUI client.
