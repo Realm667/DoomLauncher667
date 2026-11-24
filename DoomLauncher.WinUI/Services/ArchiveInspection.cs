@@ -5,7 +5,11 @@ internal sealed record ArchiveInspection(IReadOnlyList<string> Maps, ArchiveText
     // All archive ingestion paths use the same decoding and exact map counting.
     // Archive libraries also do synchronous decompression; keep that off the UI.
     public static Task<ArchiveInspection> ReadAsync(string path, CancellationToken cancellationToken) =>
-        Task.Run(async () => new ArchiveInspection(
-            await MapNameExtractor.ExtractAsync(path, cancellationToken),
-            await ArchiveTextMetadataReader.ReadAsync(path, cancellationToken)), cancellationToken);
+        Task.Run(async () =>
+        {
+            using var payload = await ArchivePayload.OpenAsync(path, cancellationToken);
+            return new ArchiveInspection(
+                await MapNameExtractor.ExtractAsync(payload.Path, cancellationToken),
+                await ArchiveTextMetadataReader.ReadAsync(payload.Path, cancellationToken));
+        }, cancellationToken);
 }

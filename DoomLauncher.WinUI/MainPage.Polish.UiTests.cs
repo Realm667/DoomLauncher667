@@ -147,6 +147,17 @@ public sealed partial class MainPage
                         "Compact detail presentation retains all existing workflows");
                     if(culture=="de-DE" || size.Item1==1440)
                         await CapturePolishAsync(Path.Combine(screenshots,$"library-{culture}-{size.Item1}.png"),1);
+                    if (culture == "de-DE" && size.Item1 == 800)
+                    {
+                        var localPrompt = ShowLocalArchiveRefreshDialogAsync(Strings["LocalArchiveRefreshIntro"], true);
+                        for (var attempt = 0; attempt < 200 && _activeThemedDialog is null && !localPrompt.IsCompleted; attempt++) await Task.Delay(50);
+                        var localDialog = _activeThemedDialog ?? throw new InvalidOperationException("Local refresh dialog did not open.");
+                        await layout();
+                        check(localDialog.ActualWidth <= XamlRoot.Size.Width && localDialog.ActualHeight <= XamlRoot.Size.Height,
+                            "German local archive refresh dialog fits a narrow native window");
+                        await CapturePolishAsync(Path.Combine(screenshots,"local-refresh-de-DE-800.png"),1,localDialog);
+                        localDialog.Hide(); await localPrompt;
+                    }
                 }
             }
             _app.Localization.SetLanguage("en-US"); ViewModel.NotifyLocalizationChanged(); DataContext=null;DataContext=Strings;

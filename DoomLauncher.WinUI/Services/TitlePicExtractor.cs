@@ -30,6 +30,9 @@ internal static class TitlePicExtractor
         if (!File.Exists(archivePath))
             return null;
 
+        using var payload = await ArchivePayload.OpenAsync(archivePath, cancellationToken);
+        archivePath = payload.Path;
+
         var extension = Path.GetExtension(archivePath);
         if (extension.Equals(".wad", StringComparison.OrdinalIgnoreCase))
         {

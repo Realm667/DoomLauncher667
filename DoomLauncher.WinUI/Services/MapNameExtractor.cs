@@ -17,6 +17,9 @@ internal static partial class MapNameExtractor
         if (!File.Exists(archivePath))
             return [];
 
+        using var payload = await ArchivePayload.OpenAsync(archivePath, cancellationToken);
+        archivePath = payload.Path;
+
         var maps = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var extension = Path.GetExtension(archivePath);
         if (extension.Equals(".wad", StringComparison.OrdinalIgnoreCase))

@@ -2,6 +2,18 @@ using DoomLauncher.Modern.Core.Launch;
 using DoomLauncher.WinUI.Services;
 using Microsoft.Data.Sqlite;
 
+if (args.Length == 3 && args[0] == "--verify-local-archive-copy")
+{
+    await LocalArchiveRefreshTests.VerifyRealCopyAsync(Path.GetFullPath(args[1]), int.Parse(args[2]));
+    return 0;
+}
+
+if (args.Length == 1 && args[0] == "--verify-local-archive-refresh")
+{
+    await LocalArchiveRefreshTests.RunAsync();
+    return 0;
+}
+
 if(args.Length==3 && args[0]=="--prepare-historical-release-test")
 {await ReleaseAcceptanceTests.PrepareHistoricalAsync(Path.GetFullPath(args[1]),Path.GetFullPath(args[2]));return 0;}
 if(args.Length==2 && args[0]=="--verify-historical-release-test")
@@ -431,6 +443,7 @@ try
 {
     await StabilizationTests.RunAsync();
     await ReliabilityTests.RunAsync();
+    await LocalArchiveRefreshTests.RunAsync();
     PerformanceTests.VerifyReconciliation();
     await ExpansionTests.RunAsync();
     Check(

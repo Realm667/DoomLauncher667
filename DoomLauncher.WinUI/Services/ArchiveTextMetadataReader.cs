@@ -53,6 +53,8 @@ internal static class ArchiveTextMetadataReader
 
         try
         {
+            using var payload = await ArchivePayload.OpenAsync(archivePath, cancellationToken);
+            archivePath = payload.Path;
             using var archive = ArchiveFactory.OpenArchive(archivePath);
             var candidates = new List<ArchiveTextMetadata>();
             foreach (var entry in archive.Entries.Where(entry =>

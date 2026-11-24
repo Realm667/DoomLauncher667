@@ -926,6 +926,17 @@ public sealed partial class MainViewModel(
             cancellationToken);
     }
 
+    public async Task RefreshSelectedLocalArchiveAsync(IProgress<double>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!CanRefreshModMetadata) throw new InvalidOperationException(localization.Get("IwadMetadataProtected"));
+        var id = SelectedGame.GameFileId;
+        var result = await nativeLibraryService.RefreshGameFromLocalArchiveAsync(id, progress, cancellationToken);
+        LaunchErrorMessage = string.Empty;
+        LaunchStatus = localization.Format(result.ArtworkImported ? "LocalArchiveRefreshedArtwork" : "LocalArchiveRefreshed", result.MapCount);
+        await LoadCatalogAsync(true, id, cancellationToken);
+    }
+
     public async Task ApplySelectedIdGamesMetadataAsync(
         IdGamesItem item,
         IProgress<double>? progress = null,

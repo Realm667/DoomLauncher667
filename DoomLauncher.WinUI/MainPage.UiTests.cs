@@ -4,6 +4,8 @@ using DoomLauncher.WinUI.Services;
 using DoomLauncher.WinUI.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Automation.Peers;
+using Microsoft.UI.Xaml.Automation.Provider;
 
 namespace DoomLauncher.WinUI;
 
@@ -108,6 +110,37 @@ public sealed partial class MainPage
                 && contextItem.GameFileId == ViewModel.SelectedGame.GameFileId,
                 "Show in Explorer follows Edit Entry and targets the context entry");
             menu.Hide();
+            var localRefreshPrompt = ShowIdGamesMetadataDialogAsync();
+            for (var attempt = 0; attempt < 200 && _activeThemedDialog is null && !localRefreshPrompt.IsCompleted; attempt++)
+                await Task.Delay(50);
+            await Layout();
+            Check(_activeThemedDialog is { } localDialog
+                && localDialog.PrimaryButtonText == Strings["RefreshLocalArchive"]
+                && localDialog.SecondaryButtonText == Strings["FindIdGamesEntry"],
+                "Unlinked mod offers an offline local refresh before any /idgames lookup");
+            _activeThemedDialog!.Hide();
+            await localRefreshPrompt;
+            Check(BlockingOperationOverlay.Visibility == Visibility.Collapsed && ShellNavigation.IsEnabled,
+                "Cancelling local refresh does not leave the library blocked");
+            var localGameId = ViewModel.SelectedGame.GameFileId;
+            var changedArchive = await _app.NativeLibraryService.ResolveManagedGameFileAsync(localGameId)
+                ?? throw new InvalidOperationException("Local UI fixture archive missing.");
+            File.Delete(changedArchive);
+            using (var changed = System.IO.Compression.ZipFile.Open(changedArchive, System.IO.Compression.ZipArchiveMode.Create))
+            {
+                changed.CreateEntry("maps/MAP01.wad");
+                changed.CreateEntry("maps/MAP02.wad");
+            }
+            var changedBytes = File.ReadAllBytes(changedArchive);
+            var applyingLocalRefresh = ShowIdGamesMetadataDialogAsync();
+            for (var attempt = 0; attempt < 200 && _activeThemedDialog is null && !applyingLocalRefresh.IsCompleted; attempt++) await Task.Delay(50);
+            var applyLocalButton = VisualDescendants<Button>(_activeThemedDialog ?? throw new InvalidOperationException("Local refresh confirmation missing."))
+                .Single(button => button.Name == "PrimaryButton");
+            ((IInvokeProvider)new ButtonAutomationPeer(applyLocalButton).GetPattern(PatternInterface.Invoke)).Invoke();
+            await applyingLocalRefresh; await Layout();
+            Check(ViewModel.SelectedGame.GameFileId == localGameId && ViewModel.SelectedGame.MapCount == 2
+                && changedBytes.SequenceEqual(File.ReadAllBytes(changedArchive)) && ShellNavigation.IsEnabled,
+                "Native local refresh applies a same-name ZIP update offline without changing its bytes or selection");
             ViewModeButton_Click(this, new RoutedEventArgs());
             await Layout();
             Check(GameGrid.Items.Count == ViewModel.Games.Count && GameGrid.ContainerFromIndex(0) is not null, "Tile view renders imported entries");

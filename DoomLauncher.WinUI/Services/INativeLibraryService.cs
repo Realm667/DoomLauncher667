@@ -40,6 +40,9 @@ public interface INativeLibraryService
         string originalFileName,
         CancellationToken cancellationToken = default);
 
+    Task<LocalArchiveRefreshResult> RefreshGameFromLocalArchiveAsync(
+        int gameFileId, IProgress<double>? progress = null, CancellationToken cancellationToken = default);
+
     Task<GameCollectionsData> LoadGameCollectionsAsync(
         int gameFileId,
         CancellationToken cancellationToken = default);

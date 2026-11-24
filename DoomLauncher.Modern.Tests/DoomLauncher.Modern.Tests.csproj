@@ -17,6 +17,7 @@
     <Compile Include="..\DoomLauncher.WinUI\Services\SaveGameService.cs" Link="Services\SaveGameService.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\MapBrowserService.cs" Link="Services\MapBrowserService.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\LibraryFeatureStore.cs" Link="Services\LibraryFeatureStore.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\ArchivePayload.cs" Link="Services\ArchivePayload.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\FeaturedModSelector.cs" Link="Services\FeaturedModSelector.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\SqliteNativeLibraryService.*.cs" Link="Services\%(Filename)%(Extension)" />
     <Compile Include="..\DoomLauncher.WinUI\Services\UiLocalization.Ux.cs" Link="Services\UiLocalization.Ux.cs" />

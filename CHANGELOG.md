@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Refresh metadata, maps and TITLEPIC directly from replaced local archives without requiring an /idgames match; retain metadata locks and personal data.
+- Read single-PK3 ZIP containers through bounded temporary files, including payloads above 256 MB, instead of silently missing maps and title artwork.
 - Add Show in Explorer below Edit Entry in the entry context menu, selecting the linked archive and reporting unavailable files.
 - Publish large Library changes in one notification, retaining incremental updates for small edits and unchanged item instances on reload.
 - Synchronize visible selection after catalog refreshes and game sessions; restore the viewport and keyboard context when publishing large list changes.

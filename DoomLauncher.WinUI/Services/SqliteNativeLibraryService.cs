@@ -883,21 +883,7 @@ public sealed partial class SqliteNativeLibraryService(
         IReadOnlySet<string>? fieldsToUpdate = null)
     {
         await using var connection = await OpenConnectionAsync(cancellationToken);
-        await using (var guard = connection.CreateCommand())
-        {
-            guard.CommandText = "SELECT EXISTS(SELECT 1 FROM IWads WHERE GameFileID=$id);";
-            guard.Parameters.AddWithValue("$id", gameFileId);
-            if (Convert.ToInt32(await guard.ExecuteScalarAsync(cancellationToken)) != 0)
-                throw new InvalidOperationException("IWADs are excluded from /idgames mod metadata updates.");
-        }
-        var enabled = new HashSet<string>(fieldsToUpdate ?? LibraryFeatureStore.MetadataFields.ToHashSet(), StringComparer.Ordinal);
-        if (enabled.Any(field => !LibraryFeatureStore.MetadataFields.Contains(field))) throw new ArgumentException("Unknown metadata field.");
-        await using (var locks = connection.CreateCommand())
-        {
-            locks.CommandText = "SELECT Field FROM WinUI_MetadataLocks WHERE GameFileID=$id;"; locks.Parameters.AddWithValue("$id", gameFileId);
-            await using var rows = await locks.ExecuteReaderAsync(cancellationToken);
-            while (await rows.ReadAsync(cancellationToken)) enabled.Remove(rows.GetString(0));
-        }
+        var enabled = await GetEnabledMetadataFieldsAsync(connection, gameFileId, fieldsToUpdate, cancellationToken);
         if (enabled.Count == 0) return;
         var archivePath = await ResolveManagedGameFileAsync(gameFileId, cancellationToken);
         var inspection = !string.IsNullOrWhiteSpace(archivePath) && File.Exists(archivePath)

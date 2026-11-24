@@ -1002,13 +1002,23 @@ public sealed partial class MainPage : Page
         var isBlocking = false;
         try
         {
-            var matches = await ViewModel.FindSelectedIdGamesMatchesAsync(
-                _loadCancellation.Token);
+            if (!ViewModel.SelectedGame.IdGamesId.HasValue
+                && !await ShowLocalArchiveRefreshDialogAsync(Strings["LocalArchiveRefreshIntro"], allowIdGamesSearch: true))
+                return;
+            IReadOnlyList<IdGamesItem> matches;
+            try
+            {
+                matches = await ViewModel.FindSelectedIdGamesMatchesAsync(_loadCancellation.Token);
+            }
+            catch (Exception error) when ((error is System.Net.Http.HttpRequestException or TaskCanceledException)
+                                         && !_loadCancellation.IsCancellationRequested)
+            {
+                await ShowLocalArchiveRefreshDialogAsync(Strings["LocalArchiveRemoteUnavailable"]);
+                return;
+            }
             if (matches.Count == 0)
             {
-                await ShowErrorAsync(
-                    Strings["IdGamesMetadataTitle"],
-                    Strings["IdGamesMetadataNoMatches"]);
+                await ShowLocalArchiveRefreshDialogAsync(Strings["IdGamesMetadataNoMatches"]);
                 return;
             }
 
@@ -1126,6 +1136,39 @@ public sealed partial class MainPage : Page
                 SetBlockingMetadataRefresh(false);
             _isRescraping = false;
         }
+    }
+
+    private async Task<bool> ShowLocalArchiveRefreshDialogAsync(string reason, bool allowIdGamesSearch = false)
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            RequestedTheme = EffectiveDialogTheme,
+            Title = Strings["RescrapeIdGames"],
+            Content = new TextBlock
+            {
+                Text = reason + "\n\n" + _app.Localization.Format("LocalArchiveRefreshDescription", ViewModel.SelectedGame.FileName),
+                TextWrapping = TextWrapping.Wrap,
+                MaxWidth = UiLayoutPolicy.DialogWidth(XamlRoot.Size.Width, 520),
+            },
+            PrimaryButtonText = Strings["RefreshLocalArchive"],
+            SecondaryButtonText = allowIdGamesSearch ? Strings["FindIdGamesEntry"] : string.Empty,
+            CloseButtonText = Strings["Cancel"],
+            DefaultButton = ContentDialogButton.Primary,
+        };
+        ApplyDialogTheme(dialog);
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Secondary) return true;
+        if (result != ContentDialogResult.Primary) return false;
+        SetBlockingMetadataRefresh(true);
+        try
+        {
+            await ViewModel.RefreshSelectedLocalArchiveAsync(
+                new Progress<double>(value => SetBlockingMetadataRefresh(true, value)), _loadCancellation.Token);
+            SyncSelection();
+        }
+        finally { SetBlockingMetadataRefresh(false); }
+        return false;
     }
 
     private void SetBlockingMetadataRefresh(bool isVisible, double progress = 0)
