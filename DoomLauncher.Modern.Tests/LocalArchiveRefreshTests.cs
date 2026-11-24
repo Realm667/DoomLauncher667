@@ -15,6 +15,7 @@ internal static class LocalArchiveRefreshTests
         Directory.CreateDirectory(root);
         try
         {
+            await VerifyMetadataIdentityAsync(root);
             var inner = Path.Combine(root, "updated.pk3");
             using (var archive = ZipFile.Open(inner, ZipArchiveMode.Create))
             {
@@ -53,6 +54,31 @@ internal static class LocalArchiveRefreshTests
             await VerifyLocalRefreshAsync(Path.Combine(root, "library"));
         }
         finally { SqliteConnection.ClearAllPools(); Directory.Delete(root, true); }
+    }
+
+    private static async Task VerifyMetadataIdentityAsync(string root)
+    {
+        var inner=Path.Combine(root,"Venturous_1.7.2.pk3");
+        using(var archive=ZipFile.Open(inner,ZipArchiveMode.Create))
+        {
+            using(var main=new StreamWriter(archive.CreateEntry("wadinfo2.txt").Open()))
+                main.Write("Title : Venturous - In The Footsteps Of The Fallen\nFilename : Venturous 1.7.1.pk3\nAuthor : Pixelfox\nDescription : Main campaign\n");
+            using(var addon=new StreamWriter(archive.CreateEntry("wadinfo.txt").Open()))
+                addon.Write("Title : Venturous Frozen Enemies\nFilename : VenturousFrozenEnemies.pk3\nAuthor : Other author\nRelease date : February 2025\nDescription : Bundled add-on, not the main game\nGame : Doom II\nAdvanced engine needed : GZDoom\n");
+        }
+        var outer=Path.Combine(root,"Venturous 1.3.1.zip");
+        using(var archive=ZipFile.Open(outer,ZipArchiveMode.Create)) archive.CreateEntryFromFile(inner,Path.GetFileName(inner));
+        var metadata=await ArchiveTextMetadataReader.ReadAsync(outer,default);
+        Check(metadata.Title=="Venturous - In The Footsteps Of The Fallen" && metadata.Author=="Pixelfox" && metadata.ReleaseDate is null,
+            "Primary archive identity outranks a more complete bundled add-on readme");
+        metadata=await ArchiveTextMetadataReader.ReadAsync(inner,default,"renamed-local.pk3","Venturous - In The Footsteps Of The Fallen");
+        Check(metadata.Title=="Venturous - In The Footsteps Of The Fallen", "Known mod title identifies primary text after a custom archive rename");
+        var unrelated=Path.Combine(root,"main-game.pk3");
+        using(var archive=ZipFile.Open(unrelated,ZipArchiveMode.Create))
+        using(var text=new StreamWriter(archive.CreateEntry("wadinfo.txt").Open()))
+            text.Write("Title : Bundled addon\nFilename : different-addon.pk3\nAuthor : Other author\n");
+        Check((await ArchiveTextMetadataReader.ReadAsync(unrelated,default)).Quality==0,
+            "An unrelated add-on document alone does not become the main mod metadata");
     }
 
     private static async Task VerifyLocalRefreshAsync(string root)
@@ -166,7 +192,12 @@ internal static class LocalArchiveRefreshTests
         var oldHash=Hash();
         var result=await library.RefreshGameFromLocalArchiveAsync(id);
         Check(before == await ProtectedStateAsync(db,id) && oldHash == Hash(), "Real copied mod refresh retains protected database rows and the exact archive bytes");
-        var report = new { OldMapCount=oldMetadata.MapCount, NewMapCount=result.MapCount, result.ArtworkImported, ProtectedDataRetained=true, ArchiveSHA256=oldHash };
+        var metadata=await LibraryFeatureStore.CaptureMetadataAsync(db,null,id,default);
+        if(oldMetadata.Title=="Venturous - In The Footsteps Of The Fallen")
+            Check(metadata.Title==oldMetadata.Title && metadata.Author=="Pixelfox" && metadata.ReleaseDate==oldMetadata.ReleaseDate
+                && metadata.Description is not null && !metadata.Description.Contains("freezing enemies",StringComparison.OrdinalIgnoreCase),
+                "Real Venturous refresh preserves main-mod identity instead of selecting bundled Frozen Enemies metadata");
+        var report = new { OldMapCount=oldMetadata.MapCount, NewMapCount=result.MapCount, result.ArtworkImported, ProtectedDataRetained=true, metadata.Title, metadata.Author, metadata.ReleaseDate, ArchiveSHA256=oldHash };
         var json=JsonSerializer.Serialize(report);
         await File.WriteAllTextAsync(Path.Combine(root,"local-refresh-report.json"),json);
         Console.WriteLine(json);

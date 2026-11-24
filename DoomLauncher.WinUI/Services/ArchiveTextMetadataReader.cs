@@ -11,7 +11,8 @@ internal sealed record ArchiveTextMetadata(
     string Description,
     DateTime? ReleaseDate,
     string Game,
-    string SourcePort)
+    string SourcePort,
+    string FileName = "")
 {
     public static ArchiveTextMetadata Empty { get; } =
         new(string.Empty, string.Empty, string.Empty, null, string.Empty, string.Empty);
@@ -41,7 +42,9 @@ internal static class ArchiveTextMetadataReader
 
     public static async Task<ArchiveTextMetadata> ReadAsync(
         string archivePath,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        string? expectedFileName = null,
+        string? expectedTitle = null)
     {
         if (!File.Exists(archivePath)
             || !ArchiveExtensions.Contains(
@@ -55,6 +58,7 @@ internal static class ArchiveTextMetadataReader
         {
             using var payload = await ArchivePayload.OpenAsync(archivePath, cancellationToken);
             archivePath = payload.Path;
+            expectedFileName ??= payload.FileName;
             using var archive = ArchiveFactory.OpenArchive(archivePath);
             var candidates = new List<ArchiveTextMetadata>();
             foreach (var entry in archive.Entries.Where(entry =>
@@ -72,10 +76,16 @@ internal static class ArchiveTextMetadataReader
                 if (metadata.Quality > 0)
                     candidates.Add(metadata);
             }
-            return candidates
-                .OrderByDescending(candidate => candidate.Quality)
-                .FirstOrDefault()
-                ?? ArchiveTextMetadata.Empty;
+            int IdentityMatch(ArchiveTextMetadata candidate) =>
+                (!string.IsNullOrWhiteSpace(expectedTitle) && candidate.Title.Equals(expectedTitle, StringComparison.OrdinalIgnoreCase) ? 4 : 0)
+                + (!string.IsNullOrWhiteSpace(candidate.FileName) && ArchiveIdentity(candidate.FileName).Equals(ArchiveIdentity(expectedFileName), StringComparison.Ordinal) ? 2 : 0);
+            var matching = candidates.Where(candidate => IdentityMatch(candidate) > 0)
+                .OrderByDescending(IdentityMatch).ThenByDescending(candidate => candidate.Quality).FirstOrDefault();
+            if (matching is not null) return matching;
+            // A document identifying a different file belongs to bundled content.
+            // When identity is ambiguous, keep existing metadata instead of guessing.
+            var unidentified = candidates.Where(candidate => string.IsNullOrWhiteSpace(candidate.FileName)).ToArray();
+            return unidentified.Length == 1 ? unidentified[0] : ArchiveTextMetadata.Empty;
         }
         catch (Exception exception) when (
             exception is IOException
@@ -116,7 +126,15 @@ internal static class ArchiveTextMetadataReader
             DatabaseTextSanitizer.Multiline(description),
             ParseDate(dateText),
             DatabaseTextSanitizer.SingleLine(game),
-            DatabaseTextSanitizer.SingleLine(sourcePort));
+            DatabaseTextSanitizer.SingleLine(sourcePort),
+            DatabaseTextSanitizer.SingleLine(FindSingleLine(lines, "filename")));
+    }
+
+    private static string ArchiveIdentity(string? fileName)
+    {
+        var stem = Path.GetFileNameWithoutExtension((fileName ?? string.Empty).Trim().Trim('"').Replace('\\', '/'));
+        stem = Regex.Replace(stem, @"[\s_.-]+(?:(?:v|rc|rev|beta)\s*)?\d+(?:[._-]\d+)*[a-z]?$", "", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        return Regex.Replace(stem, @"[^\p{L}\p{N}]", "").ToUpperInvariant();
     }
 
     internal static string DecodeText(ReadOnlySpan<byte> bytes)

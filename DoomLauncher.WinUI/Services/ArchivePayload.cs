@@ -9,6 +9,7 @@ internal sealed class ArchivePayload(string path) : IDisposable
     private const long MaximumPayloadSize = 4L * 1024 * 1024 * 1024;
     private readonly List<string> _temporaryFiles = [];
     public string Path { get; private set; } = path;
+    public string FileName { get; private set; } = System.IO.Path.GetFileName(path);
 
     public static async Task<ArchivePayload> OpenAsync(string path, CancellationToken token)
     {
@@ -49,6 +50,7 @@ internal sealed class ArchivePayload(string path) : IDisposable
                     if (length != entry.Size) throw new InvalidDataException("The nested mod archive is incomplete.");
                 }
                 payload.Path = temporary;
+                payload.FileName = System.IO.Path.GetFileName(entry.Key ?? string.Empty);
             }
         }
         catch (SharpCompress.Common.ArchiveOperationException error)

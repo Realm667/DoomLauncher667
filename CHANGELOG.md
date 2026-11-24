@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Identify main-mod text by its declared archive filename or known title, rather than importing a more complete readme belonging to a bundled add-on.
 - Refresh metadata, maps and TITLEPIC directly from replaced local archives without requiring an /idgames match; retain metadata locks and personal data.
 - Read single-PK3 ZIP containers through bounded temporary files, including payloads above 256 MB, instead of silently missing maps and title artwork.
 - Add Show in Explorer below Edit Entry in the entry context menu, selecting the linked archive and reporting unavailable files.

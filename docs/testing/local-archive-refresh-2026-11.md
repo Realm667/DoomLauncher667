@@ -6,11 +6,14 @@ An existing Venturous entry retained its old outer ZIP filename while the ZIP
 was replaced with a single `Venturous_1.7.2.pk3` payload (712,709,150 bytes).
 The database still stored eight maps and had no linked /idgames ID.
 
-Two independent problems prevented a refresh:
+The investigation found these problems:
 
 - The existing action required an /idgames match before inspecting local data.
 - Map extraction skipped embedded archives above its 256 MiB memory limit, and
   TITLEPIC extraction did not descend into a single-PK3 ZIP container.
+- Metadata selection preferred the most complete text document, even when it
+  identified a bundled add-on rather than the main mod. The actual package
+  includes both Venturous and Frozen Enemies documents.
 
 The synthetic regression was first run against the original readers and failed
 with `Large single-PK3 ZIP exposes its maps without the 256 MB memory cutoff`.
@@ -29,6 +32,11 @@ The fixture wraps a PK3 larger than 256 MiB, avoiding a large checked-in asset.
 - Local refresh updates only available text metadata and the detected map list,
   honoring the existing metadata locks. Missing readme values preserve current
   values. Existing metadata undo history is used; no /idgames link is invented.
+- Text selection matches a document's declared filename against the original
+  payload identity (normalizing version suffixes) and can match the known mod
+  title after a custom rename. An explicit document for another archive is not
+  selected; ambiguous metadata retains existing values. Temporary filenames are
+  not used as the package identity.
 - Existing TITLEPIC import updates artwork. A missing TITLEPIC retains the
   current artwork. The mod archive is neither downloaded nor replaced.
 - IWAD checks and metadata-field validation are shared by local and /idgames
@@ -40,6 +48,8 @@ The fixture wraps a PK3 larger than 256 MiB, avoiding a large checked-in asset.
   New checks cover large wrappers, artwork, depth limits and cleanup, a replaced
   ZIP with the same name, locked fields, absent readme values, undo, corrupt input,
   cancellation, IWAD protection, and preservation of personal/launch data.
+  Additional red/green tests cover a more complete bundled add-on document,
+  custom archive names, and an unrelated add-on document on its own.
 - 197 native UI checks pass. They include cancelling the new dialog and invoking
   its real primary button against a replaced fixture ZIP: maps update, archive
   bytes and selection remain unchanged, and Library input is restored.
@@ -53,21 +63,28 @@ The fixture wraps a PK3 larger than 256 MiB, avoiding a large checked-in asset.
   columns of the target entry, other entries, launch definitions, personal ratings,
   queue, collection membership, progress, /idgames links and non-artwork file
   associations remain unchanged.
+  The final real-copy check explicitly verifies the correct main title,
+  Pixelfox as author, and the original release-date value. It rejects the
+  Frozen Enemies text that the initial metadata-selection heuristic had chosen.
 
 Final local evidence (excluded from Git):
 
 - `outputs/venturous-refresh-20261124/regression-before.log`
-- `outputs/venturous-refresh-20261124/build-tests.log`
-- `outputs/venturous-refresh-20261124/native-ui.log`
-- `outputs/venturous-refresh-20261124/real-copy.log` and
+- `outputs/venturous-refresh-20261124/identity-build-tests.log`
+- `outputs/venturous-refresh-20261124/identity-native-ui.log`
+- `outputs/venturous-refresh-20261124/identity-real-copy.log` and
   `real-copy/local-refresh-report.json`
-- Native UI report under
-  `.tools/temp/DoomLauncher-native-ui-7c54abd10083414ebd123a1283433fef/`, including
+- Final native UI report under
+  `.tools/temp/DoomLauncher-native-ui-88965f7fb7304986bb81117855cf3f36/`, including
   `visual-qa/local-refresh-de-DE-800.png`.
 
 The standalone default suite skips real-database integration without arguments;
 the isolated real-copy check above supplements that gap. Genuine engine runs were
 not repeated: launch and tracking production code were not changed. No mod files,
-user database or generated artwork are committed. Z: was only read to prepare the
-isolated copy; no hotfix deployment, live metadata write, push or public release
-was performed as part of this fix.
+user database or generated artwork are committed. The initial verification used
+isolated copies. A subsequent explicit user request authorized deployment and
+refresh on Z:. Live visual verification exposed the add-on text selection; the
+original main-mod text was restored from the verified pre-update backup, and the
+identity regression was fixed before completing deployment. Deployment backups
+and preservation reports remain under the ignored `outputs`/`backups` directories.
+No push or public release was performed.

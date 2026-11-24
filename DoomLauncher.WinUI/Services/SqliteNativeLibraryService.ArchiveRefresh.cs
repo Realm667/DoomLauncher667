@@ -15,10 +15,11 @@ public sealed partial class SqliteNativeLibraryService
         var path = await ResolveManagedGameFileAsync(gameFileId, cancellationToken);
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             throw new FileNotFoundException("The linked mod archive is unavailable.", path);
+        var identity = await LibraryFeatureStore.CaptureMetadataAsync(connection, null, gameFileId, cancellationToken);
         progress?.Report(0.1);
         using var payload = await Task.Run(() => ArchivePayload.OpenAsync(path, cancellationToken), cancellationToken);
         progress?.Report(0.3);
-        var inspection = await ArchiveInspection.ReadAsync(payload.Path, cancellationToken);
+        var inspection = await ArchiveInspection.ReadAsync(payload.Path, cancellationToken, payload.FileName, identity.Title);
         progress?.Report(0.6);
         int mapCount;
         await using (var transaction = (SqliteTransaction)await connection.BeginTransactionAsync(cancellationToken))
