@@ -774,7 +774,7 @@ public sealed partial class MainPage : Page
             return;
 
         var actions = flyout.Items.OfType<MenuFlyoutItem>().ToArray();
-        if (actions.Length < 5)
+        if (actions.Length < 6)
             return;
         actions[0].Text = Strings[item.IsFavorite
             ? "RemoveFavorite"
@@ -784,18 +784,14 @@ public sealed partial class MainPage : Page
             : "MarkFinished"];
         actions[2].Text = Strings["ManageCollections"];
         actions[3].Text = Strings["EditEntry"];
-        actions[4].Text = Strings["DeleteMod"];
-        actions[4].Visibility = item.Category.Equals(
-            "IWAD",
-            StringComparison.OrdinalIgnoreCase)
-            ? Visibility.Collapsed
-            : Visibility.Visible;
+        actions[4].Text = Strings["ShowInExplorer"];
+        actions[5].Text = Strings["DeleteMod"];
         foreach (var action in actions)
         {
             action.Visibility = Visibility.Visible;
             action.Tag = item;
         }
-        actions[4].Visibility = item.Category.Equals(
+        actions[5].Visibility = item.Category.Equals(
             "IWAD",
             StringComparison.OrdinalIgnoreCase)
             ? Visibility.Collapsed
@@ -888,6 +884,35 @@ public sealed partial class MainPage : Page
     {
         SelectContextItem(sender);
         await ShowEditDialogAsync();
+    }
+
+    private async void ContextShowInExplorer_Click(object sender, RoutedEventArgs args)
+    {
+        if (sender is not MenuFlyoutItem { Tag: LibraryItem item } || item.IsPlaceholder)
+            return;
+        SelectContextItem(sender);
+        try
+        {
+            var path = await _app.NativeLibraryService.ResolveManagedGameFileAsync(
+                item.GameFileId, _loadCancellation.Token);
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            {
+                await ShowErrorAsync(Strings["ShowInExplorer"],
+                    _app.Localization.Format("LinkedFileUnavailable", path ?? item.FileName));
+                return;
+            }
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = $"/select,\"{Path.GetFullPath(path)}\"",
+                UseShellExecute = true,
+            });
+        }
+        catch (OperationCanceledException) when (_loadCancellation.IsCancellationRequested) { }
+        catch (Exception exception)
+        {
+            await ShowErrorAsync(Strings["ShowInExplorer"], exception.Message);
+        }
     }
 
     private async void ContextDelete_Click(object sender, RoutedEventArgs args)

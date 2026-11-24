@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add Show in Explorer below Edit Entry in the entry context menu, selecting the linked archive and reporting unavailable files.
 - Publish large Library changes in one notification, retaining incremental updates for small edits and unchanged item instances on reload.
 - Synchronize visible selection after catalog refreshes and game sessions; restore the viewport and keyboard context when publishing large list changes.
 - Keep existing Collection groups when navigating back to them; rebuild them when their data or sort order changes.

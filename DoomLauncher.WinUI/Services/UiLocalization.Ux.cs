@@ -6,6 +6,8 @@ public sealed partial class UiLocalization
     {
         string[][] rows =
         [
+            ["ShowInExplorer", "Show in Explorer", "Im Explorer anzeigen", "Afficher dans l’Explorateur", "Mostrar en el Explorador"],
+            ["LinkedFileUnavailable", "The linked file could not be found or is unavailable:\n{0}", "Die verknüpfte Datei wurde nicht gefunden oder ist nicht erreichbar:\n{0}", "Le fichier lié est introuvable ou inaccessible :\n{0}", "No se encuentra el archivo vinculado o no está disponible:\n{0}"],
             ["EntryTools", "Entry tools", "Eintrag verwalten", "Outils de l’entrée", "Herramientas de la entrada"],
             ["ArtworkUnavailable", "Artwork unavailable – showing the placeholder", "Titelbild nicht verfügbar – Platzhalter wird angezeigt", "Illustration indisponible – image de remplacement", "Ilustración no disponible – se muestra el marcador"],
             ["Details", "Details", "Details", "Détails", "Detalles"],

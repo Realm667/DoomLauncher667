@@ -36,6 +36,7 @@
             <MenuFlyoutSeparator />
             <MenuFlyoutItem Click="ContextCollections_Click" />
             <MenuFlyoutItem Click="ContextEdit_Click" />
+            <MenuFlyoutItem Click="ContextShowInExplorer_Click" />
             <MenuFlyoutSeparator />
             <MenuFlyoutItem Click="ContextDelete_Click" />
         </MenuFlyout>

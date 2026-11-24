@@ -101,6 +101,12 @@ public sealed partial class MainPage
             var menu = (MenuFlyout)Resources["LibraryItemContextMenu"];
             menu.ShowAt(GameList); await Layout();
             Check(menu.Items.OfType<MenuFlyoutItem>().All(item => !string.IsNullOrWhiteSpace(item.Text)), "Context menu labels populate without restart");
+            var entryActions = menu.Items.OfType<MenuFlyoutItem>().ToArray();
+            Check(entryActions.Length == 6 && entryActions[3].Text == Strings["EditEntry"]
+                && entryActions[4].Text == Strings["ShowInExplorer"]
+                && entryActions[4].Tag is LibraryItem contextItem
+                && contextItem.GameFileId == ViewModel.SelectedGame.GameFileId,
+                "Show in Explorer follows Edit Entry and targets the context entry");
             menu.Hide();
             ViewModeButton_Click(this, new RoutedEventArgs());
             await Layout();
@@ -176,6 +182,10 @@ public sealed partial class MainPage
             ViewModel.Filter(string.Empty); ViewModel.SelectGame(chosenGame); SyncSelection(); await Layout();
             Check(!ViewModel.CanRefreshModMetadata && LibraryDetailsPane.FindName("RefreshModMetadataButton") is Button { IsEnabled: false },
                 "IWAD details disable mod metadata refresh");
+            menu.ShowAt(GameList); await Layout();
+            Check(entryActions[4].Visibility == Visibility.Visible && entryActions[5].Visibility == Visibility.Collapsed,
+                "Explorer remains available for IWADs while deletion stays hidden");
+            menu.Hide();
             try { await ViewModel.FindSelectedIdGamesMatchesAsync(); throw new Exception("IWAD search was allowed"); }
             catch (InvalidOperationException error) { Check(error.Message == Strings["IwadMetadataProtected"], "IWAD metadata search is blocked with localized guidance"); }
             var bulk = await ViewModel.RefreshLinkedIdGamesMetadataAsync();
