@@ -79,6 +79,25 @@ internal static class LocalArchiveRefreshTests
             text.Write("Title : Bundled addon\nFilename : different-addon.pk3\nAuthor : Other author\n");
         Check((await ArchiveTextMetadataReader.ReadAsync(unrelated,default)).Quality==0,
             "An unrelated add-on document alone does not become the main mod metadata");
+
+        var renamedZip = Path.Combine(root, "renamed-download.zip");
+        using (var archive = ZipFile.Open(renamedZip, ZipArchiveMode.Create))
+        {
+            using (var wad = archive.CreateEntry("episode.wad").Open())
+                wad.Write("PWAD\0\0\0\0\u000c\0\0\0"u8);
+            using (var readme = new StreamWriter(archive.CreateEntry("episode.txt").Open()))
+                readme.Write("Title : The Main Episode\nFilename : episode.wad\nAuthor : Main author\n");
+            using (var addon = new StreamWriter(archive.CreateEntry("addon.txt").Open()))
+                addon.Write("Title : Optional add-on\nFilename : addon.wad\nAuthor : Other author\nDescription : Add-on instructions\nGame : Doom II\n");
+        }
+        metadata = await ArchiveTextMetadataReader.ReadAsync(renamedZip, default);
+        Check(metadata.Title == "The Main Episode" && metadata.Author == "Main author",
+            "A renamed ZIP retains the metadata for its only bundled playable file");
+        using (var archive = ZipFile.Open(renamedZip, ZipArchiveMode.Update))
+        using (var wad = archive.CreateEntry("addon.wad").Open())
+            wad.Write("PWAD\0\0\0\0\u000c\0\0\0"u8);
+        Check((await ArchiveTextMetadataReader.ReadAsync(renamedZip, default)).Quality == 0,
+            "A renamed ZIP with several playable files does not guess the main mod metadata");
     }
 
     private static async Task VerifyLocalRefreshAsync(string root)

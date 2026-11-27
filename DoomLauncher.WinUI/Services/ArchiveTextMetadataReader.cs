@@ -82,6 +82,21 @@ internal static class ArchiveTextMetadataReader
             var matching = candidates.Where(candidate => IdentityMatch(candidate) > 0)
                 .OrderByDescending(IdentityMatch).ThenByDescending(candidate => candidate.Quality).FirstOrDefault();
             if (matching is not null) return matching;
+
+            // A distribution archive can have a different name from its game file.
+            if (Path.GetExtension(archivePath).ToLowerInvariant() is ".zip" or ".7z" or ".rar")
+            {
+                var playableFiles = archive.Entries.Where(entry => !entry.IsDirectory && entry.Size > 0
+                    && Path.GetExtension(entry.Key)?.ToLowerInvariant() is ".wad" or ".pk3" or ".ipk3" or ".pk7" or ".pke")
+                    .Take(2).ToArray();
+                if (playableFiles.Length == 1 && ArchiveIdentity(playableFiles[0].Key) is { Length: > 0 } identity)
+                {
+                    var playableMatch = candidates.Where(candidate => ArchiveIdentity(candidate.FileName) == identity)
+                        .MaxBy(candidate => candidate.Quality);
+                    if (playableMatch is not null) return playableMatch;
+                }
+            }
+
             // A document identifying a different file belongs to bundled content.
             // When identity is ambiguous, keep existing metadata instead of guessing.
             var unidentified = candidates.Where(candidate => string.IsNullOrWhiteSpace(candidate.FileName)).ToArray();
