@@ -14,7 +14,7 @@ public sealed class ModImportBatch(INativeLibraryService library)
     public static IReadOnlyList<string> SupportedExtensions { get; } =
         Array.AsReadOnly(new[] { ".zip", ".7z", ".rar", ".wad", ".pk3", ".ipk3", ".pk7", ".pke" });
     public async Task<ModImportSummary> RunAsync(IReadOnlyList<ModImportRequest> requests,
-        IProgress<ModImportProgress>? progress, CancellationToken cancellationToken)
+        IProgress<ModImportProgress>? progress, CancellationToken cancellationToken, bool iwads = false)
     {
         var imported = 0; var updated = 0; var skipped = 0; var cancelled = false;
         var failures = new List<ModImportFailure>();
@@ -26,7 +26,9 @@ public sealed class ModImportBatch(INativeLibraryService library)
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var result = await Task.Run(() => library.ImportAsync(request.Path, request.Resolution, cancellationToken), cancellationToken);
+                var result = await Task.Run(() => iwads
+                    ? library.ImportIwadAsync(request.Path, cancellationToken)
+                    : library.ImportAsync(request.Path, request.Resolution, cancellationToken), cancellationToken);
                 if (result.WasSkipped) skipped++;
                 else if (result.ReusedExisting) updated++;
                 else imported++;

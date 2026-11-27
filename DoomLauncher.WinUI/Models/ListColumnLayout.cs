@@ -16,7 +16,7 @@ public sealed class ListColumnLayout : INotifyPropertyChanged
     public GridLength ArtworkWidth => Width("Artwork", 72);
     private double _availableWidth;
     public GridLength TitleWidth => Width("Title", Math.Max(280, _availableWidth - OtherColumnsWidth));
-    private double OtherColumnsWidth => new[] { ArtworkWidth, AuthorWidth, ReleaseDateWidth, MapsWidth,
+    private double OtherColumnsWidth => new[] { ArtworkWidth, VersionWidth, AuthorWidth, ReleaseDateWidth, MapsWidth,
         RatingWidth, DownloadedWidth, SourcePortWidth, PlaytimeWidth, FinishedWidth, FavoritesWidth }.Sum(value => value.Value);
     public void SetAvailableWidth(double width)
     {
@@ -25,6 +25,15 @@ public sealed class ListColumnLayout : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TitleWidth)));
     }
     public GridLength AuthorWidth => Width("Author", 160);
+    private bool _showIwadVersion;
+    public bool ShowIwadVersion => _showIwadVersion;
+    public GridLength VersionWidth => new(_showIwadVersion ? 120 : 0);
+    public void SetIwadContext(bool visible)
+    {
+        if (_showIwadVersion == visible) return;
+        _showIwadVersion = visible;
+        NotifyAll();
+    }
     public GridLength ReleaseDateWidth => Width("ReleaseDate", 132);
     public GridLength MapsWidth => Width("Maps", 80);
     public GridLength RatingWidth => Width("Rating", 90);
@@ -65,7 +74,7 @@ public sealed class ListColumnLayout : INotifyPropertyChanged
     {
         foreach (var property in new[]
                  {
-                     nameof(ArtworkWidth), nameof(TitleWidth), nameof(AuthorWidth),
+                     nameof(ArtworkWidth), nameof(TitleWidth), nameof(VersionWidth), nameof(AuthorWidth),
                      nameof(ReleaseDateWidth), nameof(MapsWidth), nameof(RatingWidth),
                      nameof(DownloadedWidth), nameof(SourcePortWidth), nameof(PlaytimeWidth),
                      nameof(FinishedWidth), nameof(FavoritesWidth),

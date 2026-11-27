@@ -23,6 +23,10 @@ public interface INativeLibraryService
         string sourcePath,
         CancellationToken cancellationToken = default);
 
+    Task<NativeImportResult> ImportIwadAsync(
+        string sourcePath,
+        CancellationToken cancellationToken = default);
+
     Task<NativeImportResult> ImportAsync(
         string sourcePath,
         ImportFileConflictResolution conflictResolution,

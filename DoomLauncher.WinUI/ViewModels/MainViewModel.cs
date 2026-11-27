@@ -673,6 +673,7 @@ public sealed partial class MainViewModel(
 
         _collectionFilterTag = null;
         _categoryFilter = filter;
+        OnPropertyChanged(nameof(CurrentCategoryFilter));
         ApplyFilter();
     }
 
@@ -692,6 +693,7 @@ public sealed partial class MainViewModel(
 
         _collectionFilterTag = normalized;
         _categoryFilter = LibraryCategoryFilter.All;
+        OnPropertyChanged(nameof(CurrentCategoryFilter));
         ApplyFilter();
     }
 
@@ -886,11 +888,12 @@ public sealed partial class MainViewModel(
     public async Task<ModImportSummary> ImportFilesAsync(IReadOnlyList<ModImportRequest> requests,
         IProgress<ModImportProgress>? progress, CancellationToken cancellationToken)
     {
-        var summary = await new ModImportBatch(nativeLibraryService).RunAsync(requests, progress, cancellationToken);
+        var iwads = _categoryFilter == LibraryCategoryFilter.Iwads;
+        var summary = await new ModImportBatch(nativeLibraryService).RunAsync(requests, progress, cancellationToken, iwads);
         if (summary.HasChanges)
         {
             await LoadCatalogAsync(true, null, CancellationToken.None);
-            ShowLatestImports();
+            if (!iwads) ShowLatestImports();
         }
         return summary;
     }

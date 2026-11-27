@@ -42,6 +42,7 @@ public sealed class LibraryItem : INotifyPropertyChanged
         GameFileId = entry.GameFileId;
         FileName = entry.FileName;
         Title = entry.Title;
+        Version = entry.Version;
         Subtitle = entry.Author;
         Author = entry.Author;
         Category = entry.Category;
@@ -111,6 +112,7 @@ public sealed class LibraryItem : INotifyPropertyChanged
     }
     public string FileName { get; } = string.Empty;
     public string Title { get; }
+    public string Version { get; } = string.Empty;
     public string Subtitle { get; }
     public string Author { get; } = string.Empty;
     public string Category { get; }

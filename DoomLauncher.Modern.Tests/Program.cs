@@ -85,6 +85,12 @@ if (args.Length == 2 && args[0] == "--verify-shared-storage")
     return 0;
 }
 
+if (args.Length == 1 && args[0] == "--verify-iwad-versions")
+{
+    await IwadLibraryTests.VerifyAsync();
+    return 0;
+}
+
 if (args.Length == 1
     && args[0].Equals(
         "--verify-archive-text-encoding",
@@ -587,6 +593,7 @@ try
         && obsidianDefinitions.IwadId == 21,
         "Obsidian setzt die passende IWAD und neueste kompatible Source-Port-Definition");
     await VerifyLegacyNotNullSchemaAsync();
+    await IwadLibraryTests.VerifyAsync();
     Check(
         MapNameExtractor.ParseStored("MAP01-MAP03, E1M1")
             .SequenceEqual(["E1M1", "MAP01", "MAP02", "MAP03"]),

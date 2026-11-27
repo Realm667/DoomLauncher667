@@ -78,11 +78,14 @@ internal static class IwadVersionDetector
         }
 
         using var archive = ArchiveFactory.OpenArchive(archivePath);
-        foreach (var entry in archive.Entries.Where(candidate =>
+        var wadEntries = archive.Entries.Where(candidate =>
                      !candidate.IsDirectory
                      && Path.GetExtension(candidate.Key ?? string.Empty).Equals(
                          ".wad",
-                         StringComparison.OrdinalIgnoreCase)))
+                         StringComparison.OrdinalIgnoreCase)).ToArray();
+        var ambiguousNames = wadEntries.GroupBy(entry => Path.GetFileName(entry.Key ?? string.Empty), StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1).Select(group => group.Key).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in wadEntries)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (entry.Size <= 0 || entry.Size > 512L * 1024 * 1024)
@@ -98,7 +101,11 @@ internal static class IwadVersionDetector
                 catalog,
                 cancellationToken);
             if (candidate is not null)
+            {
+                if (ambiguousNames.Contains(candidate.InternalFileName))
+                    throw new InvalidDataException($"Der IWAD-Dateiname {candidate.InternalFileName} kommt mehrfach im Archiv vor. Bitte getrennte Archive verwenden.");
                 candidates.Add(candidate);
+            }
         }
         return candidates;
     }

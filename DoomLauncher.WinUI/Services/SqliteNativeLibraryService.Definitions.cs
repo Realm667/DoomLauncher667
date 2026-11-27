@@ -378,6 +378,12 @@ public sealed partial class SqliteNativeLibraryService
                 await identity.ExecuteScalarAsync(cancellationToken),
                 CultureInfo.InvariantCulture);
         }
+        await WriteIwadMetadataAsync(connection, transaction, iwadId.Value, definition, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+    }
+
+    private static async Task WriteIwadMetadataAsync(SqliteConnection connection, SqliteTransaction transaction, int iwadId, NativeIwadDefinition definition, CancellationToken cancellationToken)
+    {
         await using (var metadata = connection.CreateCommand())
         {
             metadata.Transaction = transaction;
@@ -394,7 +400,7 @@ public sealed partial class SqliteNativeLibraryService
                     CatalogLabel=excluded.CatalogLabel,
                     DetectedAt=excluded.DetectedAt;
                 """;
-            metadata.Parameters.AddWithValue("$id", iwadId.Value);
+            metadata.Parameters.AddWithValue("$id", iwadId);
             metadata.Parameters.AddWithValue(
                 "$version",
                 DatabaseTextSanitizer.SingleLine(definition.Version));
@@ -412,7 +418,6 @@ public sealed partial class SqliteNativeLibraryService
                     : DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture));
             await metadata.ExecuteNonQueryAsync(cancellationToken);
         }
-        await transaction.CommitAsync(cancellationToken);
     }
 
     public async Task DeleteIwadAsync(

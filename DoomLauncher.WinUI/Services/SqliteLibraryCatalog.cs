@@ -79,6 +79,7 @@ public sealed class SqliteLibraryCatalog(
                 NULLIF(TRIM(baseIwad.FileName), '') AS BaseIwadFileName,
                 CASE WHEN game.IWadID IS NULL THEN 1 ELSE 0 END AS UsesDefaultIwad,
                 NULLIF(TRIM(ownIwad.FileName), '') AS OwnIwadFileName,
+                COALESCE(ownIwadMetadata.Version, '') AS OwnIwadVersion,
                 COALESCE((
                     SELECT titlePic.FileName
                     FROM Files titlePic
@@ -152,6 +153,8 @@ public sealed class SqliteLibraryCatalog(
                     (SELECT CAST(Value AS INTEGER) FROM Configuration WHERE Name='DefaultIWad' LIMIT 1))
             LEFT JOIN IWads ownIwad
                 ON ownIwad.GameFileID = game.GameFileID
+            LEFT JOIN WinUI_IwadMetadata ownIwadMetadata
+                ON ownIwadMetadata.IWadID = ownIwad.IWadID
             LEFT JOIN WinUI_GameState winState
                 ON winState.GameFileID = game.GameFileID
             LEFT JOIN WinUI_IdGamesDownloads idgames
@@ -255,7 +258,8 @@ public sealed class SqliteLibraryCatalog(
                 GetInt32(reader, "IsFinished") != 0,
                 GetInt32(reader, "IsIdGamesDownload") != 0,
                 !string.IsNullOrWhiteSpace(GetNullableString(reader, "Downloaded")),
-                SplitTags(GetNullableString(reader, "TagNames"))));
+                SplitTags(GetNullableString(reader, "TagNames")),
+                DatabaseTextSanitizer.SingleLine(GetNullableString(reader, "OwnIwadVersion"))));
         }
 
         return new LibraryCatalogResult(

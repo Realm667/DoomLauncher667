@@ -49,6 +49,41 @@ public sealed partial class MainPage
             Width = 1440; Height = 900;
             await Layout(); ApplyResponsiveLayout(); await Layout();
             Check(GameList.IsLoaded && LibraryDetailsPane.IsLoaded, "Native list and shared details are loaded");
+            var originalVersionTestSection = ViewModel.ActiveSection;
+            var originalVersionTestSelection = ViewModel.SelectedGame.GameFileId;
+            var iwadInput = Path.Combine(root, "ui-version-iwad.wad");
+            using (var memory = new MemoryStream())
+            {
+                using var writer = new BinaryWriter(memory, System.Text.Encoding.ASCII, leaveOpen: true);
+                writer.Write(System.Text.Encoding.ASCII.GetBytes("IWAD")); writer.Write(1); writer.Write(13);
+                writer.Write((byte)1); writer.Write(12); writer.Write(1); writer.Write(System.Text.Encoding.ASCII.GetBytes("TESTDATA"));
+                await File.WriteAllBytesAsync(iwadInput, memory.ToArray());
+            }
+            await _app.NativeLibraryService.ImportIwadAsync(iwadInput);
+            var iwadDefinitions = await _app.NativeLibraryService.LoadLauncherDefinitionsAsync();
+            var versionTestIwad = iwadDefinitions.Iwads.Single();
+            await _app.NativeLibraryService.SaveIwadAsync(versionTestIwad with { Version = "1.6" });
+            await ViewModel.RefreshAsync();
+            await Navigate(LibrarySection.Library);
+            CategoryFilter_Click(IwadFilterButton, new RoutedEventArgs()); await Layout();
+            Check(IwadVersionHeader.Visibility == Visibility.Visible && ColumnLayout.VersionWidth.Value == 120,
+                "IWAD filter shows Version between Title and Author");
+            Check(ViewModel.Games.All(item => item.Category == "IWAD") && ViewModel.Games.Any(item => item.Version == "1.6"),
+                "IWAD rows show their own persisted version");
+            var versionRow = FindDescendants<Grid>(GameList, "").FirstOrDefault(grid => grid.Tag as string == "LibraryColumnGrid");
+            Check(versionRow is not null && versionRow.ColumnDefinitions.Count == 12
+                && versionRow.Children.OfType<TextBlock>().Any(text => Grid.GetColumn(text) == 2 && text.Text == "1.6"),
+                "Realized native IWAD row renders the version in column 2");
+            Directory.CreateDirectory(Path.Combine(root, "visual-qa"));
+            await CapturePolishAsync(Path.Combine(root, "visual-qa", "iwad-version-column.png"), 1);
+            CategoryFilter_Click(ModsFilterButton, new RoutedEventArgs()); await Layout();
+            Check(IwadVersionHeader.Visibility == Visibility.Collapsed && ColumnLayout.VersionWidth.Value == 0,
+                "Mod filter hides the contextual Version column without leaving a gap");
+            await _app.NativeLibraryService.DeleteIwadAsync(versionTestIwad.IwadId!.Value, deletePhysicalFiles: true);
+            await ViewModel.RefreshAsync();
+            CategoryFilter_Click(AllFilterButton, new RoutedEventArgs()); await Layout();
+            await Navigate(originalVersionTestSection);
+            ViewModel.SelectGame(originalVersionTestSelection); SyncSelection();
             ((Expander)LibraryDetailsPane.FindName("EntryToolsExpander")).IsExpanded = true;
             await Layout();
             var iconWindow = WinRT.Interop.WindowNative.GetWindowHandle(_app.MainWindow!);

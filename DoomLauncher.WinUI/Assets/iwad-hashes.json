@@ -1,4 +1,13 @@
 [
+  { "md5": "54978d12de87f162b9bcc011676cb3c0", "size": 11159840, "version": "1.666", "edition": "Doom (Registered)", "label": "Debian game-data-packager 67/data/doom.yaml" },
+  { "md5": "11e1cd216801ea2657723abc86ecb01f", "size": 11159840, "version": "1.8", "edition": "Doom (Registered)", "label": "Debian game-data-packager 67/data/doom.yaml" },
+  { "md5": "740901119ba2953e3c7f3764eca6e128", "size": 496250, "version": "0.2 Alpha", "edition": "Doom Alpha", "label": "Debian game-data-packager 67/data/doom.yaml" },
+  { "md5": "dae9b1eea1a8e090fdfa5707187f4a43", "size": 1901322, "version": "0.3 Alpha", "edition": "Doom Alpha", "label": "Debian game-data-packager 67/data/doom.yaml" },
+  { "md5": "b6afa12a8b22e2726a8ff5bd249223de", "size": 2675669, "version": "0.4 Alpha", "edition": "Doom Alpha", "label": "Debian game-data-packager 67/data/doom.yaml" },
+  { "md5": "9c877480b8ef33b7074f1f0c07ed6487", "size": 3522207, "version": "0.5 Alpha", "edition": "Doom Alpha", "label": "Debian game-data-packager 67/data/doom.yaml" },
+  { "md5": "049e32f18d9c9529630366cfc72726ea", "size": 5468456, "version": "Press-Release Beta", "edition": "Doom Beta", "label": "Debian game-data-packager 67/data/doom.yaml" },
+  { "md5": "981b03e6d1dc033301aa3095acc437ce", "size": 10396254, "version": "1.1", "edition": "Doom (Registered)", "label": "Debian game-data-packager 67/data/doom.yaml" },
+  { "md5": "792fd1fea023d61210857089a7c1e351", "size": 10399316, "version": "1.2", "edition": "Doom (Registered)", "label": "Debian game-data-packager 67/data/doom.yaml" },
   { "md5": "c4fe9fd920207691a9f493668e0a2083", "size": 12408292, "version": "1.9ud", "edition": "The Ultimate Doom", "label": "Debian game-data-packager" },
   { "md5": "1cd63c5ddff1bf8ce844237f580e9cf3", "size": 11159840, "version": "1.9", "edition": "Doom (Registered)", "label": "Debian game-data-packager" },
   { "md5": "fb35c4a5a9fd49ec29ab6e900572c524", "size": 12487824, "version": "BFG", "edition": "Doom 3 BFG Edition", "label": "Debian game-data-packager" },

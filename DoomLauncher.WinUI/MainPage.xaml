@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="DoomLauncher.WinUI.MainPage"
     x:Name="RootPage"
@@ -877,6 +877,7 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="{Binding ArtworkWidth, Source={StaticResource ListColumnLayout}}" />
                                     <ColumnDefinition Width="{Binding TitleWidth, Source={StaticResource ListColumnLayout}}" />
+                                    <ColumnDefinition Width="{Binding VersionWidth, Source={StaticResource ListColumnLayout}}" />
                                     <ColumnDefinition Width="{Binding AuthorWidth, Source={StaticResource ListColumnLayout}}" />
                                     <ColumnDefinition Width="{Binding ReleaseDateWidth, Source={StaticResource ListColumnLayout}}" />
                                     <ColumnDefinition Width="{Binding MapsWidth, Source={StaticResource ListColumnLayout}}" />
@@ -889,15 +890,16 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding Artwork}" />
                                 <Button x:Name="TitleHeader" Grid.Column="1" Click="ColumnHeader_Click" Content="{Binding Title}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Title" />
-                                <Button x:Name="AuthorHeader" Grid.Column="2" Click="ColumnHeader_Click" Content="{Binding Author}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Author" />
-                                <Button x:Name="ReleaseDateHeader" Grid.Column="3" Click="ColumnHeader_Click" Content="{Binding ReleaseDate}" Style="{StaticResource TableHeaderButtonStyle}" Tag="ReleaseDate" />
-                                <Button x:Name="MapsHeader" Grid.Column="4" Click="ColumnHeader_Click" Content="{Binding Maps}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Maps" />
-                                <Button x:Name="RatingHeader" Grid.Column="5" Click="ColumnHeader_Click" Content="{Binding Rating}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Rating" />
-                                <Button x:Name="DownloadedHeader" Grid.Column="6" Click="ColumnHeader_Click" Content="{Binding Downloaded}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Downloaded" />
-                                <Button x:Name="SourcePortHeader" Grid.Column="7" Click="ColumnHeader_Click" Content="{Binding SourcePort}" Style="{StaticResource TableHeaderButtonStyle}" Tag="SourcePort" />
-                                <Button x:Name="PlaytimeHeader" Grid.Column="8" Click="ColumnHeader_Click" Content="{Binding Playtime}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Playtime" />
-                                <Button x:Name="FinishedHeader" Grid.Column="9" Click="ColumnHeader_Click" Content="{Binding Finished}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Finished" />
-                                <TextBlock Grid.Column="10" Margin="7,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="{Binding Favorites}" />
+                                <TextBlock x:Name="IwadVersionHeader" Grid.Column="2" Margin="7,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="{Binding Version}" />
+                                <Button x:Name="AuthorHeader" Grid.Column="3" Click="ColumnHeader_Click" Content="{Binding Author}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Author" />
+                                <Button x:Name="ReleaseDateHeader" Grid.Column="4" Click="ColumnHeader_Click" Content="{Binding ReleaseDate}" Style="{StaticResource TableHeaderButtonStyle}" Tag="ReleaseDate" />
+                                <Button x:Name="MapsHeader" Grid.Column="5" Click="ColumnHeader_Click" Content="{Binding Maps}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Maps" />
+                                <Button x:Name="RatingHeader" Grid.Column="6" Click="ColumnHeader_Click" Content="{Binding Rating}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Rating" />
+                                <Button x:Name="DownloadedHeader" Grid.Column="7" Click="ColumnHeader_Click" Content="{Binding Downloaded}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Downloaded" />
+                                <Button x:Name="SourcePortHeader" Grid.Column="8" Click="ColumnHeader_Click" Content="{Binding SourcePort}" Style="{StaticResource TableHeaderButtonStyle}" Tag="SourcePort" />
+                                <Button x:Name="PlaytimeHeader" Grid.Column="9" Click="ColumnHeader_Click" Content="{Binding Playtime}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Playtime" />
+                                <Button x:Name="FinishedHeader" Grid.Column="10" Click="ColumnHeader_Click" Content="{Binding Finished}" Style="{StaticResource TableHeaderButtonStyle}" Tag="Finished" />
+                                <TextBlock Grid.Column="11" Margin="7,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="{Binding Favorites}" />
                             </Grid>
                         </ScrollViewer>
                         <ListView
@@ -954,6 +956,7 @@
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="{Binding ArtworkWidth, Source={StaticResource ListColumnLayout}}" />
                                             <ColumnDefinition Width="{Binding TitleWidth, Source={StaticResource ListColumnLayout}}" />
+                                            <ColumnDefinition Width="{Binding VersionWidth, Source={StaticResource ListColumnLayout}}" />
                                             <ColumnDefinition Width="{Binding AuthorWidth, Source={StaticResource ListColumnLayout}}" />
                                             <ColumnDefinition Width="{Binding ReleaseDateWidth, Source={StaticResource ListColumnLayout}}" />
                                             <ColumnDefinition Width="{Binding MapsWidth, Source={StaticResource ListColumnLayout}}" />
@@ -990,15 +993,16 @@
                                             ToolTipService.ToolTip="{x:Bind Title}"
                                             Text="{x:Bind Title}"
                                             TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Grid.Column="2" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" ToolTipService.ToolTip="{x:Bind Author}" Text="{x:Bind Author}" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Grid.Column="3" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding ReleaseDate, Mode=OneWay}" />
-                                        <TextBlock Grid.Column="4" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Maps}" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Grid.Column="5" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Rating}" />
-                                        <TextBlock Grid.Column="6" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding Downloaded, Mode=OneWay}" />
-                                        <TextBlock Grid.Column="7" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" ToolTipService.ToolTip="{x:Bind SourcePort}" Text="{x:Bind SourcePort}" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Grid.Column="8" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Playtime}" />
+                                        <TextBlock Grid.Column="2" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{x:Bind Version}" ToolTipService.ToolTip="{x:Bind Version}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="3" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" ToolTipService.ToolTip="{x:Bind Author}" Text="{x:Bind Author}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="4" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding ReleaseDate, Mode=OneWay}" />
+                                        <TextBlock Grid.Column="5" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Maps}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="6" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Rating}" />
+                                        <TextBlock Grid.Column="7" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding Downloaded, Mode=OneWay}" />
+                                        <TextBlock Grid.Column="8" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" ToolTipService.ToolTip="{x:Bind SourcePort}" Text="{x:Bind SourcePort}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="9" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Playtime}" />
                                         <CheckBox
-                                            Grid.Column="9"
+                                            Grid.Column="10"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
                                             Click="FinishedCheckBox_Click"
@@ -1011,7 +1015,7 @@
                                             </CheckBox.Resources>
                                         </CheckBox>
                                         <CheckBox
-                                            Grid.Column="10"
+                                            Grid.Column="11"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
                                             Click="FavoriteCheckBox_Click"

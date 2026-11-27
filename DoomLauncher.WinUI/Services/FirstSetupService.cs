@@ -494,6 +494,16 @@ public sealed class FirstSetupService(
                         && candidate.Candidate.Md5.Equals(
                             existing.Md5,
                             StringComparison.OrdinalIgnoreCase));
+                // A second package with identical original data must not create a
+                // GameFiles row without an IWAD definition (and thus Mod protection).
+                // Same-location entries still reach the artwork repair below.
+                if (existing is not null && !sameLocation && existingLocationStillPresent
+                    && existing.Md5.Equals(item.Candidate.Md5, StringComparison.OrdinalIgnoreCase))
+                {
+                    skipped++;
+                    progress?.Report(35 + ((pendingIndex + 1) * 45d / Math.Max(1, orderedPending.Length)));
+                    continue;
+                }
                 var gameFileId = await EnsureGameFileAsync(
                     databasePath,
                     root,

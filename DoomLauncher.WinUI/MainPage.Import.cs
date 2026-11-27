@@ -20,9 +20,10 @@ public sealed partial class MainPage
             foreach (var path in paths)
             {
                 var name = Path.GetFileName(path);
-                var conflict = await ViewModel.FindImportConflictAsync(name, _loadCancellation.Token);
+                var importingIwads = ViewModel.CurrentCategoryFilter == ViewModels.LibraryCategoryFilter.Iwads;
+                var conflict = importingIwads ? null : await ViewModel.FindImportConflictAsync(name, _loadCancellation.Token);
                 var resolution = ImportFileConflictResolution.Fail;
-                if (conflict is not null || !seen.Add(name))
+                if (!importingIwads && (conflict is not null || !seen.Add(name)))
                 {
                     if (remainingResolution.HasValue) resolution = remainingResolution.Value;
                     else
