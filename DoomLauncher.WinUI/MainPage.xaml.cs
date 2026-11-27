@@ -1003,6 +1003,15 @@ public sealed partial class MainPage : Page
         var isBlocking = false;
         try
         {
+            var refreshGameId = ViewModel.SelectedGame.GameFileId;
+            var refreshArchive = await _app.NativeLibraryService.ResolveManagedGameFileAsync(refreshGameId, _loadCancellation.Token);
+            if (refreshArchive is not null && File.Exists(refreshArchive)
+                && await Task.Run(async () => (await IwadVersionDetector.ScanArchiveAsync(refreshArchive, _loadCancellation.Token)).Count > 0, _loadCancellation.Token))
+            {
+                await ShowActionMessageAsync(Strings["IdGamesMetadataTitle"], Strings["IwadMetadataProtected"], Strings["Close"]);
+                return;
+            }
+            if (ViewModel.SelectedGame.GameFileId != refreshGameId) return;
             if (!ViewModel.SelectedGame.IdGamesId.HasValue
                 && !await ShowLocalArchiveRefreshDialogAsync(Strings["LocalArchiveRefreshIntro"], allowIdGamesSearch: true))
                 return;
