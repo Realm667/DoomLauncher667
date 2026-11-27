@@ -16,9 +16,9 @@ remains its inspiration and the source of the migration compatibility work.
 
 == Download
 
-The current stable release is *1.0.0*.
+The current stable release is *1.1.0*.
 Download its Windows x64 ZIP from the
-https://github.com/Realm667/DoomLauncher667/releases/tag/v1.0.0[Download Doom Launcher 667 1.0]
+https://github.com/Realm667/DoomLauncher667/releases/tag/v1.1.0[Download Doom Launcher 667 1.1]
 or browse https://github.com/Realm667/DoomLauncher667/releases[all releases].
 Extract the complete archive into a writable folder and launch
 `DoomLauncher667.exe`.
@@ -43,7 +43,7 @@ with Doom Launcher 667. Supply your legally obtained files during setup.
 
 == Screenshots
 
-The screenshots below show the current 1.0 interface using an isolated
+The screenshots below show the 1.0 interface, retained in 1.1, using an isolated
 demonstration library, not bundled games.
 
 === Library
