@@ -1,0 +1,798 @@
+{
+  "source": "https://github.com/UZDoom/UZDoom/blob/5.0.3/wadsrc_extra/static/iwadinfo.txt",
+  "names": [
+    "doom_complete.pk3",
+    "doom2.wad",
+    "doom2xbox.wad",
+    "doom2unity.wad",
+    "doom2kex.wad",
+    "doom2f.wad",
+    "doomu.wad",
+    "doom.wad",
+    "doomxbox.wad",
+    "doomunity.wad",
+    "doomkex.wad",
+    "doom1.wad",
+    "bfgdoom.wad",
+    "bfgdoom2.wad",
+    "doombfg.wad",
+    "doom2bfg.wad",
+    "plutonia.wad",
+    "plutoniaunity.wad",
+    "plutoniakex.wad",
+    "tnt.wad",
+    "tntunity.wad",
+    "tntkex.wad",
+    "freedoom1.wad",
+    "freedoom2.wad",
+    "freedoomu.wad",
+    "freedoom.wad",
+    "freedm.wad",
+    "heretic.wad",
+    "hereticsr.wad",
+    "heretic1.wad",
+    "hexen.wad",
+    "hexdd.wad",
+    "hexendemo.wad",
+    "hexdemo.wad",
+    "strife1.wad",
+    "sve.wad",
+    "strife0.wad",
+    "strife.wad",
+    "blasphem.wad",
+    "blasphemer.wad",
+    "chex.wad",
+    "chex3.wad",
+    "action2.wad",
+    "harm1.wad",
+    "hacx.wad",
+    "hacx2.wad",
+    "square1.pk3",
+    "delaweare.wad",
+    "rotwb.wad",
+    "square.pk3"
+  ],
+  "rules": [
+    {
+      "edition": "Rise Of The Wool Ball",
+      "names": [
+        "rotwb.wad"
+      ],
+      "mustContain": [
+        "E3M6",
+        "B3DED",
+        "WORLDMAP",
+        "NUCLSKYM",
+        "PLANETLE",
+        "MEOWZEKI",
+        "ZEKIINTR",
+        "NOWAYBAC"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Delaweare",
+      "names": [
+        "delaweare.wad"
+      ],
+      "mustContain": [
+        "TITLEMAP",
+        "ROVEA0",
+        "GRLURD01",
+        "SQOUI01"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "The Adventures of Square",
+      "names": [
+        "square.pk3"
+      ],
+      "mustContain": [
+        "SQU-IWAD",
+        "E1A1"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "The Adventures of Square (Square-ware)",
+      "names": [
+        "square1.pk3"
+      ],
+      "mustContain": [
+        "SQU-SWE1",
+        "E1A1"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Harmony",
+      "names": [
+        "harm1.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "0HAWK01",
+        "0CARA3",
+        "0NOSE1"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Hacx 2.0",
+      "names": [
+        "hacx2.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "HACX-E"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Hacx: Twitch'n Kill",
+      "names": [
+        "hacx.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "HACX-R"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Action Doom 2: Urban Brawl",
+      "names": [
+        "action2.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "AD2LIB"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Chex(R) Quest 3",
+      "names": [
+        "chex3.wad"
+      ],
+      "mustContain": [
+        "E1M1",
+        "CYCLA1",
+        "FLMBA1",
+        "MAPINFO"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Chex(R) Quest",
+      "names": [
+        "chex.wad"
+      ],
+      "mustContain": [
+        "E1M1",
+        "E4M1",
+        "W94_1",
+        "POSSH0M0"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Strife: Veteran Edition",
+      "names": [
+        "sve.wad"
+      ],
+      "mustContain": [
+        "MAP35",
+        "I_RELB",
+        "FXAA_F"
+      ],
+      "required": "Strife: Quest for the Sigil",
+      "load": [
+        "voices.wad"
+      ]
+    },
+    {
+      "edition": "Strife: Quest for the Sigil",
+      "names": [
+        "strife1.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "MAP33",
+        "ENDSTRF"
+      ],
+      "required": "",
+      "load": [
+        "voices.wad"
+      ]
+    },
+    {
+      "edition": "Strife: Teaser (New Version)",
+      "names": [],
+      "mustContain": [
+        "MAP33",
+        "ENDSTRF",
+        "INVCURS"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Strife: Teaser (Old Version)",
+      "names": [],
+      "mustContain": [
+        "MAP33",
+        "ENDSTRF"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Hexen: Beyond Heretic",
+      "names": [
+        "hexen.wad"
+      ],
+      "mustContain": [
+        "TITLE",
+        "MAP01",
+        "MAP40",
+        "WINNOWR"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Hexen: Deathkings of the Dark Citadel",
+      "names": [],
+      "mustContain": [
+        "TITLE",
+        "MAP60",
+        "CLUS1MSG"
+      ],
+      "required": "Hexen: Beyond Heretic",
+      "load": []
+    },
+    {
+      "edition": "Hexen: Demo Version",
+      "names": [],
+      "mustContain": [
+        "TITLE",
+        "MAP01",
+        "WINNOWR"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Blasphemer",
+      "names": [
+        "blasphemer.wad"
+      ],
+      "mustContain": [
+        "E1M1",
+        "E2M1",
+        "TITLE",
+        "BLASPHEM"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Heretic: Shadow of the Serpent Riders",
+      "names": [
+        "heretic.wad"
+      ],
+      "mustContain": [
+        "E1M1",
+        "E2M1",
+        "TITLE",
+        "MUS_E1M1",
+        "EXTENDED"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Heretic",
+      "names": [
+        "heretic.wad"
+      ],
+      "mustContain": [
+        "E1M1",
+        "E2M1",
+        "TITLE",
+        "MUS_E1M1"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Heretic Shareware",
+      "names": [],
+      "mustContain": [
+        "E1M1",
+        "TITLE",
+        "MUS_E1M1"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "FreeDM",
+      "names": [
+        "freedm.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "FREEDM"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Freedoom: Phase 2",
+      "names": [
+        "freedoom2.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "FREEDOOM"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Freedoom: Phase 1",
+      "names": [
+        "freedoom1.wad"
+      ],
+      "mustContain": [
+        "E1M1",
+        "E2M1",
+        "E3M1",
+        "FREEDOOM"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Freedoom: Demo Version",
+      "names": [],
+      "mustContain": [
+        "E1M1",
+        "FREEDOOM"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "DOOM: BFG Edition",
+      "names": [
+        "doombfg.wad"
+      ],
+      "mustContain": [
+        "E1M1",
+        "E2M1",
+        "E2M2",
+        "E2M3",
+        "E2M4",
+        "E2M5",
+        "E2M6",
+        "E2M7",
+        "E2M8",
+        "E2M9",
+        "E3M1",
+        "E3M2",
+        "E3M3",
+        "E3M4",
+        "E3M5",
+        "E3M6",
+        "E3M7",
+        "E3M8",
+        "E3M9",
+        "DPHOOF",
+        "BFGGA0",
+        "HEADA1",
+        "CYBRA1",
+        "SPIDA1D1",
+        "E4M2",
+        "DMENUPIC",
+        "M_ACPT",
+        "M_CAN",
+        "M_EXITO",
+        "M_CHG"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "DOOM: KEX Edition",
+      "names": [
+        "doomkex.wad"
+      ],
+      "mustContain": [
+        "E1M1",
+        "E2M1",
+        "E2M2",
+        "E2M3",
+        "E2M4",
+        "E2M5",
+        "E2M6",
+        "E2M7",
+        "E2M8",
+        "E2M9",
+        "E3M1",
+        "E3M2",
+        "E3M3",
+        "E3M4",
+        "E3M5",
+        "E3M6",
+        "E3M7",
+        "E3M8",
+        "E3M9",
+        "DPHOOF",
+        "BFGGA0",
+        "HEADA1",
+        "CYBRA1",
+        "SPIDA1D1",
+        "E4M2",
+        "DMENUPIC",
+        "GAMECONF"
+      ],
+      "required": "",
+      "load": [
+        "extras.wad"
+      ]
+    },
+    {
+      "edition": "DOOM: Unity Edition",
+      "names": [
+        "doomunity.wad"
+      ],
+      "mustContain": [
+        "E1M1",
+        "E2M1",
+        "E2M2",
+        "E2M3",
+        "E2M4",
+        "E2M5",
+        "E2M6",
+        "E2M7",
+        "E2M8",
+        "E2M9",
+        "E3M1",
+        "E3M2",
+        "E3M3",
+        "E3M4",
+        "E3M5",
+        "E3M6",
+        "E3M7",
+        "E3M8",
+        "E3M9",
+        "DPHOOF",
+        "BFGGA0",
+        "HEADA1",
+        "CYBRA1",
+        "SPIDA1D1",
+        "E4M2",
+        "DMENUPIC"
+      ],
+      "required": "",
+      "load": [
+        "extras.wad",
+        "soundtrack"
+      ]
+    },
+    {
+      "edition": "DOOM: Complete: WadSmoosh",
+      "names": [
+        "doom_complete.pk3"
+      ],
+      "mustContain": [
+        "SMOOSHED",
+        "ANIMDEFS",
+        "LANGUAGE",
+        "MAPINFO",
+        "ENDOOM",
+        "M_DOOM",
+        "TITLEPIC",
+        "TEXTURES"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "DOOM: XBox Edition",
+      "names": [
+        "doomxbox.wad"
+      ],
+      "mustContain": [
+        "E1M1",
+        "E2M1",
+        "E2M2",
+        "E2M3",
+        "E2M4",
+        "E2M5",
+        "E2M6",
+        "E2M7",
+        "E2M8",
+        "E2M9",
+        "E3M1",
+        "E3M2",
+        "E3M3",
+        "E3M4",
+        "E3M5",
+        "E3M6",
+        "E3M7",
+        "E3M8",
+        "E3M9",
+        "DPHOOF",
+        "BFGGA0",
+        "HEADA1",
+        "CYBRA1",
+        "SPIDA1D1",
+        "E4M2",
+        "E1M10",
+        "SEWERS"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "The Ultimate DOOM",
+      "names": [
+        "doom.wad"
+      ],
+      "mustContain": [
+        "E1M1",
+        "E2M1",
+        "E2M2",
+        "E2M3",
+        "E2M4",
+        "E2M5",
+        "E2M6",
+        "E2M7",
+        "E2M8",
+        "E2M9",
+        "E3M1",
+        "E3M2",
+        "E3M3",
+        "E3M4",
+        "E3M5",
+        "E3M6",
+        "E3M7",
+        "E3M8",
+        "E3M9",
+        "DPHOOF",
+        "BFGGA0",
+        "HEADA1",
+        "CYBRA1",
+        "SPIDA1D1",
+        "E4M2"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "DOOM Registered",
+      "names": [
+        "doom.wad"
+      ],
+      "mustContain": [
+        "E1M1",
+        "E2M1",
+        "E2M2",
+        "E2M3",
+        "E2M4",
+        "E2M5",
+        "E2M6",
+        "E2M7",
+        "E2M8",
+        "E2M9",
+        "E3M1",
+        "E3M2",
+        "E3M3",
+        "E3M4",
+        "E3M5",
+        "E3M6",
+        "E3M7",
+        "E3M8",
+        "E3M9",
+        "DPHOOF",
+        "BFGGA0",
+        "HEADA1",
+        "CYBRA1",
+        "SPIDA1D1"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "DOOM Shareware",
+      "names": [],
+      "mustContain": [
+        "E1M1"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Final Doom: TNT - Evilution: Unity Edition",
+      "names": [
+        "tntunity.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "REDTNT2",
+        "DMAPINFO"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Final Doom: TNT - Evilution: KEX Edition",
+      "names": [
+        "tntkex.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "REDTNT2",
+        "GAMECONF"
+      ],
+      "required": "",
+      "load": [
+        "extras.wad"
+      ]
+    },
+    {
+      "edition": "Final Doom: TNT - Evilution",
+      "names": [
+        "tnt.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "REDTNT2"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Final Doom: Plutonia Experiment: Unity Edition",
+      "names": [
+        "plutoniaunity.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "CAMO1",
+        "DMAPINFO"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "Final Doom: Plutonia Experiment: KEX Edition",
+      "names": [
+        "plutoniakex.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "CAMO1",
+        "GAMECONF"
+      ],
+      "required": "",
+      "load": [
+        "extras.wad"
+      ]
+    },
+    {
+      "edition": "Final Doom: Plutonia Experiment",
+      "names": [
+        "plutonia.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "CAMO1"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "DOOM 2: BFG Edition",
+      "names": [
+        "doom2bfg.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "DMENUPIC",
+        "M_ACPT",
+        "M_CAN",
+        "M_EXITO",
+        "M_CHG"
+      ],
+      "required": "",
+      "load": [
+        "nerve.wad"
+      ]
+    },
+    {
+      "edition": "DOOM 2: KEX Edition",
+      "names": [
+        "doom2kex.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "DMENUPIC",
+        "GAMECONF"
+      ],
+      "required": "",
+      "load": [
+        "extras.wad"
+      ]
+    },
+    {
+      "edition": "DOOM 2: Unity Edition",
+      "names": [
+        "doom2unity.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "DMENUPIC"
+      ],
+      "required": "",
+      "load": [
+        "nerveunity.wad",
+        "extras.wad",
+        "soundtrack"
+      ]
+    },
+    {
+      "edition": "DOOM 2: XBox Edition",
+      "names": [
+        "doom2xbox.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "MAP33",
+        "CWILV32"
+      ],
+      "required": "",
+      "load": [
+        "nerve.wad"
+      ]
+    },
+    {
+      "edition": "DOOM 2: L'Enfer sur Terre",
+      "names": [
+        "doom2f.wad"
+      ],
+      "mustContain": [
+        "MAP01",
+        "WIOBJ"
+      ],
+      "required": "",
+      "load": []
+    },
+    {
+      "edition": "DOOM 2: Hell on Earth",
+      "names": [
+        "doom2.wad"
+      ],
+      "mustContain": [
+        "MAP01"
+      ],
+      "required": "",
+      "load": []
+    }
+  ]
+}

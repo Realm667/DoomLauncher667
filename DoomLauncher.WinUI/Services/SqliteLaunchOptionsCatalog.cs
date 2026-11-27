@@ -39,21 +39,26 @@ public sealed class SqliteLaunchOptionsCatalog(
             """,
             "SourcePortID",
             cancellationToken);
-        var iwads = await LoadChoicesAsync(
-            connection,
-            """
-            SELECT iwad.IWadID,
-                   COALESCE(NULLIF(TRIM(iwad.Name), ''), iwad.FileName) || CASE
-                       WHEN NULLIF(TRIM(metadata.Version), '') IS NULL THEN ''
-                       ELSE ' · ' || TRIM(metadata.Version)
-                   END AS Name
-            FROM IWads iwad
-            LEFT JOIN WinUI_IwadMetadata metadata
-                ON metadata.IWadID = iwad.IWadID
-            ORDER BY Name COLLATE NOCASE;
-            """,
-            "IWadID",
-            cancellationToken);
+        await IwadVersionDetector.EnsureLoadedAsync(cancellationToken);
+        var iwads = new List<LaunchOptionChoice>();
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = """
+                SELECT iwad.IWadID, COALESCE(NULLIF(TRIM(iwad.Name), ''), iwad.FileName),
+                       COALESCE(metadata.Version,''), COALESCE(metadata.Md5,''), COALESCE(metadata.CatalogLabel,'')
+                FROM IWads iwad LEFT JOIN WinUI_IwadMetadata metadata ON metadata.IWadID=iwad.IWadID
+                ORDER BY iwad.Name COLLATE NOCASE
+                """;
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            while(await reader.ReadAsync(cancellationToken))
+            {
+                var name = DatabaseTextSanitizer.SingleLine(reader.GetString(1));
+                var suffix = IwadVersionDetector.IdentitySuffix(name,
+                    IwadVersionDetector.StoredEdition(reader.GetString(3), reader.GetString(4)),
+                    IwadVersionDetector.StoredVersion(reader.GetString(3), reader.GetString(2)));
+                iwads.Add(new(reader.GetInt32(0), suffix.Length > 0 ? $"{name} · {suffix}" : name));
+            }
+        }
 
         var maps = await LoadMapsAsync(connection, gameFileId, cancellationToken);
         sourcePorts.Insert(0, new LaunchOptionChoice(null, localization.Get("Automatic")));

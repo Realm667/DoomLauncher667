@@ -43,6 +43,7 @@ public sealed class LibraryItem : INotifyPropertyChanged
         FileName = entry.FileName;
         Title = entry.Title;
         Version = entry.Version;
+        Edition = entry.Edition;
         Subtitle = entry.Author;
         Author = entry.Author;
         Category = entry.Category;
@@ -113,6 +114,17 @@ public sealed class LibraryItem : INotifyPropertyChanged
     public string FileName { get; } = string.Empty;
     public string Title { get; }
     public string Version { get; } = string.Empty;
+    private bool _showIwadVersion;
+    public string Edition { get; } = string.Empty;
+    public string InlineVersion => _showIwadVersion && IwadVersionDetector.IdentitySuffix(Title, Edition, Version) is { Length: > 0 } suffix ? "  " + suffix : string.Empty;
+    public string LibraryTitleToolTip => Title + InlineVersion;
+    internal void SetIwadVersionVisible(bool visible)
+    {
+        if (_showIwadVersion == visible) return;
+        _showIwadVersion = visible;
+        OnPropertyChanged(nameof(InlineVersion));
+        OnPropertyChanged(nameof(LibraryTitleToolTip));
+    }
     public string Subtitle { get; }
     public string Author { get; } = string.Empty;
     public string Category { get; }

@@ -1466,7 +1466,6 @@ public sealed class UiText(UiLocalization localization)
     public string UnplayedMods => this[nameof(UnplayedMods)];
     public string TotalConversions => this[nameof(TotalConversions)]; public string Unplayed => this[nameof(Unplayed)];
     public string Title => this[nameof(Title)]; public string LastPlayed => this[nameof(LastPlayed)];
-    public string Version => this[nameof(Version)];
     public string Playtime => this[nameof(Playtime)]; public string Year => this[nameof(Year)];
     public string Columns => this[nameof(Columns)]; public string Artwork => this[nameof(Artwork)];
     public string ChooseTitleArtwork => this[nameof(ChooseTitleArtwork)];

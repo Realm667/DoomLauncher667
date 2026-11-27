@@ -66,19 +66,37 @@ public sealed partial class MainPage
             await ViewModel.RefreshAsync();
             await Navigate(LibrarySection.Library);
             CategoryFilter_Click(IwadFilterButton, new RoutedEventArgs()); await Layout();
-            Check(IwadVersionHeader.Visibility == Visibility.Visible && ColumnLayout.VersionWidth.Value == 120,
-                "IWAD filter shows Version between Title and Author");
             Check(ViewModel.Games.All(item => item.Category == "IWAD") && ViewModel.Games.Any(item => item.Version == "1.6"),
                 "IWAD rows show their own persisted version");
+            var versionLibraryItem = ViewModel.Games.Single();
             var versionRow = FindDescendants<Grid>(GameList, "").FirstOrDefault(grid => grid.Tag as string == "LibraryColumnGrid");
-            Check(versionRow is not null && versionRow.ColumnDefinitions.Count == 12
-                && versionRow.Children.OfType<TextBlock>().Any(text => Grid.GetColumn(text) == 2 && text.Text == "1.6"),
-                "Realized native IWAD row renders the version in column 2");
+            var versionTitle = versionRow?.Children.OfType<TextBlock>().SingleOrDefault(text => Grid.GetColumn(text) == 1);
+            var versionRun = versionTitle?.Inlines.OfType<Microsoft.UI.Xaml.Documents.Run>().SingleOrDefault(run => run.Text.Trim() == "1.6");
+            Check(versionRow?.ColumnDefinitions.Count == 11 && versionRun is not null && versionLibraryItem.InlineVersion == "  1.6",
+                "Realized IWAD title contains the inline version without adding a table column");
+            Check(versionRun!.FontSize == 11 && versionRun.FontSize < versionTitle!.FontSize
+                && versionRun.Foreground is Microsoft.UI.Xaml.Media.SolidColorBrush gray && gray.Color.A > 0
+                && gray.Color.R == gray.Color.G && gray.Color.G == gray.Color.B,
+                "IWAD version uses smaller neutral-gray text directly after the title");
             Directory.CreateDirectory(Path.Combine(root, "visual-qa"));
-            await CapturePolishAsync(Path.Combine(root, "visual-qa", "iwad-version-column.png"), 1);
+            await CapturePolishAsync(Path.Combine(root, "visual-qa", "iwad-version-inline.png"), 1);
             CategoryFilter_Click(ModsFilterButton, new RoutedEventArgs()); await Layout();
-            Check(IwadVersionHeader.Visibility == Visibility.Collapsed && ColumnLayout.VersionWidth.Value == 0,
-                "Mod filter hides the contextual Version column without leaving a gap");
+            Check(versionLibraryItem.InlineVersion.Length == 0 && versionRow!.ColumnDefinitions.Count == 11,
+                "Mod filter hides the inline IWAD version without changing table columns");
+            CategoryFilter_Click(IwadFilterButton, new RoutedEventArgs()); await Layout();
+            Check(versionLibraryItem.InlineVersion == "  1.6" && versionLibraryItem.LibraryTitleToolTip.EndsWith("  1.6"),
+                "Returning to IWADs restores the inline version and full title tooltip");
+            CategoryFilter_Click(ModsFilterButton, new RoutedEventArgs()); await Layout();
+            // Synthetic metadata fixture: exercises display binding, not checksum validation of this test WAD.
+            await _app.NativeLibraryService.SaveIwadAsync(versionTestIwad with { Name = "My Doom", Version = "1.9", Md5 = "1cd63c5ddff1bf8ce844237f580e9cf3", FileSize = 11159840 });
+            await ViewModel.RefreshAsync(); CategoryFilter_Click(IwadFilterButton, new RoutedEventArgs()); await Layout();
+            var editionItem = ViewModel.Games.Single();
+            Check(editionItem.InlineVersion == "  Doom Registered 1.9", "Library disambiguates the detected edition after a custom title");
+            var launchChoices = await _app.LaunchOptionsCatalog.LoadAsync(editionItem.GameFileId);
+            Check(launchChoices.Iwads.Any(choice => choice.Id == versionTestIwad.IwadId && choice.Name == "My Doom · Doom Registered 1.9"),
+                "Game selection preserves the IWAD ID and custom alias while displaying exact edition and version");
+            await CapturePolishAsync(Path.Combine(root, "visual-qa", "iwad-edition-inline.png"), 1);
+            CategoryFilter_Click(ModsFilterButton, new RoutedEventArgs()); await Layout();
             await _app.NativeLibraryService.DeleteIwadAsync(versionTestIwad.IwadId!.Value, deletePhysicalFiles: true);
             await ViewModel.RefreshAsync();
             CategoryFilter_Click(AllFilterButton, new RoutedEventArgs()); await Layout();

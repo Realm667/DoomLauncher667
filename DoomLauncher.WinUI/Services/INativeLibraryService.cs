@@ -318,9 +318,9 @@ public sealed record NativeIwadDefinition(
     long FileSize = 0,
     string CatalogLabel = "")
 {
-    public string DisplayLabel => string.IsNullOrWhiteSpace(Version)
-        ? Name
-        : $"{Name} · {Version}";
+    public string Edition => IwadVersionDetector.StoredEdition(Md5, CatalogLabel);
+    public string DisplayLabel => IwadVersionDetector.IdentitySuffix(Name, Edition, Version) is { Length: > 0 } suffix
+        ? $"{Name} · {suffix}" : Name;
 }
 
 public sealed record IwadVersionDetection(

@@ -58,7 +58,7 @@ public sealed partial class SqliteNativeLibraryService
             else
             {
                 using var zip = ZipFile.Open(temporary, ZipArchiveMode.Create);
-                if (Path.GetExtension(sourcePath).Equals(".wad", StringComparison.OrdinalIgnoreCase))
+                if (IwadVersionDetector.IsPayload(sourcePath))
                 {
                     await using var input = File.OpenRead(sourcePath);
                     await using var output = zip.CreateEntry(candidate.InternalFileName, CompressionLevel.Fastest).Open();
@@ -115,9 +115,7 @@ public sealed partial class SqliteNativeLibraryService
             iwad.Parameters.AddWithValue("$internal", candidate.InternalFileName);
             iwad.Parameters.AddWithValue("$game", gameId);
             var iwadId = Convert.ToInt32(await iwad.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
-            if (candidate.InternalFileName.Equals("HEXDD.WAD", StringComparison.OrdinalIgnoreCase)
-                && !definitions.Iwads.Any(item => item.InternalFileName.Equals("HEXEN.WAD", StringComparison.OrdinalIgnoreCase)))
-                throw new InvalidOperationException("Deathkings benötigt zuerst eine registrierte HEXEN.WAD.");
+            await ValidateIwadDependencyAsync(connection, transaction, candidate.InternalFileName, candidate.Md5, candidate.CatalogLabel, cancellationToken);
             await WriteIwadMetadataAsync(connection, transaction, iwadId,
                 new(iwadId, candidate.SuggestedName, reference, candidate.InternalFileName, candidate.Version, candidate.Md5, candidate.FileSize, candidate.CatalogLabel), cancellationToken);
             await transaction.CommitAsync(cancellationToken); committed = true;
@@ -131,6 +129,23 @@ public sealed partial class SqliteNativeLibraryService
             if (!committed && ownedDestination is not null) File.Delete(ownedDestination);
             if (File.Exists(temporary)) File.Delete(temporary);
         }
+    }
+
+    private static async Task ValidateIwadDependencyAsync(SqliteConnection connection, SqliteTransaction transaction,
+        string fileName, string md5, string label, CancellationToken token)
+    {
+        await IwadVersionDetector.EnsureLoadedAsync(token);
+        var required = IwadVersionDetector.RequiredBase(fileName, md5, label);
+        if (required.Length == 0) return;
+        await using var command = connection.CreateCommand(); command.Transaction = transaction;
+        command.CommandText = """
+            SELECT i.FileName, COALESCE(m.Md5,''), COALESCE(m.CatalogLabel,'')
+            FROM IWads i LEFT JOIN WinUI_IwadMetadata m ON m.IWadID=i.IWadID
+            """;
+        await using var reader = await command.ExecuteReaderAsync(token);
+        while (await reader.ReadAsync(token))
+            if (IwadVersionDetector.IsBase(reader.GetString(0), reader.GetString(1), reader.GetString(2), required)) return;
+        throw new InvalidOperationException($"{fileName} benötigt {required}. Bitte zuerst die vollständige Basis-IWAD registrieren.");
     }
 
     private static string SafeIwadName(string value) => new(value.ToLowerInvariant()

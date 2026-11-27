@@ -70,6 +70,10 @@
       <Link>Assets\DoomPLAYPAL.LMP</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\DoomLauncher.WinUI\Assets\iwad-identities.json">
+      <Link>Assets\iwad-identities.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\DoomLauncher.WinUI\Assets\iwad-hashes.json">
       <Link>Assets\iwad-hashes.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

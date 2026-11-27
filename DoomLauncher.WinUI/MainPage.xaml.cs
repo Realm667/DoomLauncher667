@@ -235,10 +235,8 @@ public sealed partial class MainPage : Page
             CompactDetailsButton.IsEnabled = !ViewModel.SelectedGame.IsPlaceholder;
             CompactCollectionDetailsButton.IsEnabled = CompactDetailsButton.IsEnabled;
         }
-        if (args.PropertyName is nameof(MainViewModel.SectionTitle) or nameof(MainViewModel.CurrentCategoryFilter))
+        if (args.PropertyName == nameof(MainViewModel.SectionTitle))
         {
-            ColumnLayout.SetIwadContext(ViewModel.CurrentCategoryFilter == LibraryCategoryFilter.Iwads);
-            RefreshColumnGrids(ListViewHost, ColumnLayout, "LibraryColumnGrid");
             UpdateSortDescription();
             DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low,()=>ApplyResponsiveLayout());
         }
@@ -1847,14 +1845,6 @@ public sealed partial class MainPage : Page
         foreach (var child in grid.Children.OfType<FrameworkElement>())
         {
             var column = Grid.GetColumn(child);
-            // Only the Library table has the contextual Version column. Collection
-            // tables retain their original column layout and persisted preferences.
-            if (grid.ColumnDefinitions.Count == 12 && column == 2)
-            {
-                child.Visibility = layout.ShowIwadVersion ? Visibility.Visible : Visibility.Collapsed;
-                continue;
-            }
-            if (grid.ColumnDefinitions.Count == 12 && column > 2) column--;
             var key = column switch
             {
                 0 => "Artwork",

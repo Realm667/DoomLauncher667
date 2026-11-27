@@ -59,6 +59,7 @@ public sealed partial class SqliteNativeLibraryService
             }
         }
 
+        await IwadVersionDetector.EnsureLoadedAsync(cancellationToken);
         var iwads = new List<NativeIwadDefinition>();
         await using (var command = connection.CreateCommand())
         {
@@ -83,7 +84,7 @@ public sealed partial class SqliteNativeLibraryService
                     DatabaseTextSanitizer.SingleLine(GetNullableString(reader, 1)),
                     reader.GetString(2),
                     reader.GetString(3),
-                    reader.GetString(4),
+                    IwadVersionDetector.StoredVersion(reader.GetString(5), reader.GetString(4)),
                     reader.GetString(5),
                     reader.GetInt64(6),
                     reader.GetString(7)));
@@ -316,26 +317,7 @@ public sealed partial class SqliteNativeLibraryService
         await using var connection = await OpenConnectionAsync(cancellationToken);
         await using var transaction =
             (SqliteTransaction)await connection.BeginTransactionAsync(cancellationToken);
-        if (internalName.Equals("HEXDD.WAD", StringComparison.OrdinalIgnoreCase))
-        {
-            await using var dependency = connection.CreateCommand();
-            dependency.Transaction = transaction;
-            dependency.CommandText =
-                """
-                SELECT COUNT(*)
-                FROM IWads
-                WHERE FileName = 'HEXEN.WAD' COLLATE NOCASE;
-                """;
-            var count = Convert.ToInt32(
-                await dependency.ExecuteScalarAsync(cancellationToken),
-                CultureInfo.InvariantCulture);
-            if (count == 0)
-            {
-                throw new InvalidOperationException(
-                    "HEXDD.WAD ist die Erweiterung Deathkings of the Dark Citadel " +
-                    "und benötigt HEXEN.WAD. Bitte zuerst HEXEN.WAD als IWAD definieren.");
-            }
-        }
+        await ValidateIwadDependencyAsync(connection, transaction, internalName, definition.Md5, definition.CatalogLabel, cancellationToken);
         int gameFileId;
         var iwadId = definition.IwadId;
         await using (var find = connection.CreateCommand())

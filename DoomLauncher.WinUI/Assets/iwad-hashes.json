@@ -1,33 +1,1016 @@
 [
-  { "md5": "54978d12de87f162b9bcc011676cb3c0", "size": 11159840, "version": "1.666", "edition": "Doom (Registered)", "label": "Debian game-data-packager 67/data/doom.yaml" },
-  { "md5": "11e1cd216801ea2657723abc86ecb01f", "size": 11159840, "version": "1.8", "edition": "Doom (Registered)", "label": "Debian game-data-packager 67/data/doom.yaml" },
-  { "md5": "740901119ba2953e3c7f3764eca6e128", "size": 496250, "version": "0.2 Alpha", "edition": "Doom Alpha", "label": "Debian game-data-packager 67/data/doom.yaml" },
-  { "md5": "dae9b1eea1a8e090fdfa5707187f4a43", "size": 1901322, "version": "0.3 Alpha", "edition": "Doom Alpha", "label": "Debian game-data-packager 67/data/doom.yaml" },
-  { "md5": "b6afa12a8b22e2726a8ff5bd249223de", "size": 2675669, "version": "0.4 Alpha", "edition": "Doom Alpha", "label": "Debian game-data-packager 67/data/doom.yaml" },
-  { "md5": "9c877480b8ef33b7074f1f0c07ed6487", "size": 3522207, "version": "0.5 Alpha", "edition": "Doom Alpha", "label": "Debian game-data-packager 67/data/doom.yaml" },
-  { "md5": "049e32f18d9c9529630366cfc72726ea", "size": 5468456, "version": "Press-Release Beta", "edition": "Doom Beta", "label": "Debian game-data-packager 67/data/doom.yaml" },
-  { "md5": "981b03e6d1dc033301aa3095acc437ce", "size": 10396254, "version": "1.1", "edition": "Doom (Registered)", "label": "Debian game-data-packager 67/data/doom.yaml" },
-  { "md5": "792fd1fea023d61210857089a7c1e351", "size": 10399316, "version": "1.2", "edition": "Doom (Registered)", "label": "Debian game-data-packager 67/data/doom.yaml" },
-  { "md5": "c4fe9fd920207691a9f493668e0a2083", "size": 12408292, "version": "1.9ud", "edition": "The Ultimate Doom", "label": "Debian game-data-packager" },
-  { "md5": "1cd63c5ddff1bf8ce844237f580e9cf3", "size": 11159840, "version": "1.9", "edition": "Doom (Registered)", "label": "Debian game-data-packager" },
-  { "md5": "fb35c4a5a9fd49ec29ab6e900572c524", "size": 12487824, "version": "BFG", "edition": "Doom 3 BFG Edition", "label": "Debian game-data-packager" },
-  { "md5": "e4f120eab6fb410a5b6e11c947832357", "size": 12474561, "version": "PSN", "edition": "PlayStation Network", "label": "Debian game-data-packager" },
-  { "md5": "0c8758f102ccafe26a3040bee8ba5021", "size": 12538385, "version": "Xbox", "edition": "Xbox", "label": "Debian game-data-packager" },
-  { "md5": "f0cefca49926d00903cf57551d901abe", "size": 4196020, "version": "1.9", "edition": "Doom Shareware", "label": "Debian game-data-packager" },
-  { "md5": "25e1459ca71d321525f84628f45ca8cd", "size": 14604584, "version": "1.9", "edition": "Doom II", "label": "Debian game-data-packager" },
-  { "md5": "c3bea40570c23e511a7ed3ebcd9865f7", "size": 14691821, "version": "BFG", "edition": "Doom II BFG Edition", "label": "Debian game-data-packager" },
-  { "md5": "4e158d9953c79ccf97bd0663244cc6b6", "size": 18195736, "version": "1.9", "edition": "Final Doom: TNT Evilution", "label": "Debian game-data-packager" },
-  { "md5": "75c8cf89566741fa9d22447604053bd7", "size": 17420824, "version": "1.9", "edition": "Final Doom: Plutonia", "label": "Debian game-data-packager" },
-  { "md5": "023b52175d2f260c3bdc5528df5d0a8c", "size": 5120300, "version": "1.0", "edition": "Heretic Shareware", "label": "Debian game-data-packager" },
-  { "md5": "ae779722390ec32fa37b0d361f7d82f8", "size": 5120920, "version": "1.2", "edition": "Heretic Shareware", "label": "Debian game-data-packager" },
-  { "md5": "3117e399cdb4298eaa3941625f4b2923", "size": 11096488, "version": "1.0", "edition": "Heretic Registered", "label": "Debian game-data-packager" },
-  { "md5": "1e4cb4ef075ad344dd63971637307e04", "size": 11095516, "version": "1.2", "edition": "Heretic Registered", "label": "Debian game-data-packager" },
-  { "md5": "66d686b1ed6d35ff103f15dbd30e0341", "size": 14189976, "version": "1.3", "edition": "Heretic: Shadow of the Serpent Riders", "label": "Debian game-data-packager" },
-  { "md5": "876a5a44c7b68f04b3bb9bc7a5bd69d6", "size": 10644136, "version": "1.0", "edition": "Hexen Demo", "label": "HHexen reference catalog" },
-  { "md5": "b2543a03521365261d0a0f74d5dd90f0", "size": 20128392, "version": "1.0", "edition": "Hexen", "label": "HHexen reference catalog" },
-  { "md5": "abb033caf81e26f12a2103e1fa25453f", "size": 20083672, "version": "1.1", "edition": "Hexen", "label": "HHexen reference catalog" },
-  { "md5": "1077432e2690d390c256ac908b5f4efa", "size": 4429700, "version": "1.0", "edition": "Hexen: Deathkings", "label": "HHexen reference catalog" },
-  { "md5": "78d5898e99e220e4de64edaa0e479593", "size": 4440584, "version": "1.1", "edition": "Hexen: Deathkings", "label": "HHexen reference catalog" },
-  { "md5": "2fed2031a5b03892106e0f117f17901f", "size": 28377364, "version": "1.2–1.31", "edition": "Strife", "label": "Debian game-data-packager" },
-  { "md5": "25485721882b050afa96a56e5758dd52", "size": 12361532, "version": "1.0", "edition": "Chex Quest", "label": "Debian game-data-packager" }
+  {
+    "md5": "54978d12de87f162b9bcc011676cb3c0",
+    "size": 11159840,
+    "version": "1.666",
+    "edition": "Doom Registered",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "sha1": "2e89b86859acd9fc1e552f587b710751efcffa8e",
+    "format": "wad"
+  },
+  {
+    "md5": "11e1cd216801ea2657723abc86ecb01f",
+    "size": 11159840,
+    "version": "1.8",
+    "edition": "Doom Registered",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "sha1": "2c8212631b37f21ad06d18b5638c733a75e179ff",
+    "format": "wad"
+  },
+  {
+    "md5": "740901119ba2953e3c7f3764eca6e128",
+    "size": 496250,
+    "version": "0.2 Alpha",
+    "edition": "Doom Alpha",
+    "label": "Debian game-data-packager 67/data/doom.yaml",
+    "sha1": "89d934616c57fe974b06c2b37a9837853a89dbbc",
+    "format": "wad"
+  },
+  {
+    "md5": "dae9b1eea1a8e090fdfa5707187f4a43",
+    "size": 1901322,
+    "version": "0.3 Alpha",
+    "edition": "Doom Alpha",
+    "label": "Debian game-data-packager 67/data/doom.yaml",
+    "sha1": "df8ffe821a212d130ae48cf2c23721bd0ee6543b",
+    "format": "wad"
+  },
+  {
+    "md5": "b6afa12a8b22e2726a8ff5bd249223de",
+    "size": 2675669,
+    "version": "0.4 Alpha",
+    "edition": "Doom Alpha",
+    "label": "Debian game-data-packager 67/data/doom.yaml",
+    "sha1": "5f78b23fbffc828f5863ecff7e908d556241ff45",
+    "format": "wad"
+  },
+  {
+    "md5": "9c877480b8ef33b7074f1f0c07ed6487",
+    "size": 3522207,
+    "version": "0.5 Alpha",
+    "edition": "Doom Alpha",
+    "label": "Debian game-data-packager 67/data/doom.yaml",
+    "sha1": "d3648d720b5324ce3c7bf58cf019e395911d677e",
+    "format": "wad"
+  },
+  {
+    "md5": "981b03e6d1dc033301aa3095acc437ce",
+    "size": 10396254,
+    "version": "1.1",
+    "edition": "Doom Registered",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "sha1": "df0040ccb29cc1622e74ceb3b7793a2304cca2c8",
+    "format": "wad"
+  },
+  {
+    "md5": "792fd1fea023d61210857089a7c1e351",
+    "size": 10399316,
+    "version": "1.2",
+    "edition": "Doom Registered",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "sha1": "b5f86a559642a2b3bdfb8a75e91c8da97f057fe6",
+    "format": "wad"
+  },
+  {
+    "md5": "c4fe9fd920207691a9f493668e0a2083",
+    "size": 12408292,
+    "version": "1.9",
+    "edition": "The Ultimate Doom",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "sha1": "9b07b02ab3c275a6a7570c3f73cc20d63a0e3833",
+    "format": "wad"
+  },
+  {
+    "md5": "1cd63c5ddff1bf8ce844237f580e9cf3",
+    "size": 11159840,
+    "version": "1.9",
+    "edition": "Doom Registered",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "sha1": "7742089b4468a736cadb659a7deca3320fe6dcbd",
+    "format": "wad"
+  },
+  {
+    "md5": "fb35c4a5a9fd49ec29ab6e900572c524",
+    "size": 12487824,
+    "version": "",
+    "edition": "The Ultimate Doom BFG Edition",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "sha1": "e5ec79505530e151ff0e6f517f3ce1fd65969c46",
+    "format": "wad"
+  },
+  {
+    "md5": "e4f120eab6fb410a5b6e11c947832357",
+    "size": 12474561,
+    "version": "",
+    "edition": "The Ultimate Doom PlayStation Network",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "sha1": "117015379c529573510be08cf59810aa10bb934e",
+    "format": "wad"
+  },
+  {
+    "md5": "0c8758f102ccafe26a3040bee8ba5021",
+    "size": 12538385,
+    "version": "",
+    "edition": "The Ultimate Doom Xbox",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "sha1": "1d1d4f69fe14fa255228d8243470678b1b4efdc5",
+    "format": "wad"
+  },
+  {
+    "md5": "f0cefca49926d00903cf57551d901abe",
+    "size": 4196020,
+    "version": "1.9",
+    "edition": "Doom Shareware",
+    "label": "Debian game-data-packager",
+    "sha1": "5b2e249b9c5133ec987b3ea77596381dc0d6bc1d",
+    "format": "wad"
+  },
+  {
+    "md5": "25e1459ca71d321525f84628f45ca8cd",
+    "size": 14604584,
+    "version": "1.9",
+    "edition": "Doom II",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "7ec7652fcfce8ddc6e801839291f0e28ef1d5ae7",
+    "format": "wad"
+  },
+  {
+    "md5": "c3bea40570c23e511a7ed3ebcd9865f7",
+    "size": 14691821,
+    "version": "",
+    "edition": "Doom II BFG Edition",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "a59548125f59f6aa1a41c22f615557d3dd2e85a9",
+    "format": "wad"
+  },
+  {
+    "md5": "4e158d9953c79ccf97bd0663244cc6b6",
+    "size": 18195736,
+    "version": "1.9",
+    "edition": "Final Doom: TNT Evilution",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/tnt.wad/README.txt",
+    "sha1": "9fbc66aedef7fe3bae0986cdb9323d2b8db4c9d3",
+    "format": "wad"
+  },
+  {
+    "md5": "75c8cf89566741fa9d22447604053bd7",
+    "size": 17420824,
+    "version": "1.9",
+    "edition": "Final Doom: Plutonia",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/plutonia.wad/README.txt",
+    "sha1": "90361e2a538d2388506657252ae41aceeb1ba360",
+    "format": "wad"
+  },
+  {
+    "md5": "3117e399cdb4298eaa3941625f4b2923",
+    "size": 11096488,
+    "version": "1.0",
+    "edition": "Heretic",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/heretic.wad/README.txt",
+    "sha1": "b5a6cc79cde48d97905b44282e82c4c966a23a87",
+    "format": "wad"
+  },
+  {
+    "md5": "1e4cb4ef075ad344dd63971637307e04",
+    "size": 11095516,
+    "version": "1.2",
+    "edition": "Heretic",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/heretic.wad/README.txt",
+    "sha1": "a54c5d30629976a649119c5ce8babae2ddfb1a60",
+    "format": "wad"
+  },
+  {
+    "md5": "66d686b1ed6d35ff103f15dbd30e0341",
+    "size": 14189976,
+    "version": "1.3",
+    "edition": "Heretic: Shadow of the Serpent Riders",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/heretic.wad/README.txt",
+    "sha1": "f489d479371df32f6d280a0cb23b59a35ba2b833",
+    "format": "wad"
+  },
+  {
+    "md5": "876a5a44c7b68f04b3bb9bc7a5bd69d6",
+    "size": 10644136,
+    "version": "1.0",
+    "edition": "Hexen Demo",
+    "label": "HHexen reference catalog",
+    "sha1": "fa89a2475855e43c7f7e3198d6e4c4bee23bfab9",
+    "format": "wad"
+  },
+  {
+    "md5": "b2543a03521365261d0a0f74d5dd90f0",
+    "size": 20128392,
+    "version": "1.0",
+    "edition": "Hexen",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/hexen.wad/README.txt",
+    "sha1": "ac129c4331bf26f0f080c4a56aaa40d64969c98a",
+    "format": "wad"
+  },
+  {
+    "md5": "abb033caf81e26f12a2103e1fa25453f",
+    "size": 20083672,
+    "version": "1.1",
+    "edition": "Hexen",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/hexen.wad/README.txt",
+    "sha1": "4b53832f0733c1e29e5f1de2428e5475e891af29",
+    "format": "wad"
+  },
+  {
+    "md5": "1077432e2690d390c256ac908b5f4efa",
+    "size": 4429700,
+    "version": "1.0",
+    "edition": "Hexen: Deathkings",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/hexdd.wad/README.txt",
+    "sha1": "c3065527d62b05a930fe75fe8181a64fb1982976",
+    "format": "wad",
+    "required": "Hexen: Beyond Heretic"
+  },
+  {
+    "md5": "78d5898e99e220e4de64edaa0e479593",
+    "size": 4440584,
+    "version": "1.1",
+    "edition": "Hexen: Deathkings",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/hexdd.wad/README.txt",
+    "sha1": "081f6a2024643b54ef4a436a85508539b6d20a1e",
+    "format": "wad",
+    "required": "Hexen: Beyond Heretic"
+  },
+  {
+    "md5": "2fed2031a5b03892106e0f117f17901f",
+    "size": 28377364,
+    "version": "1.2",
+    "edition": "Strife: Quest for the Sigil",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/strife1.wad/README.txt",
+    "sha1": "64c13b951a845ca7f8081f68138a6181557458d1",
+    "format": "wad"
+  },
+  {
+    "md5": "25485721882b050afa96a56e5758dd52",
+    "size": 12361532,
+    "version": "1.0",
+    "edition": "Chex Quest",
+    "label": "Debian game-data-packager",
+    "sha1": "eca9cff1014ce5081804e193588d96c6ddb35432",
+    "format": "wad"
+  },
+  {
+    "md5": "35f12b439cc475e8ffcba8c42a5bba6c",
+    "size": 209908382,
+    "version": "",
+    "edition": "Action Doom 2 - Urban Brawl",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "0da97921963442f2b22959ab941744d815c4f50d",
+    "format": "wad"
+  },
+  {
+    "md5": "582cbe67ebd506dd55786552482099f8",
+    "size": 45202919,
+    "version": "2.1",
+    "edition": "The Adventures of Square - Episodes 1 & 2",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "a4bd92bde933fccc1761d749a2a0ee855f436c83",
+    "format": "pk3"
+  },
+  {
+    "md5": "c98a0eca0187edef40a06cab38949210",
+    "size": 7502640,
+    "version": "0.1.5",
+    "edition": "Blasphemer",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "7fea92986e91e2f7d58e3bb7a34733ef8e0efd9d",
+    "format": "wad"
+  },
+  {
+    "md5": "be3b96948b523ba1f95ec7411cc9d569",
+    "size": 20210180,
+    "version": "0.1.7",
+    "edition": "Blasphemer",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "cb5b47301c3ea8e0eca38a819b83770b3889fdd1",
+    "format": "wad"
+  },
+  {
+    "md5": "2d0d2c413132e93ef1a91e07034856bd",
+    "size": 20417448,
+    "version": "0.1.8",
+    "edition": "Blasphemer",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "9d071480b3e882cce13fc9be627fb6ea2ec0c2eb",
+    "format": "wad"
+  },
+  {
+    "md5": "bce163d06521f9d15f9686786e64df13",
+    "size": 19191031,
+    "version": "1.4",
+    "edition": "Chex Quest 3",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "f0581563604543060c1dce2f148fd74412adb8b8",
+    "format": "wad"
+  },
+  {
+    "md5": "9691100ff85b0902be3851890ec5aca9",
+    "size": 83219726,
+    "version": "",
+    "edition": "Delaweare",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "b1319702b200d95adf8da277fa237c7c0318a1b6",
+    "format": "wad"
+  },
+  {
+    "md5": "90facab21eede7981be10790e3f82da2",
+    "size": 4207819,
+    "version": "",
+    "edition": "Doom Shareware",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "fc0359e191bd257b3507863ae412ef3250515866",
+    "format": "wad"
+  },
+  {
+    "md5": "dae77aff77a0491e3b7254c9c8401aa8",
+    "size": 14445632,
+    "version": "",
+    "edition": "Doom (PocketPC)",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "a89b39d91122882214c3088b8cd6b308713bd7c2",
+    "format": "wad"
+  },
+  {
+    "md5": "52cbc8882f445573ce421fa5453513c1",
+    "size": 4274218,
+    "version": "1.1",
+    "edition": "Doom Shareware",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "d4dc6806abd96bd93570c8df436fb6956e13d910",
+    "format": "wad"
+  },
+  {
+    "md5": "30aa5beb9e5ebfbbe1e1765561c08f38",
+    "size": 4225504,
+    "version": "1.2",
+    "edition": "Doom Shareware",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "77ef34de7f13dc36b792fb82ed6805e9c1dc7afc",
+    "format": "wad"
+  },
+  {
+    "md5": "17aebd6b5f2ed8ce07aa526a32af8d99",
+    "size": 4225460,
+    "version": "1.25",
+    "edition": "Doom Shareware",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "72caf585f7ce56861d25f8580c1cc82bf50abd1b",
+    "format": "wad"
+  },
+  {
+    "md5": "a21ae40c388cb6f2c3cc1b95589ee693",
+    "size": 4261144,
+    "version": "1.4 Beta",
+    "edition": "Doom Shareware",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "b4a8e93f1f9544210a173035a0b04c19eb283a2a",
+    "format": "wad"
+  },
+  {
+    "md5": "e280233d533dcc28c1acd6ccdc7742d4",
+    "size": 4271324,
+    "version": "1.5 Beta",
+    "edition": "Doom Shareware",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "b559ba93d0a96e242eb6ded9deeedbd6f79d40fc",
+    "format": "wad"
+  },
+  {
+    "md5": "762fd6d4b960d4b759730f01387a50a1",
+    "size": 4211660,
+    "version": "1.6 Beta",
+    "edition": "Doom Shareware",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "1437fc1ac25a17d5b3cef4c9d2f74e40cae3d231",
+    "format": "wad"
+  },
+  {
+    "md5": "c428ea394dc52835f2580d5bfd50d76f",
+    "size": 4234124,
+    "version": "1.666",
+    "edition": "Doom Shareware",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "81535778d0d4c0c7aa8616fbfd3607dfb3dfd643",
+    "format": "wad"
+  },
+  {
+    "md5": "5f4eb849b1af12887dec04a2a12e5e62",
+    "size": 4196020,
+    "version": "1.8",
+    "edition": "Doom Shareware",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "c6612ac5a8ac2e2a1d707f9b2869af820efb7c50",
+    "format": "wad"
+  },
+  {
+    "md5": "3b37188f6337f15718b617c16e6e7a9c",
+    "size": 12996515,
+    "version": "1.1",
+    "edition": "The Ultimate Doom KEX",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "sha1": "87651324502044f9a6eed403e48853aa16c93e49",
+    "format": "wad"
+  },
+  {
+    "md5": "97573aaf26957099ed45e61d81a0a1a3",
+    "size": 14603212,
+    "version": "",
+    "edition": "Doom II PlayStation Network (Europe)",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "f1b6ba94352d53f646b67c01d2da88c5c40e3179",
+    "format": "wad"
+  },
+  {
+    "md5": "f617591a6c5d07037eb716dc4863e26b",
+    "size": 14677988,
+    "version": "",
+    "edition": "Doom II Xbox 360 BFG Edition",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "b7ba1c68631023ea1aab1d7b9f7f6e9afc508f39",
+    "format": "wad"
+  },
+  {
+    "md5": "4c3db5f23b145fccd24c9b84aba3b7dd",
+    "size": 14599800,
+    "version": "",
+    "edition": "Doom II PlayStation Network (USA)",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "ca8db908a7c9fbac764f34c148f0bcc78d18553e",
+    "format": "wad"
+  },
+  {
+    "md5": "64a4c88a871da67492aaa2020a068cd8",
+    "size": 14951361,
+    "version": "1.1",
+    "edition": "Doom II KEX",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "2921cf667359fd3a80aba3c0cf62ab39297e7e9e",
+    "format": "wad"
+  },
+  {
+    "md5": "9640fc4b2c8447bbd28f2080725d5c51",
+    "size": 14639397,
+    "version": "",
+    "edition": "Doom II Tapwave Zodiac",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "2cda310805397ae44059bbcaed3cd602f4864a82",
+    "format": "wad"
+  },
+  {
+    "md5": "7895d10c281305c45a7e5f01b3f7b1d8",
+    "size": 14685607,
+    "version": "1.1",
+    "edition": "Doom II Unity",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "b723882122e90b61a1d92a11dcfcf9cbf95a407e",
+    "format": "wad"
+  },
+  {
+    "md5": "30e3c2d0350b67bfbf47271970b74b2f",
+    "size": 14943400,
+    "version": "1.666",
+    "edition": "Doom II",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "6d559b7ceece4f5ad457415049711992370d520a",
+    "format": "wad"
+  },
+  {
+    "md5": "d9153ced9fd5b898b36cc5844e35b520",
+    "size": 14824716,
+    "version": "1.666",
+    "edition": "Doom II (German)",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "a4ce5128d57cb129fdd1441c12b58245be55c8ce",
+    "format": "wad"
+  },
+  {
+    "md5": "ea74a47a791fdef2e9f2ea8b8a9da13b",
+    "size": 14612688,
+    "version": "1.7",
+    "edition": "Doom II",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "78009057420b792eacff482021db6fe13b370dcc",
+    "format": "wad"
+  },
+  {
+    "md5": "d7a07e5d3f4625074312bc299d7ed33f",
+    "size": 14612688,
+    "version": "1.7a",
+    "edition": "Doom II",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "70192b8d5aba65c7e633a7c7bcfe7e3e90640c97",
+    "format": "wad"
+  },
+  {
+    "md5": "c236745bb01d89bbb866c8fed81b6f8c",
+    "size": 14612688,
+    "version": "1.8",
+    "edition": "Doom II",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "79c283b18e61b9a989cfd3e0f19a42ea98fda551",
+    "format": "wad"
+  },
+  {
+    "md5": "43c2df32dc6c740cb11f34dc5ab693fa",
+    "size": 14685034,
+    "version": "",
+    "edition": "Doom II Xbox Live Arcade",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "55e445badd63d8841ebea887910c26c62c7f525e",
+    "format": "wad"
+  },
+  {
+    "md5": "a793ebcdd790afad4a1f39cc39a893bd",
+    "size": 14683458,
+    "version": "",
+    "edition": "Doom II Xbox",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "sha1": "1c91d86cd8a2f3817227986503a6672a5e1613f0",
+    "format": "wad"
+  },
+  {
+    "md5": "be626c12b7c9d94b1dfb9c327566b4ff",
+    "size": 18222568,
+    "version": "",
+    "edition": "Final Doom: TNT Evilution PlayStation Network (USA)",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/tnt.wad/README.txt",
+    "sha1": "139e26d801a64b404b8d898defca10227a61867b",
+    "format": "wad"
+  },
+  {
+    "md5": "1d39e405bf6ee3df69a8d2646c8d5c49",
+    "size": 18654796,
+    "version": "",
+    "edition": "Final Doom: TNT Evilution id Anthology",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/tnt.wad/README.txt",
+    "sha1": "4a65c8b960225505187c36040b41a40b152f8f3e",
+    "format": "wad"
+  },
+  {
+    "md5": "ad7885c17a6b9b79b09d7a7634dd7e2c",
+    "size": 18507237,
+    "version": "1.1",
+    "edition": "Final Doom: TNT Evilution KEX",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/tnt.wad/README.txt",
+    "sha1": "ab4e71e360a1e64e262d77a53e4bb202450d0f6e",
+    "format": "wad"
+  },
+  {
+    "md5": "a6685de59ddf2c07f45deeec95296d98",
+    "size": 18434452,
+    "version": "1.0",
+    "edition": "Final Doom: TNT Evilution Unity",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/tnt.wad/README.txt",
+    "sha1": "503271390606ebded04a2cfaa1a4e249c0313a9d",
+    "format": "wad"
+  },
+  {
+    "md5": "b77ca6a809c4fae086162dad8e7a1335",
+    "size": 17417800,
+    "version": "",
+    "edition": "Final Doom: Plutonia PlayStation Network (USA)",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/plutonia.wad/README.txt",
+    "sha1": "327f8c41ebd4138354e9fca63cebbbd1b9489749",
+    "format": "wad"
+  },
+  {
+    "md5": "3493be7e1e2588bc9c8b31eab2587a04",
+    "size": 18240172,
+    "version": "",
+    "edition": "Final Doom: Plutonia id Anthology",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/plutonia.wad/README.txt",
+    "sha1": "f131cbe1946d7fddb3caec4aa258c83399c21e60",
+    "format": "wad"
+  },
+  {
+    "md5": "e47cf6d82a0ccedf8c1c16a284bb5937",
+    "size": 17704206,
+    "version": "1.1",
+    "edition": "Final Doom: Plutonia KEX",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/plutonia.wad/README.txt",
+    "sha1": "fbcc140825b507ab88d844c6b1635c60c4b8bcd6",
+    "format": "wad"
+  },
+  {
+    "md5": "0b381ff7bae93bde6496f9547463619d",
+    "size": 17421754,
+    "version": "1.0",
+    "edition": "Final Doom: Plutonia Unity",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/plutonia.wad/README.txt",
+    "sha1": "54e27b5791fbc5677bf7e83c1de3a92ea3ef935b",
+    "format": "wad"
+  },
+  {
+    "md5": "d40c932a9183ded919afa89f4a729668",
+    "size": 21824448,
+    "version": "0.12.1",
+    "edition": "Freedoom - FreeDM",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "61065a41a391cd2e4bff69488be36773754354ab",
+    "format": "wad"
+  },
+  {
+    "md5": "908dfd77a14cc490c4cea94b62d13449",
+    "size": 22218796,
+    "version": "0.13.0",
+    "edition": "Freedoom - FreeDM",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "42c36e9d0610bf70c710ca79c7098ef3b1b00059",
+    "format": "wad"
+  },
+  {
+    "md5": "b36aa44a23045e503c19af4b4c438a78",
+    "size": 27284988,
+    "version": "0.12.1",
+    "edition": "Freedoom - Phase 1",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "e9bf428b73a04423ea7a0e9f4408f71df85ab175",
+    "format": "wad"
+  },
+  {
+    "md5": "b93be13d05148dd01614bc205a03648e",
+    "size": 28795076,
+    "version": "0.13.0",
+    "edition": "Freedoom - Phase 1",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "97bb88094a51457a8dcad98c58be22a2d0fa9a37",
+    "format": "wad"
+  },
+  {
+    "md5": "ca9a4159a7833544a89144c7f5053412",
+    "size": 28544132,
+    "version": "0.12.1",
+    "edition": "Freedoom - Phase 2",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "51c997f430dc12abba7888c2d83c237a8e0758a7",
+    "format": "wad"
+  },
+  {
+    "md5": "cd666466759b5e5f63af93c5f0ffd0a1",
+    "size": 28787748,
+    "version": "0.13.0",
+    "edition": "Freedoom - Phase 2",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "975f781e6d801c0a23e3caa33f70493efe68a880",
+    "format": "wad"
+  },
+  {
+    "md5": "65ed74d522bdf6649c2831b13b9e02b4",
+    "size": 19321722,
+    "version": "1.2",
+    "edition": "Hacx: Twitch’n Kill",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "9fd331b9d53006af1884e89eaeb97b17b8572b71",
+    "format": "wad"
+  },
+  {
+    "md5": "793f07ebadb3d7353ee5b6b6429d9afa",
+    "size": 51079920,
+    "version": "2.0-r61",
+    "edition": "Hacx 2.0",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "bae5769b52f39e3461cf0fbcaffc4bf1e805107d",
+    "format": "wad"
+  },
+  {
+    "md5": "48ebb49b52f6a3020d174dbcc1b9aeaf",
+    "size": 58396393,
+    "version": "1.1",
+    "edition": "Harmony",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "d7c5f9095fd5f1ebfe14ecd97ca31503e2a02964",
+    "format": "wad"
+  },
+  {
+    "md5": "a5de95a3162e71b5ffc568ba2343cd46",
+    "size": 24912360,
+    "version": "",
+    "edition": "Heretic (KEX)",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "1c74bbb19ac0609573a898b40b6f022ccb25d07e",
+    "format": "wad"
+  },
+  {
+    "md5": "9178a32a496ff5befebfe6c47dac106c",
+    "size": 10615976,
+    "version": "",
+    "edition": "Hexen - Beyond Heretic (Beta) Shareware",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "f1015d659329733a237c00f2c6208243fa95e2f7",
+    "format": "wad"
+  },
+  {
+    "md5": "b68140a796f6fd7f3a5d3226a32b93be",
+    "size": 21078584,
+    "version": "",
+    "edition": "Hexen Mac",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/hexen.wad/README.txt",
+    "sha1": "4343fbe5aef905ef6d077a1517a50c919e5cc906",
+    "format": "wad"
+  },
+  {
+    "md5": "925f9f5000e17dc84b0a6a3bed3a6f31",
+    "size": 13596228,
+    "version": "",
+    "edition": "Hexen - Beyond Heretic (Mac Edition) Shareware",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "c2338e52c06c3a4925b9a9fb2c720252fe917c08",
+    "format": "wad"
+  },
+  {
+    "md5": "c88a2bb3d783e2ad7b599a8e301e099e",
+    "size": 20428208,
+    "version": "",
+    "edition": "Hexen Beta",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/hexen.wad/README.txt",
+    "sha1": "ae797f5fdce845be24a7a24dd5bfc3e762a17bbe",
+    "format": "wad"
+  },
+  {
+    "md5": "a66ae0448436a990b3aecd018bc2708a",
+    "size": 26668322,
+    "version": "",
+    "edition": "Hexen - Beyond Heretic (KEX)",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "a2ee5bc0ac7d9249d8570dc2ee85dd74d2f29936",
+    "format": "wad"
+  },
+  {
+    "md5": "2bb0f56ab1f98000990524c1b67e8759",
+    "size": 4639055,
+    "version": "",
+    "edition": "Hexen - Deathkings of the Dark Citadel (KEX)",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "a20c58783cb082b3af1102631176d704061df320",
+    "format": "wad",
+    "required": "Hexen: Beyond Heretic"
+  },
+  {
+    "md5": "9176043468e10eaa471ae556e8e55745",
+    "size": 20592999,
+    "version": "1.3",
+    "edition": "Rise Of The Wool Ball",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "a9cc79f7383dffb5447da109b0bd9e283424cff2",
+    "format": "wad"
+  },
+  {
+    "md5": "8f2d3a6a289f5d2f2f9c1eec02b47299",
+    "size": 28372168,
+    "version": "1.1",
+    "edition": "Strife: Quest for the Sigil",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/strife1.wad/README.txt",
+    "sha1": "eb0f3e157b35c34d5a598701f775e789ec85b4ae",
+    "format": "wad"
+  },
+  {
+    "md5": "de2c8dcad7cca206292294bdab524292",
+    "size": 10493652,
+    "version": "",
+    "edition": "Strife: Teaser (Old Version)",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "92a5fcff91fef9f55ce1da00c57e4aa933bd6f8d",
+    "format": "wad"
+  },
+  {
+    "md5": "bb545b9c4eca0ff92c14d466b3294023",
+    "size": 9934413,
+    "version": "1.1",
+    "edition": "Strife: Teaser (New Version)",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "bc0a110bf27aee89a0b2fc8111e2391ede891b8d",
+    "format": "wad"
+  },
+  {
+    "md5": "06a8f99b9b756ac908917c3868b8e3bc",
+    "size": 102621358,
+    "version": "",
+    "edition": "Strife - Veteran Edition",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "4768b23a2d4778862e15a14ef744da121f711d5b",
+    "format": "wad",
+    "required": "Strife: Quest for the Sigil"
+  },
+  {
+    "md5": "2c0a712d3e39b010519c879f734d79ae",
+    "size": 102621358,
+    "version": "1.1",
+    "edition": "Strife - Veteran Edition",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "08ba56e6171cec65c10c9feff8705124e72421f3",
+    "format": "wad",
+    "required": "Strife: Quest for the Sigil"
+  },
+  {
+    "md5": "47958a4fea8a54116e4b51fc155799c0",
+    "size": 102407969,
+    "version": "1.2",
+    "edition": "Strife - Veteran Edition",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "539ff0d7d9971c2c33e663dca8072c629e177dfb",
+    "format": "wad",
+    "required": "Strife: Quest for the Sigil"
+  },
+  {
+    "md5": "7912931e44c7d56e021084a256659800",
+    "size": 12474561,
+    "version": "",
+    "edition": "The Ultimate Doom (BFG Edition) (Xbox 360)",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
+    "sha1": "d6a9f0172eca101471128ec61be975361f2ad28e",
+    "format": "wad"
+  },
+  {
+    "md5": "21b200688d0fa7c1b6f63703d2bdd455",
+    "size": 12468955,
+    "version": "1.1",
+    "edition": "The Ultimate Doom Unity",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "sha1": "08ab2507e1d525c4c06b6df4f6d5862568a6b009",
+    "format": "wad"
+  },
+  {
+    "md5": "72286ddc680d47b9138053dd944b2a3d",
+    "size": 12475196,
+    "version": "",
+    "edition": "The Ultimate Doom Xbox Live Arcade",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "sha1": "37de4510216eb3ce9a835dd939109443375d10c5",
+    "format": "wad"
+  },
+  {
+    "md5": "",
+    "size": 0,
+    "sha1": "23a3a8bfafcfdc7c481f282cf2a3d03e5f386d43",
+    "edition": "The Ultimate Doom Pocket PC",
+    "version": "",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "format": "wad"
+  },
+  {
+    "md5": "",
+    "size": 0,
+    "sha1": "f770111ca9eb6d49aead51fcbd398719b462e64b",
+    "edition": "The Ultimate Doom Unity",
+    "version": "1.0",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "format": "wad"
+  },
+  {
+    "md5": "8517c4e8f0eef90b82852667d345eb86",
+    "size": 12702921,
+    "sha1": "2a8a1ce0f29497a2781b2902c76115fd60d8bbf8",
+    "edition": "The Ultimate Doom Unity",
+    "version": "1.3",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "format": "wad"
+  },
+  {
+    "md5": "",
+    "size": 0,
+    "sha1": "997bae5e5a190c5bb3b1fb9e7e3e75b2da88cb27",
+    "edition": "The Ultimate Doom KEX",
+    "version": "1.0",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
+    "format": "wad"
+  },
+  {
+    "md5": "",
+    "size": 0,
+    "sha1": "9b39107b5bcfd1f989bcfe46f68dbc1f49222922",
+    "edition": "Doom II Unity",
+    "version": "1.0",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "format": "wad"
+  },
+  {
+    "md5": "8ab6d0527a29efdc1ef200e5687b5cae",
+    "size": 14802843,
+    "sha1": "9574851209c9dfbede56db0dee0660ecd51e6150",
+    "edition": "Doom II Unity",
+    "version": "1.3",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "format": "wad"
+  },
+  {
+    "md5": "",
+    "size": 0,
+    "sha1": "c745f04a6abc2e6d2a2d52382f45500dd2a260be",
+    "edition": "Doom II KEX",
+    "version": "1.0",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
+    "format": "wad"
+  },
+  {
+    "md5": "",
+    "size": 0,
+    "sha1": "5066833da047117241cdda05a708b009eb266c91",
+    "edition": "Final Doom: TNT Evilution PlayStation Network (Europe)",
+    "version": "",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/tnt.wad/README.txt",
+    "format": "wad"
+  },
+  {
+    "md5": "f5528f6fd55cf9629141d79eda169630",
+    "size": 18529884,
+    "sha1": "ca0f0495a6c2813b49620202774c56560d6d7621",
+    "edition": "Final Doom: TNT Evilution Unity",
+    "version": "1.3",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/tnt.wad/README.txt",
+    "format": "wad"
+  },
+  {
+    "md5": "",
+    "size": 0,
+    "sha1": "9820e2a3035f0cdd87f69a7d57c59a7a267c9409",
+    "edition": "Final Doom: TNT Evilution KEX",
+    "version": "1.0",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/tnt.wad/README.txt",
+    "format": "wad"
+  },
+  {
+    "md5": "",
+    "size": 0,
+    "sha1": "85c3517434135a5886111b324955f9288c01046c",
+    "edition": "Final Doom: Plutonia PlayStation Network (Europe)",
+    "version": "",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/plutonia.wad/README.txt",
+    "format": "wad"
+  },
+  {
+    "md5": "ae76c20366ff685d3bb9fab11b148b84",
+    "size": 17517186,
+    "sha1": "20fd23ee410c466b263a741bbd53bbef573ab47d",
+    "edition": "Final Doom: Plutonia Unity",
+    "version": "1.3",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/plutonia.wad/README.txt",
+    "format": "wad"
+  },
+  {
+    "md5": "",
+    "size": 0,
+    "sha1": "816c7c6b0098f66c299c9253f62bd908456efb63",
+    "edition": "Final Doom: Plutonia KEX",
+    "version": "1.0",
+    "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/plutonia.wad/README.txt",
+    "format": "wad"
+  },
+  {
+    "md5": "29592eefedc524a3014419ce69b8d05d",
+    "sha1": "9cb3381c458170e3f1c783ce42f5bfecfea3c1ce",
+    "size": 9577278,
+    "edition": "Chex Quest 3",
+    "version": "2.0",
+    "format": "pk3",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat"
+  },
+  {
+    "md5": "049e32f18d9c9529630366cfc72726ea",
+    "size": 5468456,
+    "version": "Press-Release Beta",
+    "edition": "Doom Beta",
+    "label": "Debian game-data-packager 67/data/doom.yaml",
+    "sha1": "692994db9579be4201730b9ac77797fae2111bde",
+    "format": "wad"
+  },
+  {
+    "md5": "3cb02349b3df649c86290907eed64e7b",
+    "sha1": "d510c877031bbd5f3d198581a2c8651e09b9861f",
+    "size": 14607420,
+    "edition": "Heretic Wide Area Beta",
+    "version": "",
+    "format": "wad",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat"
+  },
+  {
+    "md5": "023b52175d2f260c3bdc5528df5d0a8c",
+    "size": 5120300,
+    "version": "1.0",
+    "edition": "Heretic Shareware",
+    "label": "Debian game-data-packager",
+    "sha1": "5ef073366e5ca523b26a529e843f05c4907c23a4",
+    "format": "wad"
+  },
+  {
+    "md5": "ae779722390ec32fa37b0d361f7d82f8",
+    "size": 5120920,
+    "version": "1.2",
+    "edition": "Heretic Shareware",
+    "label": "Debian game-data-packager",
+    "sha1": "b4c50ca9bea07f7c35250a1a11906091971c05ae",
+    "format": "wad"
+  },
+  {
+    "md5": "fc7eab659f6ee522bb57acc1a946912f",
+    "sha1": "e3d56700ecc3fefbd19cafba5bac3b115120d465",
+    "size": 4095992,
+    "edition": "Heretic Wide Area Beta",
+    "version": "",
+    "format": "wad",
+    "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat"
+  }
 ]

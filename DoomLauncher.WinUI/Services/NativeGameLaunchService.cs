@@ -97,16 +97,12 @@ public sealed class NativeGameLaunchService(
             connection,
             iwadId.Value,
             cancellationToken);
-        var isDeathkings = selectedIwad.InternalFileName.Equals(
-            "HEXDD.WAD",
-            StringComparison.OrdinalIgnoreCase);
-        var baseIwad = isDeathkings
-            ? await LoadIwadByInternalNameAsync(
-                connection,
-                "HEXEN.WAD",
-                cancellationToken)
-                ?? throw new InvalidOperationException(
-                    "HEXDD.WAD benötigt HEXEN.WAD. Bitte zuerst HEXEN.WAD als IWAD definieren.")
+        await IwadVersionDetector.EnsureLoadedAsync(cancellationToken);
+        var requiredBase = IwadVersionDetector.RequiredBase(selectedIwad.InternalFileName, selectedIwad.Md5, selectedIwad.CatalogLabel);
+        var hasBaseDependency = requiredBase.Length > 0;
+        var baseIwad = hasBaseDependency
+            ? await LoadIwadDependencyAsync(connection, requiredBase, cancellationToken)
+                ?? throw new InvalidOperationException($"{selectedIwad.InternalFileName} benötigt {requiredBase}.")
             : selectedIwad;
         var databaseDirectory = Path.GetDirectoryName(databasePath)!;
         var gameDirectory = ResolvePath(
@@ -151,7 +147,7 @@ public sealed class NativeGameLaunchService(
             };
             if (request.Multiplayer is not null) settings = settings with { Map = request.Map, Skill = request.Skill, Files = null, FilesIwad = null, FilesSourcePort = null, SpecificFiles = null, ExtraParameters = null, ExtraParametersOnly = false };
             var launchFiles = new List<string>();
-            if (isDeathkings)
+            if (hasBaseDependency)
             {
                 launchFiles.Add(await PrepareIwadAsync(
                     databaseDirectory,
@@ -1099,9 +1095,11 @@ public sealed class NativeGameLaunchService(
         await using var command = connection.CreateCommand();
         command.CommandText =
             """
-            SELECT i.IWadID, i.GameFileID, i.FileName, gf.FileName
+            SELECT i.IWadID, i.GameFileID, i.FileName, gf.FileName,
+                   COALESCE(metadata.Md5, ''), COALESCE(metadata.CatalogLabel, '')
             FROM IWads i
             JOIN GameFiles gf ON gf.GameFileID = i.GameFileID
+            LEFT JOIN WinUI_IwadMetadata metadata ON metadata.IWadID = i.IWadID
             WHERE i.IWadID = $id;
             """;
         command.Parameters.AddWithValue("$id", iwadId);
@@ -1112,33 +1110,24 @@ public sealed class NativeGameLaunchService(
             reader.GetInt32(0),
             reader.GetInt32(1),
             reader.GetString(2),
-            reader.GetString(3));
+            reader.GetString(3), reader.GetString(4), reader.GetString(5));
     }
 
-    private static async Task<IwadRow?> LoadIwadByInternalNameAsync(
-        SqliteConnection connection,
-        string internalFileName,
-        CancellationToken cancellationToken)
+    private static async Task<IwadRow?> LoadIwadDependencyAsync(SqliteConnection connection, string required, CancellationToken token)
     {
         await using var command = connection.CreateCommand();
-        command.CommandText =
-            """
-            SELECT i.IWadID, i.GameFileID, i.FileName, gf.FileName
-            FROM IWads i
-            JOIN GameFiles gf ON gf.GameFileID = i.GameFileID
-            WHERE i.FileName = $fileName COLLATE NOCASE
+        command.CommandText = """
+            SELECT i.IWadID, i.GameFileID, i.FileName, gf.FileName,
+                   COALESCE(m.Md5,''), COALESCE(m.CatalogLabel,'')
+            FROM IWads i JOIN GameFiles gf ON gf.GameFileID=i.GameFileID
+            LEFT JOIN WinUI_IwadMetadata m ON m.IWadID=i.IWadID
             ORDER BY i.IWadID
-            LIMIT 1;
             """;
-        command.Parameters.AddWithValue("$fileName", internalFileName);
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        return await reader.ReadAsync(cancellationToken)
-            ? new IwadRow(
-                reader.GetInt32(0),
-                reader.GetInt32(1),
-                reader.GetString(2),
-                reader.GetString(3))
-            : null;
+        await using var reader = await command.ExecuteReaderAsync(token);
+        while (await reader.ReadAsync(token))
+            if (IwadVersionDetector.IsBase(reader.GetString(2), reader.GetString(4), reader.GetString(5), required))
+                return new(reader.GetInt32(0), reader.GetInt32(1), reader.GetString(2), reader.GetString(3), reader.GetString(4), reader.GetString(5));
+        return null;
     }
 
     private static async Task<GameFileReference?> FindGameFileAsync(
@@ -1215,7 +1204,9 @@ public sealed class NativeGameLaunchService(
         int IwadId,
         int GameFileId,
         string InternalFileName,
-        string ArchiveFileName);
+        string ArchiveFileName,
+        string Md5 = "",
+        string CatalogLabel = "");
 
     private sealed record GameFileReference(int GameFileId, string FileName);
 

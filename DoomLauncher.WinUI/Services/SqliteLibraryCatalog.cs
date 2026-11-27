@@ -40,6 +40,7 @@ public sealed class SqliteLibraryCatalog(
             await GetPlaceholderArtworkStyleAsync(
                 connection,
                 cancellationToken);
+        await IwadVersionDetector.EnsureLoadedAsync(cancellationToken);
         var configuredIwads = await GetConfiguredIwadsAsync(
             connection,
             cancellationToken);
@@ -80,6 +81,8 @@ public sealed class SqliteLibraryCatalog(
                 CASE WHEN game.IWadID IS NULL THEN 1 ELSE 0 END AS UsesDefaultIwad,
                 NULLIF(TRIM(ownIwad.FileName), '') AS OwnIwadFileName,
                 COALESCE(ownIwadMetadata.Version, '') AS OwnIwadVersion,
+                COALESCE(ownIwadMetadata.Md5, '') AS OwnIwadMd5,
+                COALESCE(ownIwadMetadata.CatalogLabel, '') AS OwnIwadCatalogLabel,
                 COALESCE((
                     SELECT titlePic.FileName
                     FROM Files titlePic
@@ -259,7 +262,8 @@ public sealed class SqliteLibraryCatalog(
                 GetInt32(reader, "IsIdGamesDownload") != 0,
                 !string.IsNullOrWhiteSpace(GetNullableString(reader, "Downloaded")),
                 SplitTags(GetNullableString(reader, "TagNames")),
-                DatabaseTextSanitizer.SingleLine(GetNullableString(reader, "OwnIwadVersion"))));
+                IwadVersionDetector.StoredVersion(GetNullableString(reader, "OwnIwadMd5") ?? "", DatabaseTextSanitizer.SingleLine(GetNullableString(reader, "OwnIwadVersion"))),
+                IwadVersionDetector.StoredEdition(GetNullableString(reader, "OwnIwadMd5") ?? "", GetNullableString(reader, "OwnIwadCatalogLabel") ?? "")));
         }
 
         return new LibraryCatalogResult(

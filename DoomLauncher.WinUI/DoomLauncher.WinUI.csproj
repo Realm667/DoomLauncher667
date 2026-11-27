@@ -70,6 +70,7 @@
     <Content Include="Assets\AppIcon.ico" />
     <Content Include="Assets\DoomLauncher.ico" />
     <Content Include="Assets\iwad-hashes.json" />
+    <Content Include="Assets\iwad-identities.json" />
     <Content Include="Assets\DoomLauncher.Empty.sqlite" />
     <Content Include="Assets\Fonts\*.ttf" />
     <Content Include="Assets\Fonts\OFL.txt" />

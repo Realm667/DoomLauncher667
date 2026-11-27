@@ -44,4 +44,5 @@ public sealed record LibraryCatalogEntry(
     bool IsIdGamesDownload,
     bool IsDownloaded,
     IReadOnlyList<string> Tags,
-    string Version = "");
+    string Version = "",
+    string Edition = "");

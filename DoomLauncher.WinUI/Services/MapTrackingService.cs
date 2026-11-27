@@ -54,6 +54,14 @@ internal static class MapTrackingService
         }, token);
     }
 
+    // UZDoom 5.0.3 sanitizes logfile arguments into a different filename in
+    // the engine directory. The session-path protocol is not validated there.
+    // Keep launching available while withholding automatic progress.
+    internal static bool IsUnsupportedLogProtocol(string? product, string? version)
+        => product?.Contains("UZDoom", StringComparison.OrdinalIgnoreCase) == true
+            && (!Version.TryParse((version ?? "").Split('-')[0], out var parsed)
+                || parsed >= new Version(5, 0, 3));
+
     internal static bool SupportsEngine(string executable)
     {
         // Inspect the actual bundled engine API rather than trusting a display
@@ -62,6 +70,8 @@ internal static class MapTrackingService
         var name = Path.GetFileNameWithoutExtension(executable).ToLowerInvariant();
         try
         {
+            var version = System.Diagnostics.FileVersionInfo.GetVersionInfo(executable);
+            if (IsUnsupportedLogProtocol(version.ProductName, version.FileVersion)) return false;
             foreach (var baseName in new[] { name, "gzdoom", "uzdoom", "lzdoom", "vkdoom", "qzdoom" }.Distinct())
             {
                 var path = Path.Combine(Path.GetDirectoryName(executable)!, baseName + ".pk3");
@@ -77,7 +87,7 @@ internal static class MapTrackingService
                     && events.Contains("UiTick()") && events.Contains("NextMap") && events.Contains("OnEngineInitialize()")) return true;
             }
         }
-        catch (Exception error) when (error is IOException or InvalidDataException or UnauthorizedAccessException) { }
+        catch (Exception error) when (error is IOException or InvalidDataException or UnauthorizedAccessException or System.ComponentModel.Win32Exception) { }
         return false;
     }
 

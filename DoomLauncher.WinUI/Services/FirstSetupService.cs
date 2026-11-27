@@ -14,7 +14,7 @@ public sealed class FirstSetupService(
     private readonly UiLocalization _localization = localization ?? new UiLocalization();
     private const string WizardMarker = "FirstSetupWizardV2";
     private static readonly HashSet<string> ArchiveExtensions = new(
-        [".zip", ".7z", ".rar", ".wad"],
+        [".zip", ".7z", ".rar", ".wad", ".pk3", ".ipk3"],
         StringComparer.OrdinalIgnoreCase);
     private static readonly HashSet<string> ModExtensions = new(
         ModImportBatch.SupportedExtensions,
@@ -455,9 +455,7 @@ public sealed class FirstSetupService(
         var updated = 0;
         var skipped = 0;
         var orderedPending = pending
-            .OrderBy(item => item.Candidate.InternalFileName.Equals(
-                "HEXDD.WAD",
-                StringComparison.OrdinalIgnoreCase))
+            .OrderBy(item => IwadVersionDetector.RequiredBase(item.Candidate.InternalFileName, item.Candidate.Md5, item.Candidate.CatalogLabel).Length > 0)
             .ToArray();
         for (var pendingIndex = 0; pendingIndex < orderedPending.Length; pendingIndex++)
         {

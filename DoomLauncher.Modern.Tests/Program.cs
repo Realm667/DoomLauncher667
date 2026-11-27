@@ -42,6 +42,13 @@ if (args.Length == 3 && args[0] == "--verify-map-tracker-regression")
     await MapTrackingRegressionTests.RunAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]));
     return 0;
 }
+if (args.Length == 3 && args[0] == "--verify-tracking-capability")
+{
+    var supported = MapTrackingService.SupportsEngine(Path.GetFullPath(args[1]));
+    Console.WriteLine($"Tracking capability: {supported}; {args[1]}");
+    return supported == bool.Parse(args[2]) ? 0 : 1;
+}
+
 if (args.Length == 3 && args[0] == "--verify-map-tracker-engine")
 {
     await MapTrackingEngineTests.RunAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]));
@@ -88,6 +95,7 @@ if (args.Length == 2 && args[0] == "--verify-shared-storage")
 if (args.Length == 1 && args[0] == "--verify-iwad-versions")
 {
     await IwadLibraryTests.VerifyAsync();
+    await IwadIdentityTests.VerifyAsync();
     return 0;
 }
 
@@ -594,6 +602,7 @@ try
         "Obsidian setzt die passende IWAD und neueste kompatible Source-Port-Definition");
     await VerifyLegacyNotNullSchemaAsync();
     await IwadLibraryTests.VerifyAsync();
+    await IwadIdentityTests.VerifyAsync();
     Check(
         MapNameExtractor.ParseStored("MAP01-MAP03, E1M1")
             .SequenceEqual(["E1M1", "MAP01", "MAP02", "MAP03"]),

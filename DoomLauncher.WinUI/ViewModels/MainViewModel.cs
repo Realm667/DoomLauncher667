@@ -1466,6 +1466,8 @@ public sealed partial class MainViewModel(
 
     private void ApplyFilter(int? preferredGameFileId = null)
     {
+        foreach (var iwad in _catalog.Where(item => item.Category == "IWAD"))
+            iwad.SetIwadVersionVisible(_categoryFilter == LibraryCategoryFilter.Iwads);
         var currentGameFileId = preferredGameFileId
             ?? (SelectedGame.IsPlaceholder ? null : SelectedGame.GameFileId);
         IEnumerable<LibraryItem> matches = _catalog;
