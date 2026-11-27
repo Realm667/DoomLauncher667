@@ -470,7 +470,7 @@ try
     PerformanceTests.VerifyReconciliation();
     await ExpansionTests.RunAsync();
     Check(
-        AppVersion.Current == "1.0.0",
+        AppVersion.Current == "1.1.0",
         "Die sichtbare Version stammt aus der zentralen Buildversion");
     VerifyTileImageDefaults();
     Check(
