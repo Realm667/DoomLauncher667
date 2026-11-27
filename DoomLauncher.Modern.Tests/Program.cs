@@ -92,6 +92,14 @@ if (args.Length == 2 && args[0] == "--verify-shared-storage")
     return 0;
 }
 
+if (args.Length == 3 && args[0] == "--verify-update-package")
+{
+    var root = Path.Combine(Path.GetTempPath(), "DL667-actual-package-" + Guid.NewGuid().ToString("N"));
+    try { var files = LauncherUpdateService.ExtractPackage(Path.GetFullPath(args[1]), root, args[2], default); Console.WriteLine($"PASS actual release package: {files.Count} verified program files; {args[2]}"); }
+    finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    return 0;
+}
+
 if (args.Length == 1 && args[0] == "--verify-iwad-versions")
 {
     await IwadLibraryTests.VerifyAsync();

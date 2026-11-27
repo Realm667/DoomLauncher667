@@ -149,7 +149,8 @@ internal sealed class LauncherUpdateService(HttpClient client)
             result.Add(new(name, Convert.ToHexString(hash.GetHashAndReset())));
         }
         if (!seen.Contains("DoomLauncher667.exe") || !seen.Contains("WinUI/DoomLauncher.WinUI.exe") || !seen.Contains("VERSION.txt")) throw new InvalidDataException("Incomplete portable release.");
-        if (File.ReadAllText(Path.Combine(package, "VERSION.txt")).Trim() != version) throw new InvalidDataException("Package version mismatch.");
+        var packageTitle = File.ReadLines(Path.Combine(package, "VERSION.txt")).FirstOrDefault()?.Trim();
+        if (packageTitle != "Doom Launcher 667 " + version) throw new InvalidDataException("Package version mismatch.");
         return result;
     }
     internal static bool IsProgramPath(string path)

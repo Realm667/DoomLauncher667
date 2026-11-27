@@ -14,7 +14,7 @@ internal static class LauncherUpdateTests
         var root = Path.Combine(Path.GetTempPath(), "DL667-update-tests-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(root);
         try
         {
-            var payload = new Dictionary<string, string> { ["DoomLauncher667.exe"] = "new bootstrap", ["WinUI/new.dll"] = "new runtime", ["WinUI/DoomLauncher.WinUI.exe"] = "new app", ["VERSION.txt"] = "1.1.0" };
+            var payload = new Dictionary<string, string> { ["DoomLauncher667.exe"] = "new bootstrap", ["WinUI/new.dll"] = "new runtime", ["WinUI/DoomLauncher.WinUI.exe"] = "new app", ["VERSION.txt"] = "Doom Launcher 667 1.1.0\nPlatform: Windows x64\nSource revision: test\nSource: https://github.com/Realm667/DoomLauncher667/tree/v1.1.0\n" };
             var zipPath = Path.Combine(root, "release.zip");
             MakeZip(zipPath, payload, "DoomLauncher667-1.1.0-win-x64/");
             var zipBytes = await File.ReadAllBytesAsync(zipPath); var hash = Convert.ToHexString(SHA256.HashData(zipBytes));
