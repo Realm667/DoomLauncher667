@@ -8,6 +8,8 @@
     <UseSystemDrawing>true</UseSystemDrawing>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\DoomLauncher.WinUI\Services\LauncherUpdateService.cs" Link="Services\LauncherUpdateService.cs" />
+    <EmbeddedResource Include="..\DoomLauncher.WinUI\Assets\ApplyUpdate.ps1" LogicalName="DoomLauncher667.ApplyUpdate.ps1" />
     <EmbeddedResource Include="..\DoomLauncher.WinUI\Assets\Tracking\MapTracker.zs" LogicalName="DoomLauncher667.MapTracker.zs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\MapTrackingService.cs" Link="Services\MapTrackingService.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\MultiplayerBrowserQuery.cs" Link="Services\MultiplayerBrowserQuery.cs" />

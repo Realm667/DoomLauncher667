@@ -96,6 +96,7 @@ if (args.Length == 1 && args[0] == "--verify-iwad-versions")
 {
     await IwadLibraryTests.VerifyAsync();
     await IwadIdentityTests.VerifyAsync();
+    await LauncherUpdateTests.VerifyAsync();
     return 0;
 }
 
@@ -603,6 +604,7 @@ try
     await VerifyLegacyNotNullSchemaAsync();
     await IwadLibraryTests.VerifyAsync();
     await IwadIdentityTests.VerifyAsync();
+    await LauncherUpdateTests.VerifyAsync();
     Check(
         MapNameExtractor.ParseStored("MAP01-MAP03, E1M1")
             .SequenceEqual(["E1M1", "MAP01", "MAP02", "MAP03"]),

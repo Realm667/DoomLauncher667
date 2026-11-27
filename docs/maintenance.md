@@ -1,5 +1,28 @@
 # Backup, restore and duplicate checks
 
+## GitHub launcher updates
+
+After startup, the launcher checks the latest published stable release of
+`Realm667/DoomLauncher667` in the background. Offline operation and GitHub rate
+limits do not delay the Library. The current version and older releases are not
+offered. Drafts and prereleases are excluded.
+
+The update prompt offers **Update now**, **Remind me later** (ask again at the next
+launcher start), and **Skip this version** (persistently ignore only this release).
+Closing the prompt or pressing Escape means **later**. Skipping a version is saved
+separately under `Data/UserState/launcher-update.json`; other preferences are kept.
+
+**Update now** downloads the portable x64 package, verifies its release SHA-256,
+validates the program-only file list and prepares it before closing the launcher.
+The helper waits for the launcher to exit, acquires the installation lock, saves
+the old program files under `Backups/Program-update-*`, overlays the new files and
+restarts the launcher. Failed copies restore the previous program files; failure
+details and the backup location are displayed. If restart fails, start
+`DoomLauncher667.exe` manually. Download and copy may take time on network drives.
+The updater never installs a package containing a root database or nonempty Data
+files. The existing SQLite database, mods, IWADs, savegames, artwork, custom tiles,
+collections and launch options are retained. No GitHub login or token is needed.
+
 Open **Settings → Backup, restore & duplicates**. Finish any running game,
 generation or import first. These tools operate on the current portable installation.
 

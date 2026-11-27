@@ -80,6 +80,16 @@ public sealed partial class MainPage
                 "IWAD version uses smaller neutral-gray text directly after the title");
             Directory.CreateDirectory(Path.Combine(root, "visual-qa"));
             await CapturePolishAsync(Path.Combine(root, "visual-qa", "iwad-version-inline.png"), 1);
+            var previousLanguage = _app.Localization.Language;
+            _app.Localization.SetLanguage("de-DE");
+            var updateDialog = CreateLauncherUpdateDialog(new LauncherRelease("1.1.0", new Uri(LauncherUpdateService.Repository + "/releases/download/v1.1.0/test.zip"), new string('0', 64), null, LauncherUpdateService.Repository));
+            Check(updateDialog.PrimaryButtonText == "Jetzt aktualisieren" && updateDialog.SecondaryButtonText == "Version überspringen"
+                && updateDialog.CloseButtonText == "Später erinnern" && updateDialog.DefaultButton == ContentDialogButton.Close,
+                "Update offers now, next-start reminder and exact-version skip; dismissing defaults to later");
+            var updateShown = updateDialog.ShowAsync(); await Layout();
+            await CapturePolishAsync(Path.Combine(root, "visual-qa", "github-update-de-DE.png"), 1, updateDialog);
+            updateDialog.Hide(); await updateShown;
+            _app.Localization.SetLanguage(previousLanguage);
             CategoryFilter_Click(ModsFilterButton, new RoutedEventArgs()); await Layout();
             Check(versionLibraryItem.InlineVersion.Length == 0 && versionRow!.ColumnDefinitions.Count == 11,
                 "Mod filter hides the inline IWAD version without changing table columns");

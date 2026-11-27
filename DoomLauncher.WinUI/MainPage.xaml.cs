@@ -223,6 +223,7 @@ public sealed partial class MainPage : Page
                 $"User state: {Environment.GetEnvironmentVariable(JsonUserLibraryStateStore.StateEnvironmentVariable)}",
                 "Command line: --debug");
         }
+        _ = CheckForLauncherUpdatesAsync();
     }
 
     private void ViewModel_PropertyChanged(
