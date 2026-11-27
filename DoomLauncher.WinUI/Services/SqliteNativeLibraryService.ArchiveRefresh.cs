@@ -79,6 +79,28 @@ public sealed partial class SqliteNativeLibraryService
             if (Convert.ToInt32(await guard.ExecuteScalarAsync(token)) != 0)
                 throw new InvalidOperationException("IWADs are excluded from mod metadata updates.");
         }
+        string? archivePath = null;
+        await using (var locate = connection.CreateCommand())
+        {
+            locate.Transaction = transaction;
+            locate.CommandText = """
+                SELECT FileName, COALESCE((SELECT Value FROM Configuration WHERE Name='GameFileDirectory' LIMIT 1),'Data')
+                FROM GameFiles WHERE GameFileID=$id
+                """;
+            locate.Parameters.AddWithValue("$id", gameFileId);
+            await using var row = await locate.ExecuteReaderAsync(token);
+            if (await row.ReadAsync(token))
+            {
+                var directory = Environment.ExpandEnvironmentVariables(row.GetString(1));
+                var root = Path.IsPathFullyQualified(directory) ? directory : Path.Combine(Path.GetDirectoryName(connection.DataSource)!, directory);
+                archivePath = Path.GetFullPath(Path.IsPathFullyQualified(row.GetString(0)) ? row.GetString(0) : Path.Combine(root, row.GetString(0)));
+            }
+        }
+        // Legacy entries may still be categorized as Mods. Their original data
+        // must not be sent to the mod metadata pipeline merely because no IWAD ID exists.
+        if (archivePath is not null && File.Exists(archivePath)
+            && await Task.Run(async () => (await IwadVersionDetector.ScanArchiveAsync(archivePath, token)).Count > 0, token))
+            throw new InvalidOperationException("IWADs are excluded from mod metadata updates.");
         var enabled = new HashSet<string>(requested ?? LibraryFeatureStore.MetadataFields.ToHashSet(), StringComparer.Ordinal);
         if (enabled.Any(field => !LibraryFeatureStore.MetadataFields.Contains(field))) throw new ArgumentException("Unknown metadata field.");
         await using var locks = connection.CreateCommand();

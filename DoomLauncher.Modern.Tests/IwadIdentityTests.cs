@@ -90,6 +90,11 @@ internal static class IwadIdentityTests
                 throw new Exception("Launch capture did not run.");
             }
             catch (CapturedLaunch) { }
+            var originalWad = Path.Combine(root, "unregistered-original.wad"); var originalBytes = Wad("E1M1"); originalBytes[0]=(byte)'I';
+            await File.WriteAllBytesAsync(originalWad, originalBytes);
+            var originalMod = await library.ImportAsync(originalWad);
+            try { await library.RefreshGameFromLocalArchiveAsync(originalMod.GameFileId); throw new Exception("Original IWAD accepted for Mod metadata refresh before registration."); }
+            catch (InvalidOperationException) { }
             Console.WriteLine("PASS 45 ordered UZDoom identities, exact edition/version and aliases; renamed IPK3 and standalone PWAD identity; ordinary map patch excluded; unknown version remains blank");
         }
         finally { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); Directory.Delete(root, true); }

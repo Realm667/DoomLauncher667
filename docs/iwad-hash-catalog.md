@@ -23,6 +23,8 @@ The IWAD Library filter shows identity information in small gray text after the
 title, with the full text in its tooltip. The launch-option and definition selectors
 show the same detected edition and version while retaining custom aliases and IDs.
 Existing titles, archive references, collections and launch settings are preserved.
+The same labels are used in Edit Entry. Content-recognized IWADs are excluded
+from Mod metadata updates even when an old entry has not been registered as an IWAD.
 Catalog metadata is loaded once per process; ordinary Mod rows do not read archives
 or perform per-row database queries to show these labels. No schema change is needed.
 

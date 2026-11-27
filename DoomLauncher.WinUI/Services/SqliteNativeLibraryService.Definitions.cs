@@ -11,6 +11,29 @@ namespace DoomLauncher.WinUI.Services;
 
 public sealed partial class SqliteNativeLibraryService
 {
+    internal static async Task<List<NativeChoice>> LoadIwadChoicesAsync(SqliteConnection connection, CancellationToken token)
+    {
+        await IwadVersionDetector.EnsureLoadedAsync(token);
+        await using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT i.IWadID, COALESCE(NULLIF(TRIM(i.Name), ''), i.FileName),
+                   COALESCE(m.Version,''), COALESCE(m.Md5,''), COALESCE(m.CatalogLabel,'')
+            FROM IWads i LEFT JOIN WinUI_IwadMetadata m ON m.IWadID=i.IWadID
+            ORDER BY i.Name COLLATE NOCASE
+            """;
+        var choices = new List<NativeChoice>();
+        await using var reader = await command.ExecuteReaderAsync(token);
+        while (await reader.ReadAsync(token))
+        {
+            var name = DatabaseTextSanitizer.SingleLine(reader.GetString(1));
+            var suffix = IwadVersionDetector.IdentitySuffix(name,
+                IwadVersionDetector.StoredEdition(reader.GetString(3), reader.GetString(4)),
+                IwadVersionDetector.StoredVersion(reader.GetString(3), reader.GetString(2)));
+            choices.Add(new(reader.GetInt32(0), suffix.Length > 0 ? $"{name} · {suffix}" : name));
+        }
+        return choices;
+    }
+
     public async Task<LauncherDefinitionsData> LoadLauncherDefinitionsAsync(
         CancellationToken cancellationToken = default)
     {

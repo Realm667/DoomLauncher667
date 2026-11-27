@@ -24,9 +24,12 @@ Run `dotnet run --project DoomLauncher.Modern.Tests -c Release -p:Platform=x64 -
 
 Failing reproductions were retained before their fixes: duplicate setup imports,
 ambiguous setup payload names, renamed IPK3 recognition and Veteran import without
-a base game. After correction, the same regressions pass. Additional checks cover
+a base game, and original IWAD refresh before registration. After correction, the same regressions pass. Additional checks cover
 45 ordered rule fixtures, all 31 prior fingerprints, Registered/Ultimate 1.9,
 alias/ID preservation, raw-package byte identity and production launch arguments.
+The editor and launch selectors share one reader/formatter to keep aliases, IDs
+and detected edition labels consistent. Mod refresh also recognizes the contents
+of legacy unregistered original IWAD entries before applying metadata.
 
 The updater tests use fake HTTP responses but the real Windows PowerShell helper:
 verified download, exact-version skip persistence, malformed settings, rejected
@@ -73,5 +76,9 @@ The live Z: installation is updated only after this isolated preservation check.
 
 For deployment/rollback, retain the database backup and program backup. A network
 share outage can prevent rollback too; the helper reports this for manual recovery.
+The updater version-manifest test uses the real multiline portable format. Its
+initial mismatch was reproduced and fixed; original published 1.0.0 and candidate
+1.1.0 archives are accepted through the production extractor.
+
 No execution-policy bypass, new application dependencies or public game data are
 introduced.

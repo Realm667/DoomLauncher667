@@ -35,20 +35,7 @@ public sealed partial class SqliteNativeLibraryService(
             ORDER BY source.Name COLLATE NOCASE;
             """,
             cancellationToken);
-        var iwads = await LoadChoicesAsync(
-            connection,
-            """
-            SELECT iwad.IWadID,
-                   COALESCE(NULLIF(iwad.Name, ''), iwad.FileName) || CASE
-                       WHEN NULLIF(TRIM(metadata.Version), '') IS NULL THEN ''
-                       ELSE ' · ' || TRIM(metadata.Version)
-                   END
-            FROM IWads iwad
-            LEFT JOIN WinUI_IwadMetadata metadata
-                ON metadata.IWadID = iwad.IWadID
-            ORDER BY 2 COLLATE NOCASE;
-            """,
-            cancellationToken);
+        var iwads = await LoadIwadChoicesAsync(connection, cancellationToken);
 
         await using var command = connection.CreateCommand();
         command.CommandText =

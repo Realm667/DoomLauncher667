@@ -105,6 +105,9 @@ public sealed partial class MainPage
             var launchChoices = await _app.LaunchOptionsCatalog.LoadAsync(editionItem.GameFileId);
             Check(launchChoices.Iwads.Any(choice => choice.Id == versionTestIwad.IwadId && choice.Name == "My Doom · Doom Registered 1.9"),
                 "Game selection preserves the IWAD ID and custom alias while displaying exact edition and version");
+            var editChoices = await _app.NativeLibraryService.LoadGameAsync(editionItem.GameFileId);
+            Check(editChoices.Iwads.Any(choice => choice.Id == versionTestIwad.IwadId && choice.Name == "My Doom · Doom Registered 1.9"),
+                "Edit Entry uses the same exact edition labels and stable IWAD IDs");
             await CapturePolishAsync(Path.Combine(root, "visual-qa", "iwad-edition-inline.png"), 1);
             CategoryFilter_Click(ModsFilterButton, new RoutedEventArgs()); await Layout();
             await _app.NativeLibraryService.DeleteIwadAsync(versionTestIwad.IwadId!.Value, deletePhysicalFiles: true);
