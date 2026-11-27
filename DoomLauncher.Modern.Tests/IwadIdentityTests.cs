@@ -90,6 +90,43 @@ internal static class IwadIdentityTests
                 throw new Exception("Launch capture did not run.");
             }
             catch (CapturedLaunch) { }
+            var directLauncher = new NativeGameLaunchService(locator, new CapturingStarter(info =>
+            {
+                var arguments = info.ArgumentList.ToList();
+                Require(File.ReadAllBytes(arguments[arguments.IndexOf("-iwad") + 1]).SequenceEqual(File.ReadAllBytes(package)),
+                    "Playing an IWAD Library row without an explicit override must use its own package.");
+            }));
+            try
+            {
+                await directLauncher.LaunchAsync(new DoomLauncher.Modern.Core.Launch.GameLaunchRequest(importedPackage.GameFileId, "Square", SourcePortId: definitions.SourcePorts.Single().SourcePortId));
+                throw new Exception("Direct IWAD launch capture did not run.");
+            }
+            catch (CapturedLaunch) { }
+            var savedBaseId = definitions.Iwads.Single(i => i.InternalFileName == "my-base.wad").IwadId!.Value;
+            await using (var connection = new Microsoft.Data.Sqlite.SqliteConnection("Data Source=" + database))
+            {
+                await connection.OpenAsync(); await using var set = connection.CreateCommand();
+                set.CommandText = "UPDATE GameFiles SET IWadID=$base WHERE GameFileID=$game";
+                set.Parameters.AddWithValue("$base", savedBaseId); set.Parameters.AddWithValue("$game", importedPackage.GameFileId); await set.ExecuteNonQueryAsync();
+            }
+            var savedLauncher = new NativeGameLaunchService(locator, new CapturingStarter(info =>
+            {
+                var arguments = info.ArgumentList.ToList();
+                Require(File.ReadAllBytes(arguments[arguments.IndexOf("-iwad") + 1]).SequenceEqual(baseBytes), "Stored base overrides must take precedence over an IWAD's own definition.");
+            }));
+            try { await savedLauncher.LaunchAsync(new DoomLauncher.Modern.Core.Launch.GameLaunchRequest(importedPackage.GameFileId, "Saved override", SourcePortId: definitions.SourcePorts.Single().SourcePortId)); }
+            catch (CapturedLaunch) { }
+            try { await directLauncher.LaunchAsync(new DoomLauncher.Modern.Core.Launch.GameLaunchRequest(importedPackage.GameFileId, "Explicit override", SourcePortId: definitions.SourcePorts.Single().SourcePortId, IwadId: definitions.Iwads.Single(i => i.ArchiveFileName == importedPackage.FileName).IwadId)); }
+            catch (CapturedLaunch) { }
+            Require((await library.LoadGameAsync(importedPackage.GameFileId)).IwadId == savedBaseId, "One-time launch overrides must not rewrite the saved IWAD choice.");
+            await using (var connection = new Microsoft.Data.Sqlite.SqliteConnection("Data Source=" + database))
+            {
+                await connection.OpenAsync(); await using var reset = connection.CreateCommand();
+                reset.CommandText = "UPDATE GameFiles SET IWadID=NULL WHERE GameFileID=$game"; reset.Parameters.AddWithValue("$game", importedPackage.GameFileId); await reset.ExecuteNonQueryAsync();
+            }
+            await library.SaveIwadAsync(new(null, "Second definition", importedPackage.FileName, "other.wad"));
+            try { await directLauncher.LaunchAsync(new DoomLauncher.Modern.Core.Launch.GameLaunchRequest(importedPackage.GameFileId, "Ambiguous", SourcePortId: definitions.SourcePorts.Single().SourcePortId)); throw new Exception("Ambiguous shared archive auto-selected a base."); }
+            catch (InvalidOperationException error) when (error.Message.Contains("Mehrere IWAD-Definitionen")) { }
             var originalWad = Path.Combine(root, "unregistered-original.wad"); var originalBytes = Wad("E1M1"); originalBytes[0]=(byte)'I';
             await File.WriteAllBytesAsync(originalWad, originalBytes);
             var originalMod = await library.ImportAsync(originalWad);

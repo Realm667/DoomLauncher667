@@ -81,9 +81,21 @@ public sealed class NativeGameLaunchService(
         var sourcePortId = request.SourcePortId
             ?? game.SourcePortId
             ?? ParseInt(configuration.GetValueOrDefault("DefaultSourcePort"));
-        var iwadId = request.IwadId
-            ?? game.IwadId
-            ?? ParseInt(configuration.GetValueOrDefault("DefaultIWad"));
+        var iwadId = request.IwadId ?? game.IwadId;
+        if (!iwadId.HasValue)
+        {
+            await using var own = connection.CreateCommand();
+            own.CommandText = "SELECT IWadID FROM IWads WHERE GameFileID=$game ORDER BY IWadID LIMIT 2";
+            own.Parameters.AddWithValue("$game", game.GameFileId);
+            await using var rows = await own.ExecuteReaderAsync(cancellationToken);
+            if (await rows.ReadAsync(cancellationToken))
+            {
+                iwadId = rows.GetInt32(0);
+                if (await rows.ReadAsync(cancellationToken))
+                    throw new InvalidOperationException("Mehrere IWAD-Definitionen teilen dieses Archiv. Bitte die gewünschte Basis in den Launch Options auswählen.");
+            }
+        }
+        iwadId ??= ParseInt(configuration.GetValueOrDefault("DefaultIWad"));
         if (!sourcePortId.HasValue)
             throw new MissingLaunchDefinitionException("MissingSourcePortAction");
         if (!iwadId.HasValue)

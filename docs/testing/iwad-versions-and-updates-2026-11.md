@@ -44,6 +44,11 @@ NativeGameLaunchService: Registered Doom, Ultimate Doom, Doom II, Deathkings,
 Strife Veteran and Square. Each logs a loaded world and normal exit; stored launch
 options remain unchanged. Engine settings and all data stay in isolated D: folders.
 
+Direct-play regression: an imported IWAD with no saved base used to request a
+missing/global base instead of its own definition. The failing capture now passes;
+stored and explicit overrides retain priority without rewriting saved choices.
+The six real launch scenarios were repeated through this direct-play path.
+
 The first 5.0.3 tracking regression failed because the engine no longer creates the
 requested logfile path. Its source confirms the changed naming/sanitization.
 Automatic tracking is now blocked by the capability gate for that version and
