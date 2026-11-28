@@ -45,4 +45,6 @@ public sealed record LibraryCatalogEntry(
     bool IsDownloaded,
     IReadOnlyList<string> Tags,
     string Version = "",
-    string Edition = "");
+    string Edition = "",
+    string VersionGroup = "",
+    int? ReleaseOrder = null);

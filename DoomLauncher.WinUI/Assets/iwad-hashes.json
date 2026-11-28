@@ -8,7 +8,9 @@
     "sha1": "2e89b86859acd9fc1e552f587b710751efcffa8e",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 3,
+    "groupEdition": "Doom Registered"
   },
   {
     "md5": "11e1cd216801ea2657723abc86ecb01f",
@@ -19,7 +21,9 @@
     "sha1": "2c8212631b37f21ad06d18b5638c733a75e179ff",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 4,
+    "groupEdition": "Doom Registered"
   },
   {
     "md5": "740901119ba2953e3c7f3764eca6e128",
@@ -30,7 +34,9 @@
     "sha1": "89d934616c57fe974b06c2b37a9837853a89dbbc",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 1,
+    "groupEdition": "Doom Alpha"
   },
   {
     "md5": "dae9b1eea1a8e090fdfa5707187f4a43",
@@ -41,7 +47,9 @@
     "sha1": "df8ffe821a212d130ae48cf2c23721bd0ee6543b",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 2,
+    "groupEdition": "Doom Alpha"
   },
   {
     "md5": "b6afa12a8b22e2726a8ff5bd249223de",
@@ -52,7 +60,9 @@
     "sha1": "5f78b23fbffc828f5863ecff7e908d556241ff45",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 3,
+    "groupEdition": "Doom Alpha"
   },
   {
     "md5": "9c877480b8ef33b7074f1f0c07ed6487",
@@ -63,7 +73,9 @@
     "sha1": "d3648d720b5324ce3c7bf58cf019e395911d677e",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 4,
+    "groupEdition": "Doom Alpha"
   },
   {
     "md5": "981b03e6d1dc033301aa3095acc437ce",
@@ -74,7 +86,9 @@
     "sha1": "df0040ccb29cc1622e74ceb3b7793a2304cca2c8",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 1,
+    "groupEdition": "Doom Registered"
   },
   {
     "md5": "792fd1fea023d61210857089a7c1e351",
@@ -85,7 +99,9 @@
     "sha1": "b5f86a559642a2b3bdfb8a75e91c8da97f057fe6",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 2,
+    "groupEdition": "Doom Registered"
   },
   {
     "md5": "c4fe9fd920207691a9f493668e0a2083",
@@ -107,7 +123,9 @@
     "sha1": "7742089b4468a736cadb659a7deca3320fe6dcbd",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 5,
+    "groupEdition": "Doom Registered"
   },
   {
     "md5": "fb35c4a5a9fd49ec29ab6e900572c524",
@@ -151,7 +169,9 @@
     "sha1": "5b2e249b9c5133ec987b3ea77596381dc0d6bc1d",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 6,
+    "groupEdition": "Doom Shareware"
   },
   {
     "md5": "25e1459ca71d321525f84628f45ca8cd",
@@ -162,7 +182,9 @@
     "sha1": "7ec7652fcfce8ddc6e801839291f0e28ef1d5ae7",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 5,
+    "groupEdition": "Doom II"
   },
   {
     "md5": "c3bea40570c23e511a7ed3ebcd9865f7",
@@ -206,7 +228,9 @@
     "sha1": "b5a6cc79cde48d97905b44282e82c4c966a23a87",
     "format": "wad",
     "author": "Raven Software",
-    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/"
+    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/",
+    "releaseOrder": 1,
+    "groupEdition": "Heretic"
   },
   {
     "md5": "1e4cb4ef075ad344dd63971637307e04",
@@ -217,7 +241,9 @@
     "sha1": "a54c5d30629976a649119c5ce8babae2ddfb1a60",
     "format": "wad",
     "author": "Raven Software",
-    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/"
+    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/",
+    "releaseOrder": 3,
+    "groupEdition": "Heretic"
   },
   {
     "md5": "66d686b1ed6d35ff103f15dbd30e0341",
@@ -250,7 +276,9 @@
     "sha1": "ac129c4331bf26f0f080c4a56aaa40d64969c98a",
     "format": "wad",
     "author": "Raven Software",
-    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/"
+    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/",
+    "releaseOrder": 1,
+    "groupEdition": "Hexen"
   },
   {
     "md5": "abb033caf81e26f12a2103e1fa25453f",
@@ -261,7 +289,9 @@
     "sha1": "4b53832f0733c1e29e5f1de2428e5475e891af29",
     "format": "wad",
     "author": "Raven Software",
-    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/"
+    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/",
+    "releaseOrder": 2,
+    "groupEdition": "Hexen"
   },
   {
     "md5": "1077432e2690d390c256ac908b5f4efa",
@@ -273,7 +303,9 @@
     "format": "wad",
     "required": "Hexen: Beyond Heretic",
     "author": "Raven Software",
-    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/"
+    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/",
+    "releaseOrder": 1,
+    "groupEdition": "Hexen: Deathkings"
   },
   {
     "md5": "78d5898e99e220e4de64edaa0e479593",
@@ -285,7 +317,9 @@
     "format": "wad",
     "required": "Hexen: Beyond Heretic",
     "author": "Raven Software",
-    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/"
+    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/",
+    "releaseOrder": 2,
+    "groupEdition": "Hexen: Deathkings"
   },
   {
     "md5": "2fed2031a5b03892106e0f117f17901f",
@@ -296,7 +330,9 @@
     "sha1": "64c13b951a845ca7f8081f68138a6181557458d1",
     "format": "wad",
     "author": "Rogue Entertainment",
-    "authorSource": "https://store.steampowered.com/app/317040/Strife_Veteran_Edition/"
+    "authorSource": "https://store.steampowered.com/app/317040/Strife_Veteran_Edition/",
+    "releaseOrder": 2,
+    "groupEdition": "Strife: Quest for the Sigil"
   },
   {
     "md5": "25485721882b050afa96a56e5758dd52",
@@ -340,7 +376,9 @@
     "sha1": "7fea92986e91e2f7d58e3bb7a34733ef8e0efd9d",
     "format": "wad",
     "author": "Blasphemer contributors",
-    "authorSource": "https://github.com/Blasphemer/blasphemer/blob/master/CREDITS.md"
+    "authorSource": "https://github.com/Blasphemer/blasphemer/blob/master/CREDITS.md",
+    "releaseOrder": 1,
+    "groupEdition": "Blasphemer"
   },
   {
     "md5": "be3b96948b523ba1f95ec7411cc9d569",
@@ -351,7 +389,9 @@
     "sha1": "cb5b47301c3ea8e0eca38a819b83770b3889fdd1",
     "format": "wad",
     "author": "Blasphemer contributors",
-    "authorSource": "https://github.com/Blasphemer/blasphemer/blob/master/CREDITS.md"
+    "authorSource": "https://github.com/Blasphemer/blasphemer/blob/master/CREDITS.md",
+    "releaseOrder": 2,
+    "groupEdition": "Blasphemer"
   },
   {
     "md5": "2d0d2c413132e93ef1a91e07034856bd",
@@ -362,7 +402,9 @@
     "sha1": "9d071480b3e882cce13fc9be627fb6ea2ec0c2eb",
     "format": "wad",
     "author": "Blasphemer contributors",
-    "authorSource": "https://github.com/Blasphemer/blasphemer/blob/master/CREDITS.md"
+    "authorSource": "https://github.com/Blasphemer/blasphemer/blob/master/CREDITS.md",
+    "releaseOrder": 3,
+    "groupEdition": "Blasphemer"
   },
   {
     "md5": "bce163d06521f9d15f9686786e64df13",
@@ -373,7 +415,9 @@
     "sha1": "f0581563604543060c1dce2f148fd74412adb8b8",
     "format": "wad",
     "author": "Charles Jacobi",
-    "authorSource": "https://www.chexquest3.com/about/"
+    "authorSource": "https://www.chexquest3.com/about/",
+    "releaseOrder": 1,
+    "groupEdition": "Chex Quest 3"
   },
   {
     "md5": "9691100ff85b0902be3851890ec5aca9",
@@ -417,7 +461,9 @@
     "sha1": "d4dc6806abd96bd93570c8df436fb6956e13d910",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 1,
+    "groupEdition": "Doom Shareware"
   },
   {
     "md5": "30aa5beb9e5ebfbbe1e1765561c08f38",
@@ -428,7 +474,9 @@
     "sha1": "77ef34de7f13dc36b792fb82ed6805e9c1dc7afc",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 2,
+    "groupEdition": "Doom Shareware"
   },
   {
     "md5": "17aebd6b5f2ed8ce07aa526a32af8d99",
@@ -439,7 +487,9 @@
     "sha1": "72caf585f7ce56861d25f8580c1cc82bf50abd1b",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 3,
+    "groupEdition": "Doom Shareware"
   },
   {
     "md5": "a21ae40c388cb6f2c3cc1b95589ee693",
@@ -483,7 +533,9 @@
     "sha1": "81535778d0d4c0c7aa8616fbfd3607dfb3dfd643",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 4,
+    "groupEdition": "Doom Shareware"
   },
   {
     "md5": "5f4eb849b1af12887dec04a2a12e5e62",
@@ -494,7 +546,9 @@
     "sha1": "c6612ac5a8ac2e2a1d707f9b2869af820efb7c50",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 5,
+    "groupEdition": "Doom Shareware"
   },
   {
     "md5": "3b37188f6337f15718b617c16e6e7a9c",
@@ -505,7 +559,9 @@
     "sha1": "87651324502044f9a6eed403e48853aa16c93e49",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 2,
+    "groupEdition": "The Ultimate Doom KEX"
   },
   {
     "md5": "97573aaf26957099ed45e61d81a0a1a3",
@@ -549,7 +605,9 @@
     "sha1": "2921cf667359fd3a80aba3c0cf62ab39297e7e9e",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 2,
+    "groupEdition": "Doom II KEX"
   },
   {
     "md5": "9640fc4b2c8447bbd28f2080725d5c51",
@@ -571,7 +629,9 @@
     "sha1": "b723882122e90b61a1d92a11dcfcf9cbf95a407e",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 2,
+    "groupEdition": "Doom II Unity"
   },
   {
     "md5": "30e3c2d0350b67bfbf47271970b74b2f",
@@ -582,7 +642,9 @@
     "sha1": "6d559b7ceece4f5ad457415049711992370d520a",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 1,
+    "groupEdition": "Doom II"
   },
   {
     "md5": "d9153ced9fd5b898b36cc5844e35b520",
@@ -604,7 +666,9 @@
     "sha1": "78009057420b792eacff482021db6fe13b370dcc",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 2,
+    "groupEdition": "Doom II"
   },
   {
     "md5": "d7a07e5d3f4625074312bc299d7ed33f",
@@ -615,7 +679,9 @@
     "sha1": "70192b8d5aba65c7e633a7c7bcfe7e3e90640c97",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 3,
+    "groupEdition": "Doom II"
   },
   {
     "md5": "c236745bb01d89bbb866c8fed81b6f8c",
@@ -626,7 +692,9 @@
     "sha1": "79c283b18e61b9a989cfd3e0f19a42ea98fda551",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 4,
+    "groupEdition": "Doom II"
   },
   {
     "md5": "43c2df32dc6c740cb11f34dc5ab693fa",
@@ -681,7 +749,9 @@
     "sha1": "ab4e71e360a1e64e262d77a53e4bb202450d0f6e",
     "format": "wad",
     "author": "TeamTNT",
-    "authorSource": "IWAD ENDOOM credits; https://github.com/libretro/libretro-database/blob/master/dat/DOOM.dat"
+    "authorSource": "IWAD ENDOOM credits; https://github.com/libretro/libretro-database/blob/master/dat/DOOM.dat",
+    "releaseOrder": 2,
+    "groupEdition": "Final Doom: TNT Evilution KEX"
   },
   {
     "md5": "a6685de59ddf2c07f45deeec95296d98",
@@ -692,7 +762,9 @@
     "sha1": "503271390606ebded04a2cfaa1a4e249c0313a9d",
     "format": "wad",
     "author": "TeamTNT",
-    "authorSource": "IWAD ENDOOM credits; https://github.com/libretro/libretro-database/blob/master/dat/DOOM.dat"
+    "authorSource": "IWAD ENDOOM credits; https://github.com/libretro/libretro-database/blob/master/dat/DOOM.dat",
+    "releaseOrder": 1,
+    "groupEdition": "Final Doom: TNT Evilution Unity"
   },
   {
     "md5": "b77ca6a809c4fae086162dad8e7a1335",
@@ -725,7 +797,9 @@
     "sha1": "fbcc140825b507ab88d844c6b1635c60c4b8bcd6",
     "format": "wad",
     "author": "Dario Casali; Milo Casali",
-    "authorSource": "IWAD ENDOOM credits"
+    "authorSource": "IWAD ENDOOM credits",
+    "releaseOrder": 2,
+    "groupEdition": "Final Doom: Plutonia KEX"
   },
   {
     "md5": "0b381ff7bae93bde6496f9547463619d",
@@ -736,7 +810,9 @@
     "sha1": "54e27b5791fbc5677bf7e83c1de3a92ea3ef935b",
     "format": "wad",
     "author": "Dario Casali; Milo Casali",
-    "authorSource": "IWAD ENDOOM credits"
+    "authorSource": "IWAD ENDOOM credits",
+    "releaseOrder": 1,
+    "groupEdition": "Final Doom: Plutonia Unity"
   },
   {
     "md5": "d40c932a9183ded919afa89f4a729668",
@@ -747,7 +823,9 @@
     "sha1": "61065a41a391cd2e4bff69488be36773754354ab",
     "format": "wad",
     "author": "Freedoom contributors",
-    "authorSource": "https://github.com/freedoom/freedoom/blob/master/CREDITS"
+    "authorSource": "https://github.com/freedoom/freedoom/blob/master/CREDITS",
+    "releaseOrder": 1,
+    "groupEdition": "Freedoom - FreeDM"
   },
   {
     "md5": "908dfd77a14cc490c4cea94b62d13449",
@@ -758,7 +836,9 @@
     "sha1": "42c36e9d0610bf70c710ca79c7098ef3b1b00059",
     "format": "wad",
     "author": "Freedoom contributors",
-    "authorSource": "https://github.com/freedoom/freedoom/blob/master/CREDITS"
+    "authorSource": "https://github.com/freedoom/freedoom/blob/master/CREDITS",
+    "releaseOrder": 2,
+    "groupEdition": "Freedoom - FreeDM"
   },
   {
     "md5": "b36aa44a23045e503c19af4b4c438a78",
@@ -769,7 +849,9 @@
     "sha1": "e9bf428b73a04423ea7a0e9f4408f71df85ab175",
     "format": "wad",
     "author": "Freedoom contributors",
-    "authorSource": "https://github.com/freedoom/freedoom/blob/master/CREDITS"
+    "authorSource": "https://github.com/freedoom/freedoom/blob/master/CREDITS",
+    "releaseOrder": 1,
+    "groupEdition": "Freedoom - Phase 1"
   },
   {
     "md5": "b93be13d05148dd01614bc205a03648e",
@@ -780,7 +862,9 @@
     "sha1": "97bb88094a51457a8dcad98c58be22a2d0fa9a37",
     "format": "wad",
     "author": "Freedoom contributors",
-    "authorSource": "https://github.com/freedoom/freedoom/blob/master/CREDITS"
+    "authorSource": "https://github.com/freedoom/freedoom/blob/master/CREDITS",
+    "releaseOrder": 2,
+    "groupEdition": "Freedoom - Phase 1"
   },
   {
     "md5": "ca9a4159a7833544a89144c7f5053412",
@@ -791,7 +875,9 @@
     "sha1": "51c997f430dc12abba7888c2d83c237a8e0758a7",
     "format": "wad",
     "author": "Freedoom contributors",
-    "authorSource": "https://github.com/freedoom/freedoom/blob/master/CREDITS"
+    "authorSource": "https://github.com/freedoom/freedoom/blob/master/CREDITS",
+    "releaseOrder": 1,
+    "groupEdition": "Freedoom - Phase 2"
   },
   {
     "md5": "cd666466759b5e5f63af93c5f0ffd0a1",
@@ -802,7 +888,9 @@
     "sha1": "975f781e6d801c0a23e3caa33f70493efe68a880",
     "format": "wad",
     "author": "Freedoom contributors",
-    "authorSource": "https://github.com/freedoom/freedoom/blob/master/CREDITS"
+    "authorSource": "https://github.com/freedoom/freedoom/blob/master/CREDITS",
+    "releaseOrder": 2,
+    "groupEdition": "Freedoom - Phase 2"
   },
   {
     "md5": "65ed74d522bdf6649c2831b13b9e02b4",
@@ -935,7 +1023,9 @@
     "sha1": "eb0f3e157b35c34d5a598701f775e789ec85b4ae",
     "format": "wad",
     "author": "Rogue Entertainment",
-    "authorSource": "https://store.steampowered.com/app/317040/Strife_Veteran_Edition/"
+    "authorSource": "https://store.steampowered.com/app/317040/Strife_Veteran_Edition/",
+    "releaseOrder": 1,
+    "groupEdition": "Strife: Quest for the Sigil"
   },
   {
     "md5": "de2c8dcad7cca206292294bdab524292",
@@ -1015,7 +1105,9 @@
     "sha1": "08ab2507e1d525c4c06b6df4f6d5862568a6b009",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 2,
+    "groupEdition": "The Ultimate Doom Unity"
   },
   {
     "md5": "72286ddc680d47b9138053dd944b2a3d",
@@ -1048,7 +1140,9 @@
     "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 1,
+    "groupEdition": "The Ultimate Doom Unity"
   },
   {
     "md5": "8517c4e8f0eef90b82852667d345eb86",
@@ -1059,7 +1153,9 @@
     "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 3,
+    "groupEdition": "The Ultimate Doom Unity"
   },
   {
     "md5": "",
@@ -1070,7 +1166,9 @@
     "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom.wad/README.txt",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 1,
+    "groupEdition": "The Ultimate Doom KEX"
   },
   {
     "md5": "",
@@ -1081,7 +1179,9 @@
     "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 1,
+    "groupEdition": "Doom II Unity"
   },
   {
     "md5": "8ab6d0527a29efdc1ef200e5687b5cae",
@@ -1092,7 +1192,9 @@
     "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 3,
+    "groupEdition": "Doom II Unity"
   },
   {
     "md5": "",
@@ -1103,7 +1205,9 @@
     "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/doom2.wad/README.txt",
     "format": "wad",
     "author": "id Software",
-    "authorSource": "https://github.com/id-Software/DOOM"
+    "authorSource": "https://github.com/id-Software/DOOM",
+    "releaseOrder": 1,
+    "groupEdition": "Doom II KEX"
   },
   {
     "md5": "",
@@ -1125,7 +1229,9 @@
     "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/tnt.wad/README.txt",
     "format": "wad",
     "author": "TeamTNT",
-    "authorSource": "IWAD ENDOOM credits; https://github.com/libretro/libretro-database/blob/master/dat/DOOM.dat"
+    "authorSource": "IWAD ENDOOM credits; https://github.com/libretro/libretro-database/blob/master/dat/DOOM.dat",
+    "releaseOrder": 3,
+    "groupEdition": "Final Doom: TNT Evilution Unity"
   },
   {
     "md5": "",
@@ -1136,7 +1242,9 @@
     "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/tnt.wad/README.txt",
     "format": "wad",
     "author": "TeamTNT",
-    "authorSource": "IWAD ENDOOM credits; https://github.com/libretro/libretro-database/blob/master/dat/DOOM.dat"
+    "authorSource": "IWAD ENDOOM credits; https://github.com/libretro/libretro-database/blob/master/dat/DOOM.dat",
+    "releaseOrder": 1,
+    "groupEdition": "Final Doom: TNT Evilution KEX"
   },
   {
     "md5": "",
@@ -1158,7 +1266,9 @@
     "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/plutonia.wad/README.txt",
     "format": "wad",
     "author": "Dario Casali; Milo Casali",
-    "authorSource": "IWAD ENDOOM credits"
+    "authorSource": "IWAD ENDOOM credits",
+    "releaseOrder": 3,
+    "groupEdition": "Final Doom: Plutonia Unity"
   },
   {
     "md5": "",
@@ -1169,7 +1279,9 @@
     "label": "https://raw.githubusercontent.com/Doom-Utils/iwad-patches/471ec9be0babbb7b5dcb3aff696c2802b95955a2/plutonia.wad/README.txt",
     "format": "wad",
     "author": "Dario Casali; Milo Casali",
-    "authorSource": "IWAD ENDOOM credits"
+    "authorSource": "IWAD ENDOOM credits",
+    "releaseOrder": 1,
+    "groupEdition": "Final Doom: Plutonia KEX"
   },
   {
     "md5": "29592eefedc524a3014419ce69b8d05d",
@@ -1180,7 +1292,9 @@
     "format": "pk3",
     "label": "https://raw.githubusercontent.com/libretro/libretro-database/f89f09cbe13f9f7863ecf20d0ebf2c5ce53be029/dat/DOOM.dat",
     "author": "Charles Jacobi",
-    "authorSource": "https://www.chexquest3.com/about/"
+    "authorSource": "https://www.chexquest3.com/about/",
+    "releaseOrder": 2,
+    "groupEdition": "Chex Quest 3"
   },
   {
     "md5": "049e32f18d9c9529630366cfc72726ea",
@@ -1213,7 +1327,9 @@
     "sha1": "5ef073366e5ca523b26a529e843f05c4907c23a4",
     "format": "wad",
     "author": "Raven Software",
-    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/"
+    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/",
+    "releaseOrder": 1,
+    "groupEdition": "Heretic Shareware"
   },
   {
     "md5": "ae779722390ec32fa37b0d361f7d82f8",
@@ -1224,7 +1340,9 @@
     "sha1": "b4c50ca9bea07f7c35250a1a11906091971c05ae",
     "format": "wad",
     "author": "Raven Software",
-    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/"
+    "authorSource": "https://www.ravensoftware.com/our-games; https://store.steampowered.com/app/2390/Heretic_Shadow_of_the_Serpent_Riders/",
+    "releaseOrder": 3,
+    "groupEdition": "Heretic Shareware"
   },
   {
     "md5": "fc7eab659f6ee522bb57acc1a946912f",

@@ -53,6 +53,7 @@
     <Compile Include="..\DoomLauncher.WinUI\Services\ArchiveTextMetadataReader.cs" Link="Services\ArchiveTextMetadataReader.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\MapNameExtractor.cs" Link="Services\MapNameExtractor.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\IwadVersionDetector.cs" Link="Services\IwadVersionDetector.cs" />
+    <Compile Include="..\DoomLauncher.WinUI\Services\IwadVersionGroups.cs" Link="Services\IwadVersionGroups.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\FirstSetupService.cs" Link="Services\FirstSetupService.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\ObsidianService.cs" Link="Services\ObsidianService.cs" />
     <Compile Include="..\DoomLauncher.WinUI\Services\INativeLibraryService.cs" Link="Services\INativeLibraryService.cs" />

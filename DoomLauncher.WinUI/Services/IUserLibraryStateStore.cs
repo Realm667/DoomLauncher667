@@ -26,7 +26,9 @@ public sealed record UserLibraryState(
     IReadOnlySet<string> CollapsedCollectionNames,
     IReadOnlyDictionary<string, string> CollectionArtworkPaths,
     int? WindowWidth,
-    int? WindowHeight)
+    int? WindowHeight,
+    bool GroupIwadVersions = true,
+    IReadOnlySet<string>? ExpandedIwadVersionGroups = null)
 {
     public static IReadOnlyList<string> DefaultVisibleColumns { get; } =
     [

@@ -49,6 +49,34 @@ internal static class IwadLibraryTests
                 await library.SaveIwadAsync(authorDefinition);
                 Require(await DisplayAuthor() == "—", "Structural IWAD recognition must not invent authors.");
             }
+            await IwadVersionDetector.EnsureLoadedAsync();
+            var registeredGrouping = IwadVersionDetector.StoredGrouping("54978d12de87f162b9bcc011676cb3c0", "");
+            var latestGrouping = IwadVersionDetector.StoredGrouping("1cd63c5ddff1bf8ce844237f580e9cf3", "");
+            Require(registeredGrouping.Key == "Doom Registered" && latestGrouping.Order > registeredGrouping.Order,
+                "Doom 1.666 must precede 1.9 according to the curated chronology, not ordinary version parsing.");
+            Require(IwadVersionDetector.StoredGrouping("unknown", "").Key == "", "Unknown contents must never group by title or filename.");
+            var groupInput = new[] {
+                entry with { GameFileId=10, Title="Renamed old Doom", Version="1.666", VersionGroup=registeredGrouping.Key, ReleaseOrder=registeredGrouping.Order },
+                entry with { GameFileId=11, Title="My Doom", Version="1.9", VersionGroup=latestGrouping.Key, ReleaseOrder=latestGrouping.Order },
+                entry with { GameFileId=12, Edition="The Ultimate Doom", VersionGroup="The Ultimate Doom", ReleaseOrder=1 },
+                entry with { GameFileId=13, Title="My Doom", VersionGroup="", ReleaseOrder=null },
+                entry with { GameFileId=14, Category="Mod", VersionGroup=latestGrouping.Key, ReleaseOrder=100 }
+            };
+            var groups = IwadVersionGroups.Build(groupInput);
+            Require(groups.Count == 1 && groups["Doom Registered"].Select(e => e.GameFileId).SequenceEqual(new[] {11,10}),
+                "Group exact verified editions, preserve IDs/custom titles and exclude Ultimate, unknown contents and Mods.");
+            var statePath=Path.Combine(root,"group-state.json");
+            var previousState=Environment.GetEnvironmentVariable(JsonUserLibraryStateStore.StateEnvironmentVariable);
+            try
+            {
+                Environment.SetEnvironmentVariable(JsonUserLibraryStateStore.StateEnvironmentVariable,statePath);
+                var stateStore=new JsonUserLibraryStateStore();
+                await stateStore.SaveAsync(UserLibraryState.Empty with {GroupIwadVersions=false, ExpandedIwadVersionGroups=new HashSet<string>{"Doom Registered"}});
+                var restored=await stateStore.LoadAsync();
+                Require(!restored.GroupIwadVersions && restored.ExpandedIwadVersionGroups!.SetEquals(new[]{"Doom Registered"}),
+                    "Grouping preference and expansion keys must survive a portable state roundtrip.");
+            }
+            finally {Environment.SetEnvironmentVariable(JsonUserLibraryStateStore.StateEnvironmentVariable,previousState);}
             var method = typeof(SqliteNativeLibraryService).GetMethod("ImportIwadAsync", [typeof(string), typeof(CancellationToken)]);
             Require(method is not null, "An IWAD import must preserve separate versions rather than overwrite an archive with the same source name.");
             async Task<NativeImportResult> Import(string path, CancellationToken token = default) =>

@@ -222,6 +222,7 @@ public sealed class SqliteLibraryCatalog(
             var minutesPlayed = GetInt32(reader, "MinutesPlayed");
             var lastPlayedAt = ParseNullableDate(reader, "LastPlayed");
             var author = DatabaseTextSanitizer.SingleLine(GetNullableString(reader, "Author"));
+            var grouping = IwadVersionDetector.StoredGrouping(GetString(reader, "OwnIwadMd5"), GetString(reader, "OwnIwadCatalogLabel"));
             if (author.Length == 0 && ownIwad is not null && GetInt32(reader, "AuthorLocked") == 0)
                 author = IwadVersionDetector.StoredAuthor(GetString(reader, "OwnIwadMd5"), GetString(reader, "OwnIwadCatalogLabel"));
             entries.Add(new LibraryCatalogEntry(
@@ -266,7 +267,8 @@ public sealed class SqliteLibraryCatalog(
                 !string.IsNullOrWhiteSpace(GetNullableString(reader, "Downloaded")),
                 SplitTags(GetNullableString(reader, "TagNames")),
                 IwadVersionDetector.StoredVersion(GetNullableString(reader, "OwnIwadMd5") ?? "", DatabaseTextSanitizer.SingleLine(GetNullableString(reader, "OwnIwadVersion"))),
-                IwadVersionDetector.StoredEdition(GetNullableString(reader, "OwnIwadMd5") ?? "", GetNullableString(reader, "OwnIwadCatalogLabel") ?? "")));
+                IwadVersionDetector.StoredEdition(GetNullableString(reader, "OwnIwadMd5") ?? "", GetNullableString(reader, "OwnIwadCatalogLabel") ?? ""),
+                grouping.Key, grouping.Order));
         }
 
         return new LibraryCatalogResult(

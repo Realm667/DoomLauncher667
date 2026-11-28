@@ -76,7 +76,9 @@ public sealed class JsonUserLibraryStateStore : IUserLibraryStateStore
                 NormalizeCollectionNames(state?.CollapsedCollectionNames),
                 NormalizeCollectionArtworkPaths(state?.CollectionArtworkPaths),
                 NormalizeWindowDimension(state?.WindowWidth),
-                NormalizeWindowDimension(state?.WindowHeight));
+                NormalizeWindowDimension(state?.WindowHeight),
+                state?.GroupIwadVersions ?? true,
+                new HashSet<string>((state?.ExpandedIwadVersionGroups ?? []).Where(key => key.Length is > 0 and <= 256), StringComparer.Ordinal));
     }
 
     public async Task SaveAsync(
@@ -120,7 +122,9 @@ public sealed class JsonUserLibraryStateStore : IUserLibraryStateStore
                                 item => item.Value,
                                 StringComparer.OrdinalIgnoreCase),
                         NormalizeWindowDimension(state.WindowWidth),
-                        NormalizeWindowDimension(state.WindowHeight)),
+                        NormalizeWindowDimension(state.WindowHeight),
+                        state.GroupIwadVersions,
+                        state.ExpandedIwadVersionGroups?.Order(StringComparer.Ordinal).ToArray()),
                     cancellationToken: cancellationToken);
                 await stream.FlushAsync(cancellationToken);
                 stream.Flush(flushToDisk: true);
@@ -276,5 +280,7 @@ public sealed class JsonUserLibraryStateStore : IUserLibraryStateStore
         string[]? CollapsedCollectionNames = null,
         Dictionary<string, string>? CollectionArtworkPaths = null,
         int? WindowWidth = null,
-        int? WindowHeight = null);
+        int? WindowHeight = null,
+        bool? GroupIwadVersions = null,
+        string[]? ExpandedIwadVersionGroups = null);
 }

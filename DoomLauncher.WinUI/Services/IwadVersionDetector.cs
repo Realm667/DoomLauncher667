@@ -49,6 +49,15 @@ internal static class IwadVersionDetector
             && item.Md5.Equals(md5, StringComparison.OrdinalIgnoreCase))?.Author)
             ?? ReadLabel(label)?.Author ?? "";
 
+    internal static (string Key, int? Order) StoredGrouping(string md5, string label)
+    {
+        if (md5.Length == 0 && label.Length == 0) return ("", null);
+        var match = md5.Length == 0 ? null : _catalog?.FirstOrDefault(item => item.Md5.Length > 0 && item.Md5.Equals(md5, StringComparison.OrdinalIgnoreCase));
+        if (match is not null) return (match.GroupEdition, match.ReleaseOrder);
+        var identity = ReadLabel(label);
+        return (identity?.GroupEdition ?? "", identity?.ReleaseOrder);
+    }
+
     internal static string RequiredBase(string fileName, string md5, string label)
     {
         var required = ReadLabel(label)?.Required ?? _catalog?.FirstOrDefault(item =>
@@ -160,7 +169,7 @@ internal static class IwadVersionDetector
         var sha = Convert.ToHexString(sha1.GetHashAndReset()).ToLowerInvariant();
         var match = FindHash(digest, sha, input.Length);
         if (match is not null)
-            return new(true, true, match.Edition, match.Version, digest, MakeLabel(match.Edition, match.Required, match.Label, match.Author));
+            return new(true, true, match.Edition, match.Version, digest, MakeLabel(match.Edition, match.Required, match.Label, match.Author, match.GroupEdition, match.ReleaseOrder));
         input.Position = 0;
         var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var iwadHeader = false; string customName = "";
@@ -216,8 +225,8 @@ internal static class IwadVersionDetector
             edition.Length == 0 ? "" : MakeLabel(edition, rule?.Required ?? "", _identities.Source));
     }
 
-    private static string MakeLabel(string edition, string required, string source, string author = "")
-        => LabelPrefix + JsonSerializer.Serialize(new IdentityLabel(edition, required, source, author));
+    private static string MakeLabel(string edition, string required, string source, string author = "", string groupEdition = "", int? releaseOrder = null)
+        => LabelPrefix + JsonSerializer.Serialize(new IdentityLabel(edition, required, source, author, groupEdition, releaseOrder));
     private static IdentityLabel? ReadLabel(string label)
     {
         if (!label.StartsWith(LabelPrefix, StringComparison.Ordinal)) return null;
@@ -258,9 +267,9 @@ internal static class IwadVersionDetector
     }
 
     private sealed record IwadHashEntry(string Md5, long Size, string Version, string Edition, string Label,
-        string Sha1 = "", string Format = "wad", string Required = "", string Author = "", string AuthorSource = "");
+        string Sha1 = "", string Format = "wad", string Required = "", string Author = "", string AuthorSource = "", string GroupEdition = "", int? ReleaseOrder = null);
     private sealed record IdentityCatalog(string Source, string[] Names, IdentityRule[] Rules);
     private sealed record IdentityRule(string Edition, string[] Names, string[] MustContain, string Required);
-    private sealed record IdentityLabel(string Edition, string Required, string Source, string Author = "");
+    private sealed record IdentityLabel(string Edition, string Required, string Source, string Author = "", string GroupEdition = "", int? ReleaseOrder = null);
     private sealed record Inspection(bool IsIwad, bool Known, string Edition, string Version, string Md5, string Label);
 }
