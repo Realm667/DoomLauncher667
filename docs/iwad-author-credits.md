@@ -56,6 +56,9 @@ No launch or tracking code is changed; real engine tests are not rerun for this
 metadata-only correction. This is a working correction to 1.1.0, not a new public
 release or replacement of the published release artifacts.
 
-Live deployment status: not applied. Automatic approval review rejected the
-live database write and program overlay, requiring a new explicit user order
-for this exact stand. The original live installation remains unchanged.
+Live deployment completed after explicit user approval. All 83 planned Author
+changes passed the database preservation check. Subsequent audit: 86 IWADs,
+zero blank authors, zero outstanding corrections. Program overlay succeeded;
+installed DLL SHA-256 B575977ACBC6B6513968A12B03304E568024CE8F7CACEE1D9102C5BA8C1AD88D
+matched the tested package. All 6,897 Data files retained their sizes and modification
+times. Both approved source commits were pushed to origin/main.

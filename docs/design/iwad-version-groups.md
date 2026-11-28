@@ -1,6 +1,8 @@
-# Proposal: expandable IWAD version groups
+# Expandable IWAD version groups
 
-Status: concept only, not implemented. Proposed initial scope: IWAD Library list.
+Status: implemented for the IWAD Library list. Grouping is enabled by default and
+can be disabled with the tree toggle beside the sort selector. Its preference and
+expanded edition keys are stored in portable user state; no SQLite schema change.
 
 Collapsed:
 
@@ -50,7 +52,15 @@ when one child matches, reveals matching children temporarily, and restores the
 previous expansion when the query is cleared. Counts should distinguish matching
 from total versions. Filtering must not silently replace the active launch target.
 
-Implementation should flatten group headers and visible children into the existing
-virtualized ListView. Avoid nested ListViews/Expanders containing full collections.
+The implementation flattens group headers and visible children into the existing
+virtualized ListView. There are no nested ListViews/Expanders containing full collections.
 Verify selection, scroll/focus, keyboard, sorting/search, narrow windows, high DPI,
 German labels and 11,000 entries before enabling the optional 'Group versions' view.
+
+Ordering coverage: 59 fingerprint records have explicit per-edition release ranks.
+Registered Doom 1.666 precedes 1.8 and 1.9. Unranked, unknown-version or structurally
+identified-only entries remain ordinary separate rows. This deliberately avoids
+guessing chronology for different binaries merely sharing an edition label.
+Search may be folded temporarily with the chevron, without changing stored
+expansion preferences. Group roots sort by their displayed canonical title (or
+selected sort field), while children remain in verified newest-first order.
