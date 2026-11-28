@@ -423,6 +423,24 @@ public sealed partial class SqliteNativeLibraryService
                     : DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture));
             await metadata.ExecuteNonQueryAsync(cancellationToken);
         }
+        await IwadVersionDetector.EnsureLoadedAsync(cancellationToken);
+        var author = IwadVersionDetector.StoredAuthor(definition.Md5, definition.CatalogLabel);
+        if (author.Length > 0)
+        {
+            // Fill verified credits only; a user's value or an explicitly locked blank wins.
+            await using var credits = connection.CreateCommand();
+            credits.Transaction = transaction;
+            credits.CommandText = """
+                UPDATE GameFiles SET Author=$author
+                WHERE GameFileID=(SELECT GameFileID FROM IWads WHERE IWadID=$id)
+                  AND COALESCE(TRIM(Author),'')=''
+                  AND NOT EXISTS (SELECT 1 FROM WinUI_MetadataLocks locks
+                      WHERE locks.GameFileID=GameFiles.GameFileID AND locks.Field='Author');
+                """;
+            credits.Parameters.AddWithValue("$author", author);
+            credits.Parameters.AddWithValue("$id", iwadId);
+            await credits.ExecuteNonQueryAsync(cancellationToken);
+        }
     }
 
     public async Task DeleteIwadAsync(

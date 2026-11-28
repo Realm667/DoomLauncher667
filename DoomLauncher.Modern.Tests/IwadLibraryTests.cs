@@ -25,6 +25,30 @@ internal static class IwadLibraryTests
             Require(typeof(LibraryCatalogEntry).GetProperty("Version")?.GetValue(entry) as string == "1.6",
                 "IWAD library rows must expose the stored version, independently of the selected base IWAD.");
 
+            Require(entry.Author == "—", "An unknown author must be shown as a dash, never as the archive filename.");
+            // Metadata fixture only: the synthetic payload is not a real Doom checksum match.
+            var authorDefinition = (await library.LoadLauncherDefinitionsAsync()).Iwads.Single();
+            var knownAuthor = authorDefinition with { Md5 = "1cd63c5ddff1bf8ce844237f580e9cf3", FileSize = 11159840 };
+            await using (var authors = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = database }.ToString()))
+            {
+                await authors.OpenAsync();
+                async Task Execute(string sql)
+                { await using var command = authors.CreateCommand(); command.CommandText = sql; await command.ExecuteNonQueryAsync(); }
+                async Task<string> DisplayAuthor() => (await new SqliteLibraryCatalog(locator, new UiLocalization()).LoadAsync()).Entries.Single().Author;
+                await library.SaveIwadAsync(knownAuthor);
+                Require(await DisplayAuthor() == "id Software", "Known IWAD credits must be populated from the checksum catalog.");
+                await Execute("UPDATE GameFiles SET Author=NULL;");
+                Require(await DisplayAuthor() == "id Software", "Existing blank IWAD authors must project verified catalog credits without archive reads.");
+                await Execute("INSERT INTO WinUI_MetadataLocks(GameFileID,Field) SELECT GameFileID,'Author' FROM GameFiles;");
+                await library.SaveIwadAsync(knownAuthor);
+                Require(await DisplayAuthor() == "—", "An explicitly locked blank author must stay blank in storage and display.");
+                await Execute("DELETE FROM WinUI_MetadataLocks; UPDATE GameFiles SET Author='My credit';");
+                await library.SaveIwadAsync(knownAuthor);
+                Require(await DisplayAuthor() == "My credit", "User authors must survive verified IWAD metadata updates.");
+                await Execute("UPDATE GameFiles SET Author=NULL;");
+                await library.SaveIwadAsync(authorDefinition);
+                Require(await DisplayAuthor() == "—", "Structural IWAD recognition must not invent authors.");
+            }
             var method = typeof(SqliteNativeLibraryService).GetMethod("ImportIwadAsync", [typeof(string), typeof(CancellationToken)]);
             Require(method is not null, "An IWAD import must preserve separate versions rather than overwrite an archive with the same source name.");
             async Task<NativeImportResult> Import(string path, CancellationToken token = default) =>

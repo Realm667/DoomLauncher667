@@ -56,6 +56,7 @@ public sealed class SqliteLibraryCatalog(
                 game.FileName,
                 NULLIF(TRIM(game.Title), '') AS Title,
                 NULLIF(TRIM(game.Author), '') AS Author,
+                CASE WHEN authorLock.GameFileID IS NULL THEN 0 ELSE 1 END AS AuthorLocked,
                 game.ReleaseDate,
                 NULLIF(TRIM(game.Map), '') AS Maps,
                 COALESCE(game.MapCount, 0) AS MapCount,
@@ -147,6 +148,8 @@ public sealed class SqliteLibraryCatalog(
                     ORDER BY COALESCE(screenshot.FileOrder, 0), screenshot.FileID
                 ) AS ScreenshotFileNames
             FROM GameFiles game
+            LEFT JOIN WinUI_MetadataLocks authorLock
+                ON authorLock.GameFileID = game.GameFileID AND authorLock.Field = 'Author'
             LEFT JOIN SourcePorts sourcePort
                 ON sourcePort.SourcePortID = COALESCE(game.SourcePortID,
                     (SELECT CAST(Value AS INTEGER) FROM Configuration WHERE Name='DefaultSourcePort' LIMIT 1))
@@ -218,14 +221,14 @@ public sealed class SqliteLibraryCatalog(
 
             var minutesPlayed = GetInt32(reader, "MinutesPlayed");
             var lastPlayedAt = ParseNullableDate(reader, "LastPlayed");
+            var author = DatabaseTextSanitizer.SingleLine(GetNullableString(reader, "Author"));
+            if (author.Length == 0 && ownIwad is not null && GetInt32(reader, "AuthorLocked") == 0)
+                author = IwadVersionDetector.StoredAuthor(GetString(reader, "OwnIwadMd5"), GetString(reader, "OwnIwadCatalogLabel"));
             entries.Add(new LibraryCatalogEntry(
                 reader.GetInt32(reader.GetOrdinal("GameFileID")),
                 fileName,
                 title,
-                DatabaseTextSanitizer.SingleLine(GetNullableString(reader, "Author"))
-                    is { Length: > 0 } author
-                    ? author
-                    : Path.GetFileName(fileName),
+                author.Length > 0 ? author : "—",
                 ownIwad is null ? "Mod" : "IWAD",
                 FormatYear(reader, "ReleaseDate"),
                 FormatReleaseDate(reader, "ReleaseDate"),
