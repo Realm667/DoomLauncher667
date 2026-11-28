@@ -573,6 +573,7 @@ public sealed partial class MainPage : Page
 
     private void GameList_SelectionChanged(object sender, SelectionChangedEventArgs args)
     {
+        if (_syncingVersionSelection || _updatingVersionRows) return;
         if (GameList.SelectedItem is LibraryItem game)
             ViewModel.SelectedGame = game;
     }
@@ -1314,6 +1315,7 @@ public sealed partial class MainPage : Page
     private void ViewModeButton_Click(object sender, RoutedEventArgs args)
     {
         _showList = !_showList;
+        ViewModel.SetVersionListMode(_showList);
         GameGrid.Visibility = _showList ? Visibility.Collapsed : Visibility.Visible;
         ListViewHost.Visibility = _showList ? Visibility.Visible : Visibility.Collapsed;
         LibraryTileSizeSlider.IsEnabled = !_showList;
@@ -1873,6 +1875,7 @@ public sealed partial class MainPage : Page
             if (key is not null)
             {
                 child.Visibility = layout.VisibleColumns.Contains(key)
+                    && (child is not Button { Tag: LibraryItem versionRow } || versionRow.IsVersionGroup)
                     ? Visibility.Visible
                     : Visibility.Collapsed;
             }
@@ -1920,7 +1923,11 @@ public sealed partial class MainPage : Page
         if (GameGrid is not null)
             GameGrid.SelectedItem = ViewModel.SelectedGame;
         if (GameList is not null)
-            GameList.SelectedItem = ViewModel.SelectedGame;
+        {
+            _syncingVersionSelection = true;
+            try { GameList.SelectedItem = ViewModel.SelectedListRow; }
+            finally { _syncingVersionSelection = false; }
+        }
         if (CollectionDetailGameList is not null
             && _selectedCollectionGroup?.Items.Contains(ViewModel.SelectedGame) == true)
         {

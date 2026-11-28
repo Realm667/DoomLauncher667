@@ -285,7 +285,7 @@
                     </Grid.ColumnDefinitions>
                     <Button
                         HorizontalAlignment="Stretch"
-                        AutomationProperties.Name="{Binding Play}"
+                        AutomationProperties.Name="{Binding ViewModel.LaunchButtonText, ElementName=DetailsRoot}"
                         Click="PlayButton_Click"
                         IsEnabled="{Binding ViewModel.CanLaunch, ElementName=DetailsRoot}"
                         x:Name="PrimaryPlayButton" MinHeight="44" Style="{StaticResource AccentButtonStyle}">

@@ -15,7 +15,7 @@ public sealed partial class MainPage
     // selection bindings and native layout, rather than timing a detached LINQ query.
     private async Task RunPerformanceChecksAsync()
     {
-        if (!Environment.GetCommandLineArgs().Any(arg => arg is "--ui-performance-test" or "--ui-startup-test" or "--ui-collection-test" or "--ui-refresh-visual-test")) return;
+        if (!Environment.GetCommandLineArgs().Any(arg => arg is "--ui-performance-test" or "--ui-startup-test" or "--ui-collection-test" or "--ui-refresh-visual-test" or "--ui-version-group-performance-test")) return;
         var root = Environment.GetEnvironmentVariable("DOOMLAUNCHER_UI_TEST_ROOT");
         if (root is null || !File.Exists(Path.Combine(root, ".ui-test-instance"))
             || !Path.GetFullPath(GetPortableRoot()).TrimEnd('\\').Equals(Path.GetFullPath(root).TrimEnd('\\'), StringComparison.OrdinalIgnoreCase))
@@ -66,6 +66,27 @@ public sealed partial class MainPage
             await Layout();
             results["process-start-to-library"] = [(DateTime.Now - Process.GetCurrentProcess().StartTime).TotalMilliseconds];
             var count = ViewModel.Games.Count;
+            if (Environment.GetCommandLineArgs().Contains("--ui-version-group-performance-test"))
+            {
+                ViewModel.SetCategoryFilter(LibraryCategoryFilter.Iwads); SyncSelection(); await Layout();
+                Check(ViewModel.ListRows.Count==1 && ViewModel.Games.Count==count,"Stress entries collapse without merging concrete IDs");
+                var header=ViewModel.ListRows.Single();
+                for(var run=0;run<3;run++)
+                {
+                    await Measure("expand-versions",async()=> {await ViewModel.ToggleVersionGroupAsync(header,true);SyncSelection();});
+                    Check(GameList.ItemsPanelRoot is ItemsStackPanel && ViewModel.ListRows.Count==count+1,"Expanded group uses the native virtualized flat panel");
+                    diagnostics["group-realized"]=Enumerable.Range(0,GameList.Items.Count).Count(i=>GameList.ContainerFromIndex(i)!=null);
+                    Check(diagnostics["group-realized"]<Math.Min(100,count),"Expanded version children stay virtualized");
+                    var selected=header.VersionMembers.Last();ViewModel.SelectedGame=selected;SyncSelection();await Layout();
+                    await Measure("collapse-versions",async()=>{await ViewModel.ToggleVersionGroupAsync(header,false);SyncSelection();});
+                    Check(ReferenceEquals(ViewModel.SelectedGame,selected) && ReferenceEquals(GameList.SelectedItem,header),"Large collapse preserves concrete launch target and its group highlight");
+                }
+                await Measure("version-search",()=>{ViewModel.Filter("1.8");SyncSelection();return Task.CompletedTask;});
+                Check(ViewModel.ListRows.Skip(1).All(item=>item.Version=="1.8"),"Large version search exposes only matching children");
+                await Measure("clear-version-search",()=>{ViewModel.Filter("");SyncSelection();return Task.CompletedTask;});
+                Check(ViewModel.ListRows.Count==1,"Large search clear restores prior collapse state");
+                return;
+            }
             Check(count >= 65 && GameList.ContainerFromIndex(0) is not null, "Library is rendered");
             var realized = Enumerable.Range(0, count).Count(i => GameList.ContainerFromIndex(i) is not null);
             Check(realized < Math.Min(100, count), $"List virtualization: {realized}/{count}");

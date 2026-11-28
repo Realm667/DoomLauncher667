@@ -659,6 +659,11 @@
                     Orientation="Horizontal"
                     Spacing="8">
                     <Button x:Name="CompactDetailsButton" Content="{Binding Details}" Click="CompactDetails_Click" Visibility="Collapsed" />
+                    <ToggleButton x:Name="GroupVersionsButton" Width="40" Height="40" Padding="8"
+                        AutomationProperties.Name="{Binding GroupVersions}" ToolTipService.ToolTip="{Binding GroupVersions}"
+                        IsChecked="{x:Bind ViewModel.GroupIwadVersions, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.VersionGroupingVisibility, Mode=OneWay}"
+                        Click="GroupVersions_Click"><Path Width="18" Height="18" Stroke="{ThemeResource TextFillColorPrimaryBrush}" StrokeThickness="1.5" Data="M3,1 L3,16 M3,8 L16,8 M3,16 L16,16 M0,1 L8,1" /></ToggleButton>
                     <ComboBox
                         x:Name="SortOrderBox"
                         Width="170"
@@ -905,7 +910,8 @@
                             Grid.Row="1"
                             AutomationProperties.Name="{Binding ListAutomation}"
                             HorizontalContentAlignment="Left"
-                            ItemsSource="{x:Bind ViewModel.Games, Mode=OneWay}"
+                            ItemsSource="{x:Bind ViewModel.ListRows, Mode=OneWay}"
+                            IsItemClickEnabled="True" ItemClick="VersionRow_ItemClick"
                             SelectionChanged="GameList_SelectionChanged"
                             ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                             ScrollViewer.HorizontalScrollMode="Enabled"
@@ -982,16 +988,29 @@
                                         </Border>
                                         <TextBlock
                                             Grid.Column="1"
-                                            Margin="7,0"
+                                            Margin="{x:Bind VersionTitleMargin, Mode=OneWay}"
                                             VerticalAlignment="Center"
                                             FontFamily="{StaticResource DoomHeadlineFontFamily}"
                                             FontSize="13"
                                             FontWeight="SemiBold"
                                             ToolTipService.ToolTip="{x:Bind LibraryTitleToolTip, Mode=OneWay}"
+                                            Tag="LibraryRowTitle"
                                             TextTrimming="CharacterEllipsis">
                                             <Run Text="{x:Bind Title}" />
                                             <Run Text="{x:Bind InlineVersion, Mode=OneWay}" FontSize="11" FontWeight="Normal" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            <Run Text="{x:Bind VersionGroupSummary, Mode=OneWay}" FontSize="11" FontWeight="Normal" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         </TextBlock>
+                                        <TextBlock x:Name="VersionSelectionHint" x:Load="{x:Bind IsVersionGroup, Mode=OneWay}" Grid.Column="1" Margin="37,32,7,0" VerticalAlignment="Center" FontSize="11"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis"
+                                            Text="{x:Bind SelectedVersionLabel, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind SelectedVersionLabel, Mode=OneWay}" />
+                                        <Button x:Name="VersionToggle" x:Load="{x:Bind IsVersionGroup, Mode=OneWay}" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                            Width="30" Height="30" Padding="0" Background="Transparent" BorderThickness="0"
+                                            Visibility="{x:Bind VersionToggleVisibility, Mode=OneWay}"
+                                            AutomationProperties.Name="{x:Bind VersionToggleLabel, Mode=OneWay}"
+                                            ToolTipService.ToolTip="{x:Bind VersionToggleLabel, Mode=OneWay}"
+                                            Tag="{Binding}" PointerPressed="VersionToggle_PointerPressed" Click="VersionToggle_Click">
+                                            <FontIcon FontSize="12" Glyph="{x:Bind VersionChevron, Mode=OneWay}" />
+                                        </Button>
                                         <TextBlock Grid.Column="2" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" ToolTipService.ToolTip="{x:Bind Author}" Text="{x:Bind Author}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Grid.Column="3" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" Text="{Binding ReleaseDate, Mode=OneWay}" />
                                         <TextBlock Grid.Column="4" Margin="7,0" VerticalAlignment="Center" Style="{StaticResource MetaTextStyle}" HorizontalAlignment="Right" TextAlignment="Right" Text="{x:Bind Maps}" TextTrimming="CharacterEllipsis" />

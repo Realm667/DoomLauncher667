@@ -11,7 +11,14 @@ public sealed partial class MainPage
 {
     private void ConfigureLibraryReconciliation()
     {
-        if (ViewModel.Games is not ReconciledCollection<LibraryItem> items) return;
+        ViewModel.VersionPreferencesChanged += () => _userState = ViewModel.WithVersionPreferences(_userState);
+        ConfigureVersionKeyboard();
+        ConfigureLibraryReconciliation((ReconciledCollection<LibraryItem>)ViewModel.Games, false);
+        ConfigureLibraryReconciliation((ReconciledCollection<LibraryItem>)ViewModel.ListRows, true);
+    }
+
+    private void ConfigureLibraryReconciliation(ReconciledCollection<LibraryItem> items, bool isList)
+    {
         double vertical = 0, horizontal = 0;
         bool restoreFocus = false;
         DependencyObject? focusBeforeUpdate = null;
@@ -24,7 +31,9 @@ public sealed partial class MainPage
         }
         items.Updating += () =>
         {
-            var list = _showList ? (Control)GameList : GameGrid;
+            if (isList) _updatingVersionRows = true;
+            if (_showList != isList) return;
+            var list = isList ? (Control)GameList : GameGrid;
             var scroll = FindDescendant<ScrollViewer>(list);
             vertical = scroll?.VerticalOffset ?? 0;
             horizontal = scroll?.HorizontalOffset ?? 0;
@@ -33,12 +42,14 @@ public sealed partial class MainPage
         };
         items.Updated += () =>
         {
+            if (isList) _updatingVersionRows = false;
+            if (_showList != isList) return;
             var current = ++generation;
             var savedVertical = vertical; var savedHorizontal = horizontal; var savedFocus = restoreFocus;
             var savedFocusElement = focusBeforeUpdate;
             DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
             {
-                if (current != generation || _loadCancellation.IsCancellationRequested) return;
+                if (current != generation || _loadCancellation.IsCancellationRequested || _showList != isList) return;
                 // ApplyFilter has now restored the final selection. Navigation
                 // and Latest enqueue their explicit target viewport afterward.
                 SyncSelection();
@@ -54,7 +65,7 @@ public sealed partial class MainPage
                     // Leave a surviving focus alone. Refocusing a ListView can
                     // initiate another scroll; a new focus outside it belongs
                     // to the user's next action or an open dialog.
-                    if (list.ContainerFromItem(ViewModel.SelectedGame) is Control selected)
+                    if (list.ContainerFromItem(isList ? ViewModel.SelectedListRow : ViewModel.SelectedGame) is Control selected)
                         selected.Focus(FocusState.Programmatic);
                     else if (!stillInList)
                         list.Focus(FocusState.Programmatic);

@@ -121,6 +121,7 @@ public sealed partial class MainViewModel(
         set
         {
             value ??= LibraryItem.Empty;
+            value = value.VersionGroupTarget ?? value;
             if (ReferenceEquals(_selectedGame, value))
                 return;
 
@@ -137,6 +138,7 @@ public sealed partial class MainViewModel(
             OnPropertyChanged(nameof(LaunchSetupHint));
             OnPropertyChanged(nameof(LaunchSetupHintVisibility));
             NotifyPersonalSelection();
+            UpdateVersionSelection();
         }
     }
 
@@ -481,7 +483,8 @@ public sealed partial class MainViewModel(
         ? localization.Get("Launching")
         : IsGameRunning
             ? localization.Get("GameRunning")
-            : localization.Get("Play");
+            : SelectedGame.Category == "IWAD" && SelectedGame.Version.Length > 0
+                ? localization.Get("Play") + " " + SelectedGame.Version : localization.Get("Play");
     public Visibility LoadingVisibility => IsLoading ? Visibility.Visible : Visibility.Collapsed;
     public Visibility LaunchingVisibility =>
         IsLaunching || IsGameRunning ? Visibility.Visible : Visibility.Collapsed;
@@ -1358,6 +1361,12 @@ public sealed partial class MainViewModel(
         try
         {
             var userState = await userLibraryStateStore.LoadAsync(cancellationToken);
+            if (!_isInitialized)
+            {
+                _groupIwadVersions = userState.GroupIwadVersions;
+                OnPropertyChanged(nameof(GroupIwadVersions));
+                _expandedVersionGroups = new(userState.ExpandedIwadVersionGroups ?? new HashSet<string>(), StringComparer.Ordinal);
+            }
             _favoriteGameFileIds = new HashSet<int>(userState.FavoriteGameFileIds);
             _collectionArtworkPaths = new Dictionary<string, string>(
                 userState.CollectionArtworkPaths,
@@ -1495,11 +1504,14 @@ public sealed partial class MainViewModel(
                 _collectionFilterTag,
                 StringComparer.OrdinalIgnoreCase));
         }
+        _versionScope = matches.ToArray();
         matches = string.IsNullOrWhiteSpace(_searchText)
             ? matches
             : matches
                 .Where(game =>
                     game.Title.Contains(_searchText, StringComparison.CurrentCultureIgnoreCase)
+                    || (game.Category == "IWAD" && (game.Version.Contains(_searchText, StringComparison.OrdinalIgnoreCase)
+                        || game.Edition.Contains(_searchText, StringComparison.CurrentCultureIgnoreCase)))
                     || game.Subtitle.Contains(_searchText, StringComparison.CurrentCultureIgnoreCase)
                     || game.Category.Contains(_searchText, StringComparison.CurrentCultureIgnoreCase)
                     || game.Tags.Any(tag =>
@@ -1526,8 +1538,11 @@ public sealed partial class MainViewModel(
         UpdateSectionSummary();
 
         SelectedGame = filteredGames.FirstOrDefault(game => game.GameFileId == currentGameFileId)
+            ?? (VersionGroupingActive && SelectedGame.Category == "IWAD"
+                ? _catalog.FirstOrDefault(game => game.GameFileId == currentGameFileId) : null)
             ?? filteredGames.FirstOrDefault()
             ?? LibraryItem.Empty;
+        RebuildVersionRows();
 
         OnPropertyChanged(nameof(IsEmpty));
         OnPropertyChanged(nameof(EmptyStateVisibility));

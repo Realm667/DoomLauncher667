@@ -3,6 +3,7 @@ param(
     [Parameter(Mandatory=$true)][string]$ApplicationDirectory,
     [Parameter(Mandatory=$true)][string]$OutputDirectory,
     [ValidateRange(3,10)][int]$Runs = 3,
+    [int[]]$Sizes = @(65,11000),
     [switch]$KeepLastWindow,
     [switch]$RecordFailures
 )
@@ -15,7 +16,7 @@ $output = [IO.Path]::GetFullPath($OutputDirectory)
 if (Test-Path -LiteralPath $output) { throw "Use a new output directory: $output" }
 [void][IO.Directory]::CreateDirectory($output)
 $reports = @()
-foreach ($size in @(65,11000)) {
+foreach ($size in $Sizes) {
     for ($run=1; $run -le $Runs; $run++) {
         $root = Join-Path $output "$size-$run"
         & dotnet run --project (Join-Path $repo 'DoomLauncher.Modern.Tests') -c Release --no-build --no-restore -p:Platform=x64 -- --prepare-performance-ui $root $size

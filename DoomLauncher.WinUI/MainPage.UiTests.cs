@@ -70,7 +70,7 @@ public sealed partial class MainPage
                 "IWAD rows show their own persisted version");
             var versionLibraryItem = ViewModel.Games.Single();
             var versionRow = FindDescendants<Grid>(GameList, "").FirstOrDefault(grid => grid.Tag as string == "LibraryColumnGrid");
-            var versionTitle = versionRow?.Children.OfType<TextBlock>().SingleOrDefault(text => Grid.GetColumn(text) == 1);
+            var versionTitle = versionRow?.Children.OfType<TextBlock>().SingleOrDefault(text => text.Tag as string == "LibraryRowTitle");
             Check(versionRow?.Children.OfType<TextBlock>().Single(text => Grid.GetColumn(text) == 2).Text == "—",
                 "Realized Author cell shows a dash for unknown credits, never the archive filename");
             var versionRun = versionTitle?.Inlines.OfType<Microsoft.UI.Xaml.Documents.Run>().SingleOrDefault(run => run.Text.Trim() == "1.6");
@@ -114,6 +114,7 @@ public sealed partial class MainPage
             Check(editChoices.Iwads.Any(choice => choice.Id == versionTestIwad.IwadId && choice.Name == "My Doom · Doom Registered 1.9"),
                 "Edit Entry uses the same exact edition labels and stable IWAD IDs");
             await CapturePolishAsync(Path.Combine(root, "visual-qa", "iwad-edition-inline.png"), 1);
+            await VerifyVersionGroupsAsync(root, Check, Layout);
             CategoryFilter_Click(ModsFilterButton, new RoutedEventArgs()); await Layout();
             await _app.NativeLibraryService.DeleteIwadAsync(versionTestIwad.IwadId!.Value, deletePhysicalFiles: true);
             await ViewModel.RefreshAsync();

@@ -2,6 +2,25 @@ using DoomLauncher.Modern.Core.Launch;
 using DoomLauncher.WinUI.Services;
 using Microsoft.Data.Sqlite;
 
+if (args.Length == 3 && args[0] == "--prepare-version-performance-ui")
+{
+    var root = Path.GetFullPath(args[1]);
+    await ReliabilityTests.PrepareUiAsync(root, int.Parse(args[2]));
+    // Deliberate stress fixture: repeated known metadata on synthetic payloads,
+    // not a claim of 11,000 unique Doom releases or actual checksum validation.
+    await using var db = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource=Path.Combine(root,"DoomLauncher.sqlite") }.ToString());
+    await db.OpenAsync(); await WinUiDatabaseSchema.EnsureAsync(db, default);
+    await using var command=db.CreateCommand();
+    command.CommandText="""
+        INSERT INTO IWads(Name,FileName,GameFileID) SELECT Title,'DOOM.WAD',GameFileID FROM GameFiles;
+        INSERT INTO WinUI_IwadMetadata(IWadID,Version,Md5,FileSize,CatalogLabel,DetectedAt)
+        SELECT IWadID,CASE GameFileID%3 WHEN 0 THEN '1.9' WHEN 1 THEN '1.8' ELSE '1.666' END,
+            CASE GameFileID%3 WHEN 0 THEN '1cd63c5ddff1bf8ce844237f580e9cf3' WHEN 1 THEN '11e1cd216801ea2657723abc86ecb01f' ELSE '54978d12de87f162b9bcc011676cb3c0' END,
+            11159840,'',NULL FROM IWads;
+        """;
+    await command.ExecuteNonQueryAsync(); return 0;
+}
+
 if (args.Length == 3 && args[0] == "--verify-local-archive-copy")
 {
     await LocalArchiveRefreshTests.VerifyRealCopyAsync(Path.GetFullPath(args[1]), int.Parse(args[2]));

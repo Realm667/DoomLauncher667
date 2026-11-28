@@ -6,6 +6,12 @@ public sealed partial class UiLocalization
     {
         string[][] rows =
         [
+            ["GroupVersions", "Group versions", "Versionen gruppieren", "Grouper les versions", "Agrupar versiones"],
+            ["ExpandVersions", "Expand versions", "Versionen aufklappen", "Déplier les versions", "Expandir versiones"],
+            ["CollapseVersions", "Collapse versions", "Versionen zuklappen", "Replier les versions", "Contraer versiones"],
+            ["VersionCount", "{0} versions", "{0} Versionen", "{0} versions", "{0} versiones"],
+            ["MatchingVersionCount", "{0}/{1} versions", "{0}/{1} Versionen", "{0}/{1} versions", "{0}/{1} versiones"],
+            ["SelectedVersion", "Selected: {0}", "Ausgewählt: {0}", "Sélection : {0}", "Selección: {0}"],
             ["LauncherUpdateTitle", "Launcher update", "Launcher-Update", "Mise à jour du lanceur", "Actualización del lanzador"],
             ["LauncherUpdateAvailable", "Version {0} is available (installed: {1}). Update the portable installation and restart the launcher? Your library and savegames are retained.", "Version {0} ist verfügbar (installiert: {1}). Portable Installation aktualisieren und Launcher neu starten? Library und Spielstände bleiben erhalten.", "La version {0} est disponible (installée : {1}). Mettre à jour et redémarrer ? Bibliothèque et sauvegardes sont conservées.", "La versión {0} está disponible (instalada: {1}). ¿Actualizar y reiniciar? Se conservan la biblioteca y las partidas."],
             ["UpdateNow", "Update now", "Jetzt aktualisieren", "Mettre à jour maintenant", "Actualizar ahora"],

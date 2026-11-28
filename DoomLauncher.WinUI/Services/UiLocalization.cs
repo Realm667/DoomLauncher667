@@ -1462,6 +1462,7 @@ public sealed class UiText(UiLocalization localization)
     public string ImportTooltip => this[nameof(ImportTooltip)];
     public string RefreshTooltip => this[nameof(RefreshTooltip)]; public string All => this[nameof(All)];
     public string Iwads => this[nameof(Iwads)]; public string Mods => this[nameof(Mods)];
+    public string GroupVersions => this[nameof(GroupVersions)];
     public string PlayedMods => this[nameof(PlayedMods)];
     public string UnplayedMods => this[nameof(UnplayedMods)];
     public string TotalConversions => this[nameof(TotalConversions)]; public string Unplayed => this[nameof(Unplayed)];

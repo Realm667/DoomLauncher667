@@ -8,7 +8,7 @@ using Microsoft.UI.Xaml;
 
 namespace DoomLauncher.WinUI.Models;
 
-public sealed class LibraryItem : INotifyPropertyChanged
+public sealed partial class LibraryItem : INotifyPropertyChanged
 {
     private static readonly ConcurrentDictionary<string, WeakReference<BitmapImage>> ArtworkCache =
         new(StringComparer.OrdinalIgnoreCase);
@@ -44,6 +44,8 @@ public sealed class LibraryItem : INotifyPropertyChanged
         Title = entry.Title;
         Version = entry.Version;
         Edition = entry.Edition;
+        VersionGroupKey = entry.VersionGroup;
+        ReleaseOrder = entry.ReleaseOrder;
         Subtitle = entry.Author;
         Author = entry.Author;
         Category = entry.Category;
@@ -117,7 +119,8 @@ public sealed class LibraryItem : INotifyPropertyChanged
     private bool _showIwadVersion;
     public string Edition { get; } = string.Empty;
     public string InlineVersion => _showIwadVersion && IwadVersionDetector.IdentitySuffix(Title, Edition, Version) is { Length: > 0 } suffix ? "  " + suffix : string.Empty;
-    public string LibraryTitleToolTip => Title + InlineVersion;
+    public string LibraryTitleToolTip => Title + InlineVersion + VersionGroupSummary + (SelectedVersionLabel.Length > 0 ? " · " + SelectedVersionLabel : "");
+    public override string ToString() => LibraryTitleToolTip;
     internal void SetIwadVersionVisible(bool visible)
     {
         if (_showIwadVersion == visible) return;
